@@ -11,7 +11,6 @@
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "LinqToDBEntity";
-	//LoadMySqlMetadata("192.168.83.127", "iworkcloudbagdb", "us_dev_yudd", "P1tRghCV2pRSqLgR");
-	LoadMySqlMetadata("127.0.0.1", "iworkcloudbagdb", "root", "123456");
+	LoadMySqlMetadata("127.0.0.1", "hangfire", "root", "123456");
 	GenerateModel();
 #>

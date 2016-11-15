@@ -122,7 +122,7 @@ namespace AntData.ORM.Mapping
 		public bool           IsPrimaryKey    { get; private set; }
 		public int            PrimaryKeyOrder { get; private set; }
 		public bool           CanBeNull       { get; private set; }
-		public int?           Length          { get; private set; }
+		public long?           Length          { get; private set; }
 		public int?           Precision       { get; private set; }
 		public int?           Scale           { get; private set; }
 		public string         CreateFormat    { get; private set; }

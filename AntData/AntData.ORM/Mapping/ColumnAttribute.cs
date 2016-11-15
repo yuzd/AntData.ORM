@@ -157,11 +157,11 @@ namespace AntData.ORM.Mapping
 
 		public bool HasCanBeNull() { return _canBeNull.HasValue; }
 
-		private int? _length;
+		private long? _length;
 		/// <summary>
 		/// Gets or sets the length of the database column.
 		/// </summary>
-		public  int   Length
+		public  long   Length
 		{
 			get { return _length ?? 0; }
 			set { _length = value;         }

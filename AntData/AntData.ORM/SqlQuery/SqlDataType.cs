@@ -118,7 +118,7 @@ namespace AntData.ORM.SqlQuery
 
 		public DataType DataType  { get; private set; }
 		public Type     Type      { get; private set; }
-		public int?     Length    { get; private set; }
+		public long?     Length    { get; private set; }
 		public int?     Precision { get; private set; }
 		public int?     Scale     { get; private set; }
 
@@ -348,7 +348,7 @@ namespace AntData.ORM.SqlQuery
 
 		#region Default Types
 
-		internal SqlDataType(DataType dbType, Type type, int? length, int? precision, int? scale)
+		internal SqlDataType(DataType dbType, Type type, long? length, int? precision, int? scale)
 		{
 			DataType  = dbType;
 			Type      = type;

@@ -157,8 +157,8 @@ namespace AntData.ORM.Mysql.Base
         //    public Dictionary<string, System.Tuple<System.Type, System.Func<object, object>, System.Action<object, object>>> MemberAccessor { get { return memberAccessor; } }
         //}
 
-        public abstract long Tid { get; set; }
+        //public abstract long Tid { get; set; }
         //public abstract DateTime CreateTime { get; set; }
-        public abstract DateTime DataChange_LastTime { get; set; }
+        //public abstract DateTime DataChange_LastTime { get; set; }
     }
 }

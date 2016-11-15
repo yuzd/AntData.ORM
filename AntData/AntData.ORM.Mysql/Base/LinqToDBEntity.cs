@@ -17,38 +17,38 @@ namespace AntData.ORM.Mysql.Base
     /// </summary>
     public class LinqToDBEntity:LinqToDBEntityBase
     {
-        [PrimaryKey, Column(Name = "Tid"), NotNull]
-        public override long Tid { get; set; } 
+        //[PrimaryKey, Column(Name = "Tid"), NotNull]
+        //public override long Tid { get; set; } 
 
-        //private DateTime _createTime = DateTime.Now;
+        ////private DateTime _createTime = DateTime.Now;
 
-        //[Column(Name = "CreateTime")]
-        //public override DateTime CreateTime {
+        ////[Column(Name = "CreateTime")]
+        ////public override DateTime CreateTime {
+        ////    get
+        ////    {
+        ////        return _createTime;
+        ////    }
+        ////    set
+        ////    {
+        ////        _createTime = value;
+                
+        ////    }
+        ////}
+
+        //private DateTime _updateTime = DateTime.Now;
+
+        //[Column(Name = "DataChange_LastTime")]
+        //public override DateTime DataChange_LastTime
+        //{
         //    get
         //    {
-        //        return _createTime;
+        //        return _updateTime;
         //    }
         //    set
         //    {
-        //        _createTime = value;
-                
+        //        _updateTime = value;
+
         //    }
-        //}
-
-        private DateTime _updateTime = DateTime.Now;
-
-        [Column(Name = "DataChange_LastTime")]
-        public override DateTime DataChange_LastTime
-        {
-            get
-            {
-                return _updateTime;
-            }
-            set
-            {
-                _updateTime = value;
-
-            }
-        } 
+        //} 
     }
 }
