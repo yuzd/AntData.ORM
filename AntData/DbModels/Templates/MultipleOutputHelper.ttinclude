@@ -1,0 +1,290 @@
+<#@ assembly name="System.Core"
+#><#@ assembly name="System.Data.Linq"
+#><#@ assembly name="EnvDTE"
+#><#@ assembly name="System.Xml"
+#><#@ assembly name="System.Xml.Linq"
+#><#@ assembly name="System.Data" #>
+<#@ assembly name="$(ProjectDir)bin\Debug\Common.dll" #>
+<#@ assembly name="$(ProjectDir)bin\Debug\DbModels.dll" #>
+<#@ assembly name="$(ProjectDir)bin\Debug\linq2db.dll" #>
+<#@ import namespace="System"
+#><#@ import namespace="System.CodeDom"
+#><#@ import namespace="System.CodeDom.Compiler"
+#><#@ import namespace="System.Collections.Generic"
+#><#@ import namespace="System.Data.Linq"
+#><#@ import namespace="System.Data.Linq.Mapping"
+#><#@ import namespace="System.IO"
+#><#@ import namespace="System.Linq"
+#><#@ import namespace="System.Reflection"
+#><#@ import namespace="System.Text"
+#><#@ import namespace="System.Xml.Linq"
+#><#@ import namespace="Microsoft.VisualStudio.TextTemplating"
+#><#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="DbModels" #>
+<#@ import namespace="Common" #>
+<#@ import namespace="LinqToDB" #><#+
+// https://raw.github.com/damieng/DamienGKit
+// http://damieng.com/blog/2009/11/06/multiple-outputs-from-t4-made-easy-revisited
+
+// Manager class records the various blocks so it can split them up
+class Manager {
+    public static string connectionString= @"server=139.196.194.127\QUQUTON;database=Test;uid=sa;pwd=Yun160zhu315ji;";
+    private class Block {
+        public String Name;
+        public int Start, Length;
+        public bool IncludeInDefault;
+    }
+
+    private Block currentBlock;
+    private List<Block> files = new List<Block>();
+    private Block footer = new Block();
+    private Block header = new Block();
+    private ITextTemplatingEngineHost host;
+    private StringBuilder template;
+    protected List<String> generatedFileNames = new List<String>();
+
+    public static Manager Create(ITextTemplatingEngineHost host, StringBuilder template) {
+        return (host is IServiceProvider) ? new VSManager(host, template) : new Manager(host, template);
+    }
+
+	public static string Template(string tbl,string desc, List<System.Tuple<string, string, bool, bool, int, int, string>> cols)
+        {
+            var sb = new System.Text.StringBuilder(null);
+
+            var line = System.Environment.NewLine;
+
+			if (!string.IsNullOrEmpty(desc))
+			{
+				sb.AppendFormat("    /// <summary>{0}", line);
+				sb.AppendFormat("    /// {1}{0}", line, desc);
+				sb.AppendFormat("    /// </summary>{0}", line);
+			}
+            sb.AppendFormat("    [Table(Name = \"{1}\")]{0}", line, tbl);
+
+            sb.AppendFormat("    public partial class {1} : LinqToDBEntity{0}", line, tbl);
+
+            sb.AppendFormat("    {{{0}", line);
+
+            for (int i = 0; i < cols.Count; i++)
+            {
+                var col = cols[i];
+                var name = System.Convert.ToString(col.Item1);
+                var type = System.Convert.ToString(col.Item2);
+                var pk = System.Convert.ToBoolean(col.Item3);
+                var isnull = System.Convert.ToBoolean(col.Item4);
+                var maxlength = System.Convert.ToInt32(col.Item5);
+                var scale = System.Convert.ToInt32(col.Item6);
+                var description = System.Convert.ToString(col.Item7);
+
+                var _name = string.Format("_{0}", name);
+                var _type = DbModels.SqlServer.DdTypeConvert.SqlTypeString2SqlType(type);
+                var _type1 = DbModels.SqlServer.DdTypeConvert.SqlTypeString2LinqDBSqlType(type);
+                if (_type == System.Data.SqlDbType.DateTime && !isnull)
+                {
+                    sb.AppendFormat("        private System.DateTime {1} = System.Data.SqlTypes.SqlDateTime.MinValue.Value;{0}", line, _name);
+                }
+
+                if (!System.String.IsNullOrEmpty(description))
+                {
+                    sb.AppendFormat("        /// <summary>{0}", line);
+                    sb.AppendFormat("        /// {1}{0}", line, description);
+                    sb.AppendFormat("        /// </summary>{0}", line);
+                }
+
+                sb.AppendFormat("        [{3}Column(Name = \"{1}\"{4}{5}{6}){2}]{0}", line, name, isnull ? System.String.Empty : ", NotNull", pk ? "PrimaryKey," : System.String.Empty, string.Format(", Length = {0}", maxlength), _type == System.Data.SqlDbType.Decimal ? string.Format(", Scale = {0}", scale) : System.String.Empty, string.Format(", DataType = DataType.{0}", System.Enum.GetName(typeof(DataType), _type1)));
+
+                if (_type == System.Data.SqlDbType.DateTime && !isnull)
+                {
+                    sb.AppendFormat("        public {2} {1} {{ get {{ return this.{3}; }} set {{ this.{3} = value; }} }}{0}", line, name, DbModels.SqlServer.DdTypeConvert.SqlType2CsharpType(_type).FullName, _name);
+                }else if (_type == System.Data.SqlDbType.DateTime && isnull)
+                {
+                    sb.AppendFormat("        public {2}? {1} {{ get; set; }}{0}", line, name, DbModels.SqlServer.DdTypeConvert.SqlType2CsharpType(_type).FullName);
+                }
+                else
+                {
+                    sb.AppendFormat("        public {2} {1} {{ get; set; }}{0}", line, name, DbModels.SqlServer.DdTypeConvert.SqlType2CsharpType(_type).FullName);
+                }
+
+                if (i < cols.Count - 1) { sb.Append(line); }
+            }
+
+            sb.AppendFormat("    }}{0}", line);
+
+            return sb.ToString();
+        }
+	public static DataTable FillDataTable(string strSQL)
+    {
+        using (SqlConnection con = new SqlConnection(Manager.connectionString))
+        {
+            SqlCommand cmd = new SqlCommand(strSQL,con);
+            cmd.Connection = con;
+            if (con.State != ConnectionState.Open)
+            {
+                con.Open();
+            }
+            SqlDataReader reader = cmd.ExecuteReader();
+            DataSet ds = new DataSet();
+            ds.EnforceConstraints = false;
+            DataTable table = new DataTable("_tb");
+            ds.Tables.Add(table);
+            table.Load(reader);
+            return table;
+        }
+    }
+
+
+    public void StartNewFile(String name) {
+        if (name == null)
+            throw new ArgumentNullException("name");
+        CurrentBlock = new Block { Name = name };
+    }
+
+    public void StartFooter(bool includeInDefault = true) {
+        CurrentBlock = footer;
+        footer.IncludeInDefault = includeInDefault;
+    }
+
+    public void StartHeader(bool includeInDefault = true) {
+        CurrentBlock = header;
+        header.IncludeInDefault = includeInDefault;
+    }
+
+    public void EndBlock() {
+        if (CurrentBlock == null)
+            return;
+        CurrentBlock.Length = template.Length - CurrentBlock.Start;
+        if (CurrentBlock != header && CurrentBlock != footer)
+            files.Add(CurrentBlock);
+        currentBlock = null;
+    }
+
+    public virtual void Process(bool split, bool sync = true) {
+        if (split) {
+            EndBlock();
+            String headerText = template.ToString(header.Start, header.Length);
+            String footerText = template.ToString(footer.Start, footer.Length);
+            String outputPath = Path.GetDirectoryName(host.TemplateFile);
+            files.Reverse();
+            if (!footer.IncludeInDefault)
+                template.Remove(footer.Start, footer.Length);
+            foreach(Block block in files) {
+                String fileName = Path.Combine(outputPath, block.Name);
+                String content = headerText + template.ToString(block.Start, block.Length) + footerText;
+                generatedFileNames.Add(fileName);
+                CreateFile(fileName, content);
+                template.Remove(block.Start, block.Length);
+            }
+            if (!header.IncludeInDefault)
+                template.Remove(header.Start, header.Length);
+        }
+    }
+
+    protected virtual void CreateFile(String fileName, String content) {
+        if (IsFileContentDifferent(fileName, content))
+            File.WriteAllText(fileName, content);
+    }
+
+    public virtual String GetCustomToolNamespace(String fileName) {
+        return null;
+    }
+
+    public virtual String DefaultProjectNamespace {
+        get { return null; }
+    }
+
+    protected bool IsFileContentDifferent(String fileName, String newContent) {
+        return !(File.Exists(fileName) && File.ReadAllText(fileName) == newContent);
+    }
+
+    private Manager(ITextTemplatingEngineHost host, StringBuilder template) {
+        this.host = host;
+        this.template = template;
+    }
+
+    private Block CurrentBlock {
+        get { return currentBlock; }
+        set {
+            if (CurrentBlock != null)
+                EndBlock();
+            if (value != null)
+                value.Start = template.Length;
+            currentBlock = value;
+        }
+    }
+
+    private class VSManager: Manager {
+        private EnvDTE.ProjectItem templateProjectItem;
+        private EnvDTE.DTE dte;
+        private Action<String> checkOutAction;
+        private Action<IEnumerable<String>> projectSyncAction;
+
+        public override String DefaultProjectNamespace {
+            get {
+                return templateProjectItem.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
+            }
+        }
+
+        public override String GetCustomToolNamespace(string fileName) {
+            return dte.Solution.FindProjectItem(fileName).Properties.Item("CustomToolNamespace").Value.ToString();
+        }
+
+        public override void Process(bool split, bool sync) {
+            if (templateProjectItem.ProjectItems == null)
+                return;
+            base.Process(split, sync);
+            if (sync)
+                projectSyncAction.EndInvoke(projectSyncAction.BeginInvoke(generatedFileNames, null, null));
+        }
+
+        protected override void CreateFile(String fileName, String content) {
+            if (IsFileContentDifferent(fileName, content)) {
+                CheckoutFileIfRequired(fileName);
+                File.WriteAllText(fileName, content);
+            }
+        }
+
+        internal VSManager(ITextTemplatingEngineHost host, StringBuilder template)
+            : base(host, template) {
+            var hostServiceProvider = (IServiceProvider) host;
+            if (hostServiceProvider == null)
+                throw new ArgumentNullException("Could not obtain IServiceProvider");
+            dte = (EnvDTE.DTE) hostServiceProvider.GetService(typeof(EnvDTE.DTE));
+            if (dte == null)
+                throw new ArgumentNullException("Could not obtain DTE from host");
+            templateProjectItem = dte.Solution.FindProjectItem(host.TemplateFile);
+            checkOutAction = (String fileName) => dte.SourceControl.CheckOutItem(fileName);
+            projectSyncAction = (IEnumerable<String> keepFileNames) => ProjectSync(templateProjectItem, keepFileNames);
+        }
+
+        private static void ProjectSync(EnvDTE.ProjectItem templateProjectItem, IEnumerable<String> keepFileNames) {
+            var keepFileNameSet = new HashSet<String>(keepFileNames);
+            var projectFiles = new Dictionary<String, EnvDTE.ProjectItem>();
+            var originalFilePrefix = Path.GetFileNameWithoutExtension(templateProjectItem.get_FileNames(0)) + ".";
+            foreach(EnvDTE.ProjectItem projectItem in templateProjectItem.ProjectItems)
+                projectFiles.Add(projectItem.get_FileNames(0), projectItem);
+
+            // Remove unused items from the project
+            foreach(var pair in projectFiles)
+                if (!keepFileNames.Contains(pair.Key) && !(Path.GetFileNameWithoutExtension(pair.Key) + ".").StartsWith(originalFilePrefix))
+                    pair.Value.Delete();
+
+            // Add missing files to the project
+            foreach(String fileName in keepFileNameSet)
+                if (!projectFiles.ContainsKey(fileName))
+                    templateProjectItem.ProjectItems.AddFromFile(fileName);
+        }
+
+        private void CheckoutFileIfRequired(String fileName) {
+            var sc = dte.SourceControl;
+            if (sc != null && sc.IsItemUnderSCC(fileName) && !sc.IsItemCheckedOut(fileName))
+                checkOutAction.EndInvoke(checkOutAction.BeginInvoke(fileName, null, null));
+        }
+
+		
+    }
+} 
+
+
+
+#>
