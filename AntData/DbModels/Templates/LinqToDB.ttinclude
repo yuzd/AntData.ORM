@@ -369,9 +369,9 @@ void GenerateTypesFromMetadata()
 					key.Comment.Add("/ </summary>");
 
 					if (key.AssociationType == AssociationType.OneToMany)
-						key.Type = string.Format(OneToManyAssociationType, key.OtherTable.TypePrefix + key.OtherTable.TypeName);
+						key.Type = string.Format(OneToManyAssociationType, key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName));
 					else
-						key.Type = key.OtherTable.TypePrefix + key.OtherTable.TypeName;
+						key.Type = key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName);
 
 					var aa = new Attribute("Association");
 
@@ -488,7 +488,7 @@ void GenerateTypesFromMetadata()
 			else
 			{
 				p.IsStatic = true;
-				p.Type     = p.ResultTable == null ? "int" : "IEnumerable<" + p.ResultTable.TypeName + ">";
+				p.Type     = p.ResultTable == null ? "int" : "IEnumerable<" + ToPascalCase(p.ResultTable.TypeName) + ">";
 				p.Parameters.Add("this DataConnection dataConnection");
 			}
 
