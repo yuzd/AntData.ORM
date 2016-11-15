@@ -128,7 +128,7 @@
     <value>Dal Phase error, can not navigate to next phase, current phase is {0}</value>
   </data>
   <data name="DALVersion" xml:space="preserve">
-    <value>1.4.1.0</value>
+    <value>1.0.0</value>
   </data>
   <data name="DatabaseSetDoesNotExistException" xml:space="preserve">
     <value>Database set '{0}' doesn't exist!</value>
