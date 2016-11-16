@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using AntData.ORM.Reflection;
 
 namespace AntData.ORM.Linq
 {
@@ -331,7 +332,32 @@ namespace AntData.ORM.Linq
 				query = SetCommand(dataContext, expr, parameters, 0, true);
                 if (parameters != null && parameters.Length == 1)
                 {
-                    return (TS)dataContext.ExecuteScalar(query,true);
+                    //获取了主键
+                    var pKey = (TS)dataContext.ExecuteScalar(query,true);
+                    var entity = parameters[0];
+                    var type = entity.GetType();
+                    var resourceInfo = type.GetCanWritePropertyInfo().ToList();
+                    foreach (var p in resourceInfo)
+                    {
+                        var attributes = p.GetCustomAttributes(typeof(IdentityAttribute), false).ToList();
+                        //foreach (var att in attributes)
+                        //{
+                        //    var column = att as ColumnAttribute;
+                        //    if (column!=null && column.IsPrimaryKey)
+                        //    {
+                        //        isPrimaryKey = true;
+                        //        break;
+                        //    }
+                        //}
+                        if(attributes.Count>0)
+                        {
+                            var pType = p.PropertyType;
+                            var value = Convert.ChangeType(pKey, pType);
+                            p.FastSetValue(entity, value);
+                            break;
+                        }
+                    }
+                    return pKey;
                 }
 				return (TS)dataContext.ExecuteScalar(query);
 			}
@@ -678,7 +704,7 @@ namespace AntData.ORM.Linq
 						ObjectOperation<T>.InsertWithIdentity.Add(key, ei);
 					}
 
-			return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), new object[1]{false});
+			return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), new object[1] { obj});
 		}
 
 		#endregion

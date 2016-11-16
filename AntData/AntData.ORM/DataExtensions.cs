@@ -185,6 +185,16 @@ namespace AntData.ORM
 
 		#region Insert
 
+        /// <summary>
+        /// 不能插入list 或 ienumer
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dataContextInfo"></param>
+        /// <param name="obj"></param>
+        /// <param name="tableName"></param>
+        /// <param name="databaseName"></param>
+        /// <param name="schemaName"></param>
+        /// <returns></returns>
 		public static int Insert<T>([NotNull] this IDataContextInfo dataContextInfo, T obj,
 			string tableName = null, string databaseName = null, string schemaName = null)
 		{
@@ -192,9 +202,19 @@ namespace AntData.ORM
 			return Query<T>.Insert(dataContextInfo, obj, tableName, databaseName, schemaName);
 		}
 
+        /// <summary>
+        ///  不能插入list 或 ienumer
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dataContext"></param>
+        /// <param name="obj"></param>
+        /// <param name="tableName"></param>
+        /// <param name="databaseName"></param>
+        /// <param name="schemaName"></param>
+        /// <returns></returns>
 		public static int Insert<T>(this IDataContext dataContext, T obj,
-			string tableName = null, string databaseName = null, string schemaName = null)
-		{
+			string tableName = null, string databaseName = null, string schemaName = null) 
+        {
 			return Query<T>.Insert(DataContextInfo.Create(dataContext), obj, tableName, databaseName, schemaName);
 		}
 

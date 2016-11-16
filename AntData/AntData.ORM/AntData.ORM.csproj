@@ -284,9 +284,13 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="ProviderName.cs" />
+    <Compile Include="Reflection\DynamicMethodEmit.cs" />
     <Compile Include="Reflection\IObjectFactory.cs" />
     <Compile Include="Reflection\MemberAccessor.cs" />
+    <Compile Include="Reflection\MethodWrapper.cs" />
     <Compile Include="Reflection\ObjectFactoryAttribute.cs" />
+    <Compile Include="Reflection\PropertyWrapper.cs" />
+    <Compile Include="Reflection\ReflectionExtensions.cs" />
     <Compile Include="Reflection\TypeAccessor.cs" />
     <Compile Include="Reflection\TypeAccessorT.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

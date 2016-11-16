@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AntData.ORM;
@@ -33,9 +34,29 @@ namespace AntDataUnitTest
                 //ignore
             }
         }
-
         [TestMethod]
-        public void TestMethod1()
+        public void TestMethod1_00()
+        {
+            List<Person> pList = new List<Person>
+            {
+                new Person
+                {
+                    Name = "yuzd",
+                    Age = 27
+                },
+                new Person
+                {
+                    Name = "nainaigu",
+                    Age = 18
+                }
+            };
+
+            var insertResult = DB.BulkCopy(pList);
+            Assert.AreEqual(insertResult.RowsCopied, 2);
+
+        }
+        [TestMethod]
+        public void TestMethod1_01()
         {
             Person p = new Person
             {
@@ -49,7 +70,7 @@ namespace AntDataUnitTest
         }
 
         [TestMethod]
-        public void TestMethod2()
+        public void TestMethod1_02()
         {
             var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set(r => r.Age, 10).Update() > 0;
             Assert.AreEqual(updateResult, true);
@@ -57,23 +78,23 @@ namespace AntDataUnitTest
         }
 
         [TestMethod]
-        public void TestMethod3()
+        public void TestMethod1_03()
         {
             var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Delete() > 0;
             Assert.AreEqual(updateResult, true);
-            TestMethod1();
+            TestMethod1_01();
         }
 
         [TestMethod]
-        public void TestMethod4()
+        public void TestMethod1_04()
         {
-            var p = DB.Tables.People.FirstOrDefault() ;
+            var p = DB.Tables.People.FirstOrDefault();
             Assert.IsNotNull(p);
             Assert.IsNotNull(p.Age);
         }
 
         [TestMethod]
-        public void TestMethod5()
+        public void TestMethod1_05()
         {
             Person p = new Person
             {
@@ -88,10 +109,43 @@ namespace AntDataUnitTest
         }
 
         [TestMethod]
-        public void TestMethod6()
+        public void TestMethod1_06()
         {
-            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set2<Person,int?>("Age", 20).Update() > 0;
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set2<Person, int?>("Age", 20).Update() > 0;
             Assert.AreEqual(updateResult, true);
+
+        }
+
+        [TestMethod]
+        public void TestMethod1_07()
+        {
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy(r => r.Id).ToList();
+            Assert.AreEqual(updateResult.Count > 0, true);
+
+        }
+
+        [TestMethod]
+        public void TestMethod1_08()
+        {
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderByDescending(r => r.Id).ToList();
+            Assert.AreEqual(updateResult.Count > 0, true);
+
+        }
+
+        [TestMethod]
+        public void TestMethod1_09()
+        {
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderByDescending(r => r.Id).Skip(1).Take(1).ToList();
+            Assert.AreEqual(updateResult.Count > 0, true);
+
+        }
+
+
+        [TestMethod]
+        public void TestMethod2_01()
+        {
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).DynamicOrderBy("Id", "desc").Skip(1).Take(1).ToList();
+            Assert.AreEqual(updateResult.Count > 0, true);
 
         }
     }
