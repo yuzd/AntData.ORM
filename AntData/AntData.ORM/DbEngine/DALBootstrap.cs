@@ -1,7 +1,6 @@
 ﻿using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.DbEngine.DB;
 using AntData.ORM.DbEngine.Providers;
-using AntData.ORM.DbEngine.Sharding;
 using AntData.ORM.Properties;
 using System;
 using System.Collections.Generic;
@@ -16,14 +15,20 @@ namespace AntData.ORM.DbEngine
     {
         static DALBootstrap()
         {
-            LoadConfig();
-            LoadDatabaseProviders();
-            LoadAllInOneKeys();
+            LoadConfig();//读取配置文件
+            LoadDatabaseProviders(); //配置文件中解析providers
+            LoadAllInOneKeys(); //配置文件中解析 DatabaseSet 里面的节点 DatabaseElement 的name 和 connectionstring
             LoadDatabaseSets();
         }
 
+        /// <summary>
+        /// 配置对象
+        /// </summary>
         private static DbEngineConfigurationSection ConfigurationSection { get; set; }
 
+        /// <summary>
+        /// 配置的所有的Provider
+        /// </summary>
         private static Dictionary<String, IDatabaseProvider> DatabaseProviders { get; set; }
 
         public static Dictionary<String, DatabaseSetWrapper> DatabaseSets { get; set; }
@@ -55,6 +60,7 @@ namespace AntData.ORM.DbEngine
             {
                 if (provider.Type == null)
                     throw new ConfigurationErrorsException(String.Format(Resources.InvalidDatabaseProviderException, provider.TypeName));
+                //创建provider实例
                 var databaseProvider = Activator.CreateInstance(provider.Type) as IDatabaseProvider;
                 String[] names = provider.Name.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var name in names)
@@ -98,31 +104,12 @@ namespace AntData.ORM.DbEngine
                 var databaseSetWrapper = new DatabaseSetWrapper
                 {
                     Name = databaseSet.Name,
-                    EnableReadWriteSpliding = false,
+                    EnableReadWriteSpliding = false,//默认关闭读写分离
                     ProviderType = DatabaseProviderTypeFactory.GetProviderType(provider.ProviderType),
-                    ShardingStrategy = ShardingStrategyFactory.Instance.GetShardingStrategy(databaseSet)
                 };
 
                 foreach (DatabaseElement database in databaseSet.Databases)
                 {
-                    String shard = database.Sharding ?? String.Empty;
-                    Int32 ratio = 0;
-                    Int32 ratioStart = 0;
-                    Int32 ratioEnd = 0;
-                    if (shard.Length > 0)
-                    {
-                        if (database.DatabaseType == DatabaseType.Slave)
-                        {
-                            ratioStart = ratio;
-                            ratio += database.Ratio;
-                            ratioEnd = ratio;
-                        }
-
-                        databaseSetWrapper.AllShards.Add(shard);
-                        if (!databaseSetWrapper.TotalRatios.ContainsKey(shard))
-                            databaseSetWrapper.TotalRatios.Add(shard, ratio);
-                    }
-
                     databaseSetWrapper.DatabaseWrappers.Add(new DatabaseWrapper
                     {
                         Name = database.Name,
@@ -130,9 +117,6 @@ namespace AntData.ORM.DbEngine
                         DatabaseType = database.DatabaseType,
                         DatabaseProvider = provider,
                         Database = new Database(databaseSet.Name, database.Name, database.ConnectionString, provider) { DatabaseRWType = database.DatabaseType },
-                        Sharding = shard,
-                        RatioStart = ratioStart,
-                        RatioEnd = ratioEnd
                     });
 
                     if (database.DatabaseType == DatabaseType.Slave && !databaseSetWrapper.EnableReadWriteSpliding)
@@ -144,13 +128,6 @@ namespace AntData.ORM.DbEngine
         }
 
        
-        public static IShardingStrategy GetShardingStrategy(String logicDbName)
-        {
-            if (!DatabaseSets.ContainsKey(logicDbName))
-                throw new ArgumentOutOfRangeException(String.Format(Resources.DatabaseSetDoesNotExistException, logicDbName));
-            return DatabaseSets[logicDbName].ShardingStrategy;
-        }
-
         public static DatabaseProviderType GetProviderType(String logicDbName)
         {
             if (!DatabaseSets.ContainsKey(logicDbName))

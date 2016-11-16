@@ -60,33 +60,13 @@
     <Compile Include="DbEngine\Dao\BaseDao.cs" />
     <Compile Include="DbEngine\Dao\BaseDaoFactory.cs" />
     <Compile Include="DbEngine\Dao\Common\DALExtStatementConstant.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\AssemblyUtil.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\CommonUtil.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\ConnectionLocatorManager.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\ExceptionUtil.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\ExecutorManager.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\HintsUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ParameterUtility.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ShardingUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\SplitUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\TypeUtils.cs" />
     <Compile Include="DbEngine\Dao\DalException.cs" />
-    <Compile Include="DbEngine\Dao\sql\IDataBridge.cs" />
-    <Compile Include="DbEngine\Dao\sql\imp\IColumn.cs" />
-    <Compile Include="DbEngine\Dao\sql\imp\IConstraint.cs" />
-    <Compile Include="DbEngine\Dao\sql\imp\IDAttribute.cs" />
-    <Compile Include="DbEngine\Dao\sql\imp\IQuery.cs" />
-    <Compile Include="DbEngine\Dao\sql\imp\ITable.cs" />
-    <Compile Include="DbEngine\Dao\sql\imp\Timing.cs" />
-    <Compile Include="DbEngine\Dao\sql\OrmUtil.cs" />
     <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlColumn.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlOrder.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlTable.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlTableFactory.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlTrigger.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlUtils.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="DataContextTransaction.cs" />
     <Compile Include="DataExtensions.cs" />
@@ -131,7 +111,6 @@
     <Compile Include="DbEngine\Configuration\DatabaseSetElement.cs" />
     <Compile Include="DbEngine\Configuration\DatabaseSetElementCollection.cs" />
     <Compile Include="DbEngine\Configuration\DbEngineConfigurationSection.cs" />
-    <Compile Include="DbEngine\Configuration\ExecutorElement.cs" />
     <Compile Include="DbEngine\Configuration\RWSplittingElement.cs" />
     <Compile Include="DbEngine\ConnectionString\DefaultConnectionString.cs" />
     <Compile Include="DbEngine\ConnectionString\IConnectionString.cs" />
@@ -147,14 +126,7 @@
     <Compile Include="DbEngine\Enums\DALState.cs" />
     <Compile Include="DbEngine\Enums\DatabaseProviderType.cs" />
     <Compile Include="DbEngine\Enums\DatabaseType.cs" />
-    <Compile Include="DbEngine\Enums\MarkDownCategory.cs" />
-    <Compile Include="DbEngine\Enums\MarkDownEnums.cs" />
-    <Compile Include="DbEngine\Enums\MarkDownPolicy.cs" />
-    <Compile Include="DbEngine\Enums\MethodType.cs" />
-    <Compile Include="DbEngine\Enums\NumericTypeEnum.cs" />
     <Compile Include="DbEngine\Enums\OperationType.cs" />
-    <Compile Include="DbEngine\Enums\OrderDirection.cs" />
-    <Compile Include="DbEngine\Enums\ShardingType.cs" />
     <Compile Include="DbEngine\Enums\SqlStatementType.cs" />
     <Compile Include="DbEngine\Enums\StatementType.cs" />
     <Compile Include="DbEngine\Executor\DefaultExecutor.cs" />
@@ -170,12 +142,6 @@
     <Compile Include="DbEngine\Providers\SqlDatabaseProvider.cs" />
     <Compile Include="DbEngine\RW\DefaultReadWriteSplitting.cs" />
     <Compile Include="DbEngine\RW\IReadWriteSplitting.cs" />
-    <Compile Include="DbEngine\Sharding\ExecuteParallelHelper.cs" />
-    <Compile Include="DbEngine\Sharding\IShardingStrategy.cs" />
-    <Compile Include="DbEngine\Sharding\ModShardingStrategy.cs" />
-    <Compile Include="DbEngine\Sharding\SequenceShardingStrategy.cs" />
-    <Compile Include="DbEngine\Sharding\ShardingExecutor.cs" />
-    <Compile Include="DbEngine\Sharding\ShardingStrategyFactory.cs" />
     <Compile Include="DbEngine\Statement\Statement.cs" />
     <Compile Include="DbEngine\Statement\StatementParameter.cs" />
     <Compile Include="DbEngine\Statement\StatementParameterCollection.cs" />
@@ -392,6 +358,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

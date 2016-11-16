@@ -3,6 +3,9 @@ using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
 {
+    /// <summary>
+    /// 读写分离配置
+    /// </summary>
     public sealed class RWSplittingElement : ConfigurationElement
     {
         /// <summary>

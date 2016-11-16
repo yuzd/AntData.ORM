@@ -8,6 +8,11 @@ namespace AntData.ORM.DbEngine.RW
 {
     class DefaultReadWriteSplitting : IReadWriteSplitting
     {
+        /// <summary>
+        /// 目前只支持一主一丛
+        /// </summary>
+        /// <param name="statement"></param>
+        /// <returns></returns>
         public OperationalDatabases GetOperationalDatabases(Statement statement)
         {
             OperationalDatabases databases = new OperationalDatabases
@@ -20,15 +25,10 @@ namespace AntData.ORM.DbEngine.RW
                 String databaseSet = statement.DatabaseSet;
                 var master = DALBootstrap.DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Master).Single();
                 var slaves = DALBootstrap.DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave)
-                    .OrderByDescending(p => p.Ratio).ToList();
-
-                if (slaves != null && slaves.Count > 0)
-                {
-                    databases.FirstCandidate = slaves[0].Database;
-                    slaves.RemoveAt(0);
-                    slaves.ForEach(p => databases.OtherCandidates.Add(p.Database));
-                    databases.OtherCandidates.Add(master.Database);
-                }
+                   .Single();
+                databases.FirstCandidate = slaves.Database;
+                databases.OtherCandidates.Add(master.Database);
+               
             }
             catch
             {

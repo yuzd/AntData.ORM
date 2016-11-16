@@ -7,6 +7,9 @@ using System.Xml;
 
 namespace AntData.ORM.DbEngine.ConnectionString
 {
+    /// <summary>
+    /// 默认的获取连接字符串的方式
+    /// </summary>
     class DefaultConnectionString : IConnectionString
     {
         private static ConnectionStringSettingsCollection connectionStringCollection;
@@ -17,7 +20,8 @@ namespace AntData.ORM.DbEngine.ConnectionString
             try
             {
                
-
+                //这里原来的意思是从一个固定的地址去根据逻辑数据库名(key)去读真实的连接字符串
+                
                 //rwLock.EnterWriteLock();
                 //var collection = DALBootstrap.ConnectionStringKeys;
                 //if (collection != null && collection.Count > 0)

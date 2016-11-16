@@ -15,6 +15,9 @@ namespace AntData.ORM.DbEngine.HA
       
         public abstract HashSet<Int32> RetryFailOverErrorCodes { get; }
 
+        /// <summary>
+        /// 默认重试一次
+        /// </summary>
         private Int32 RetryFailOverTimes
         {
             get
@@ -68,8 +71,7 @@ namespace AntData.ORM.DbEngine.HA
 
             try
             {
-                ExecutorManager.Executor.Daemon();
-
+               // ExecutorManager.Executor.Daemon();
                 //被Mark Down了，且当前Request没有放行
                 //while (haBean.EnableHA && retryTimes > 0 && !currentOperateDatabase.Available)
                 //{
@@ -79,9 +81,8 @@ namespace AntData.ORM.DbEngine.HA
                 //    currentOperateDatabase = fallbackDatabase;
                 //    retryTimes--;
                 //}
-
-                if (!currentOperateDatabase.Available)
-                    throw new DalException(String.Format(Resources.DBMarkDownException, currentOperateDatabase.AllInOneKey));
+                //if (!currentOperateDatabase.Available)
+                //    throw new DalException(String.Format(Resources.DBMarkDownException, currentOperateDatabase.AllInOneKey));
                 result = func(currentOperateDatabase);
             }
             catch (DalException)
@@ -105,7 +106,7 @@ namespace AntData.ORM.DbEngine.HA
                         Boolean failoverNecessary = SatisfyRetryFailOverCondition(exception);
                         if (!failoverNecessary)
                             throw;
-
+                        //有备用的就去备用的执行试试
                         var failoverDatabase = FallToNextDatabase(currentOperateDatabase, databases.OtherCandidates, bitArray);
                         if (failoverDatabase == null)
                             throw;

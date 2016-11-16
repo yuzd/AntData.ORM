@@ -9,7 +9,7 @@ namespace AntData.ORM.DbEngine.DB
     {
         private DatabaseBridge() { }
 
-        private static DatabaseBridge instance = new DatabaseBridge();
+        private static readonly DatabaseBridge instance = new DatabaseBridge();
 
         public static DatabaseBridge Instance { get { return instance; } }
 
@@ -17,15 +17,14 @@ namespace AntData.ORM.DbEngine.DB
         /// 根据Statement，返回DataSet结果集
         /// </summary>
         /// <param name="statement"></param>
-        /// <param name="tableNames"></param>
         /// <returns></returns>
-        public DataSet ExecuteDataSet(Statement statement, params String[] tableNames)
+        public DataSet ExecuteDataSet(Statement statement)
         {
             try
             {
               
                 var databases = DatabaseFactory.GetDatabasesByStatement(statement);
-                return HAFactory.GetInstance(statement.DatabaseSet).ExecuteWithHa(db => db.ExecuteDataSet(statement, tableNames), databases);
+                return HAFactory.GetInstance(statement.DatabaseSet).ExecuteWithHa(db => db.ExecuteDataSet(statement), databases);
             }
             finally
             {

@@ -80,15 +80,6 @@ namespace AntData.ORM.DbEngine.Configuration
             set { this[c_DatabaseTypeProperty] = value; }
         }
 
-        /// <summary>
-        /// 分片标识
-        /// </summary>
-        [ConfigurationProperty(c_ShardingProperty, DefaultValue = "")]
-        public String Sharding
-        {
-            get { return (String)this[c_ShardingProperty]; }
-            set { this[c_ShardingProperty] = value; }
-        }
 
         /// <summary>
         /// 链接字符串名称

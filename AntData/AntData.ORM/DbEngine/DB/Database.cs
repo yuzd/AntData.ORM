@@ -10,7 +10,6 @@ using System.Transactions;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine.Connection;
-using AntData.ORM.DbEngine.ConnectionString;
 using AntData.ORM.DbEngine.Providers;
 using AntData.ORM.Enums;
 using StatementType = AntData.ORM.Enums.StatementType;
@@ -304,7 +303,7 @@ namespace AntData.ORM.DbEngine.DB
         /// <param name="statement">指令</param>
         /// <param name="tableNames">填充表名称</param>
         /// <returns>数据集</returns>
-        public DataSet ExecuteDataSet(Statement statement, params String[] tableNames)
+        public DataSet ExecuteDataSet(Statement statement)
         {
             var watch = new Stopwatch();
 
@@ -319,7 +318,7 @@ namespace AntData.ORM.DbEngine.DB
                     using (var wrapper = GetOpenConnection(true))
                     {
                         command.Connection = wrapper.Connection;
-                        LoadDataSet(statement, command, dataSet, tableNames);
+                        LoadDataSet(statement, command, dataSet);
                         UpdateStatementParamenters(statement, command);
                     }
                 }

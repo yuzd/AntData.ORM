@@ -9,11 +9,10 @@
 using System.Collections;
 using System.Data;
 using AntData.ORM.Common.Util;
+using AntData.ORM.Dao.Common;
 using AntData.ORM.Dao.sql;
-using AntData.ORM.Dao.sql.imp;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.DB;
-using AntData.ORM.DbEngine.Sharding;
 using AntData.ORM.Enums;
 
 
@@ -35,19 +34,6 @@ namespace AntData.ORM.Dao
         /// </summary>
         private readonly String LogicDbName;
 
-        private readonly SqlTable Table = SqlTableFactory.Instance.Build();
-
-        private readonly Lazy<IShardingStrategy> shardingStrategyLazy;
-
-        /// <summary>
-        ///当前的分片策略， 使用ShardingStrategy时，需要确保已经指定了逻辑数据库名，即 new BaseDao("逻辑数据库名");
-        /// </summary>
-        public IShardingStrategy ShardingStrategy { get { return shardingStrategyLazy.Value; } }
-
-        private Boolean IsShardEnabled
-        {
-            get { return ShardingStrategy != null; }
-        }
 
         /// <summary>
         /// 构造初始化
@@ -59,12 +45,7 @@ namespace AntData.ORM.Dao
                 throw new DalException("Please specify databaseSet.");
 
             LogicDbName = logicDbName;
-            shardingStrategyLazy = new Lazy<IShardingStrategy>(() => DALBootstrap.GetShardingStrategy(logicDbName), true);
         }
-
-
-     
-
 
         #region SelectDataReader VisitDataReader
 
@@ -74,7 +55,7 @@ namespace AntData.ORM.Dao
         /// <param name="sql">SQL语句</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏，不推荐使用，建议使用VisitDataReader！")]
+        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
         public IDataReader SelectDataReader(String sql)
         {
             return SelectDataReader(sql, null);
@@ -87,7 +68,7 @@ namespace AntData.ORM.Dao
         /// <param name="parameters">查询参数</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏，不推荐使用，建议使用VisitDataReader！")]
+        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
         public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters)
         {
             return SelectDataReader(sql, parameters, null);
@@ -101,7 +82,7 @@ namespace AntData.ORM.Dao
         /// <param name="hints">指令扩展属性</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏，不推荐使用，建议使用VisitDataReader！")]
+        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
         public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints)
         {
             return SelectDataReader(sql, parameters, hints, OperationType.Default);
@@ -116,13 +97,13 @@ namespace AntData.ORM.Dao
         /// <param name="operationType">操作类型，读写分离，默认从master库读取</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏，不推荐使用，建议使用VisitDataReader！")]
+        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
         public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
         {
             try
             {
-                Statement statement = SqlBuilder.GetSqlStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
-                SqlTable.AddSqlToExtendParams(statement, hints);
+                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, sql, parameters, hints, operationType);
+                AddSqlToExtendParams(statement, hints);
                 return DatabaseBridge.Instance.ExecuteReader(statement);
             }
             catch (Exception ex)
@@ -302,20 +283,9 @@ namespace AntData.ORM.Dao
             try
             {
                 DataSet dataSet;
-
-                if (!IsShardEnabled)
-                {
-                    Statement statement = SqlBuilder.GetSqlStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
-                    SqlTable.AddSqlToExtendParams(statement, hints);
-                    dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement, null);
-                }
-                else
-                {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                        newHints => SqlBuilder.GetSqlStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType));
-                    dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
-                }
-
+                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, sql, parameters, hints, operationType);
+                AddSqlToExtendParams(statement, hints);
+                dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
                 return dataSet;
             }
             catch (Exception ex)
@@ -331,9 +301,6 @@ namespace AntData.ORM.Dao
 
 
         #endregion
-
-    
-  
 
         #region ExecScalar
 
@@ -387,33 +354,9 @@ namespace AntData.ORM.Dao
             try
             {
                 Object result = null;
-
-                if (!IsShardEnabled)
-                {
-                    Statement statement = SqlBuilder.GetScalarStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
-                    SqlTable.AddSqlToExtendParams(statement, hints);
-                    result = DatabaseBridge.Instance.ExecuteScalar(statement);
-                }
-                else
-                {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                        newHints => SqlBuilder.GetScalarStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType));
-
-                    var temp = ShardingExecutor.ExecuteShardingScalar(statements);
-
-                    if (temp.Count > 0)
-                    {
-                        if (temp.Count == 1)
-                        {
-                            result = temp[0];
-                        }
-                        else
-                        {
-                            throw new DalException("ExecScalar exception:more than one shard.");
-                        }
-                    }
-                }
-
+                Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, sql, parameters, hints, operationType);
+                AddSqlToExtendParams(statement, hints);
+                result = DatabaseBridge.Instance.ExecuteScalar(statement);
                 return result;
             }
             catch (Exception ex)
@@ -479,21 +422,9 @@ namespace AntData.ORM.Dao
             try
             {
                 Int32 result;
-
-                if (!IsShardEnabled)
-                {
-                    Statement statement = SqlBuilder.GetNonQueryStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
-                    SqlTable.AddSqlToExtendParams(statement, hints);
-                    result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
-                }
-                else
-                {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                        newHints => SqlBuilder.GetNonQueryStatement(Table, LogicDbName, ShardingStrategy, sql, parameters, newHints));
-
-                    result = ShardingExecutor.ExecuteShardingNonQuery(statements).Sum();
-                }
-
+                Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, sql, parameters, hints, operationType);
+                AddSqlToExtendParams(statement, hints);
+                result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
                 return result;
             }
             catch (Exception ex)
@@ -507,5 +438,15 @@ namespace AntData.ORM.Dao
 
         #endregion
 
+        public  void AddSqlToExtendParams(Statement statement, IDictionary extendParams)
+        {
+            if (extendParams == null) return;
+            var types = extendParams.GetType().GetGenericArguments();
+
+            //仅当extendParams是 Dictionary<string, object> 或者 Dictionary<string, string>时，
+            //才将SQL填回
+            if (types.Length != 2 || types[0] != typeof(String) || (types[1] != typeof(String) && types[1] != typeof(Object))) return;
+            extendParams[DALExtStatementConstant.SQL] = statement.StatementText;
+        }
     }
 }

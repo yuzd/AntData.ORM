@@ -3,6 +3,9 @@ using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
 {
+    /// <summary>
+    /// 这是提供的一个接口，接受connection的来源，比如可以从database.config中读取连接串，从titan中获取连接串，这是一个接口
+    /// </summary>
     public sealed class ConnectionLocatorElement : ConfigurationElement
     {
         /// <summary>

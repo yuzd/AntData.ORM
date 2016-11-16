@@ -40,10 +40,7 @@ namespace AntData.ORM.DbEngine.DB
             if (databaseSetWrapper.DatabaseWrappers.Count == 0)
                 throw new System.Configuration.ConfigurationErrorsException(String.Format("DatabaseSet '{0}' doesn't contain any database.", databaseSetWrapper.Name));
 
-            String shard = statement.ShardID ?? String.Empty;
-            if (shard.Length > 0 && !databaseSetWrapper.TotalRatios.ContainsKey(shard))
-                throw new ArgumentOutOfRangeException(String.Format("Shard '{0}' doesn't exist.", shard));
-
+           
             if (databaseSetWrapper.EnableReadWriteSpliding)
             {
                 if (readWriteSplit == null)
@@ -62,12 +59,12 @@ namespace AntData.ORM.DbEngine.DB
             if (result == null || (result.FirstCandidate == null && result.OtherCandidates.Count == 0))
             {
                 result = new OperationalDatabases();
-                Database master = databaseSetWrapper.DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master && item.Sharding == shard).Database;
+                Database master = databaseSetWrapper.DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master).Database;
 
                 if (databaseSetWrapper.EnableReadWriteSpliding && statement.OperationType == OperationType.Read)
                 {
                     //首先选出所有Slave
-                    var slaves = databaseSetWrapper.DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave && item.Sharding == shard);
+                    var slaves = databaseSetWrapper.DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave);
                     Int32 count = slaves.Count();
 
                     //如果多于1个Slave，随机选择一个
