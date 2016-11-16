@@ -65,6 +65,7 @@
     <Compile Include="DbEngine\Dao\Common\Util\ExceptionUtil.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\ExecutorManager.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
+    <Compile Include="DbEngine\Dao\DalBridge.cs" />
     <Compile Include="DbEngine\Dao\DalException.cs" />
     <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />
     <Compile Include="DataContext.cs" />
@@ -221,6 +222,7 @@
     <Compile Include="Linq\ExpressionQueryImpl.cs" />
     <Compile Include="Linq\Expressions.cs" />
     <Compile Include="Linq\IDataContextInfo.cs" />
+    <Compile Include="Linq\IEntity.cs" />
     <Compile Include="Linq\IExpressionInfo.cs" />
     <Compile Include="Linq\IExpressionQuery.cs" />
     <Compile Include="Linq\IExpressionQueryT.cs" />

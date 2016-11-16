@@ -45,11 +45,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base\IEntity.cs" />
-    <Compile Include="Base\LinqToDBEntity.cs" />
-    <Compile Include="Base\LinqToDBEntityBase.cs" />
-    <Compile Include="DalBridge.cs" />
-    <Compile Include="LinqToDBConnection.cs" />
     <Compile Include="MysqlContext.cs" />
     <Compile Include="MySqlDatabaseProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

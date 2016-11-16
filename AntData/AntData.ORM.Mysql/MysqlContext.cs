@@ -12,7 +12,7 @@ using AntData.ORM.DataProvider.MySql;
 
 namespace Arch.Data.ORM.Mysql
 {
-    public class MysqlContext<T> : LinqToDBConnection, IDataContext where T : class
+    public class MysqlContext<T> : AntData.ORM.Data.DataConnection, IDataContext where T : class
     {
         private static readonly IDataProvider provider = new MySqlDataProvider();
 
@@ -26,10 +26,11 @@ namespace Arch.Data.ORM.Mysql
         }
 
         public MysqlContext(string dbMappingName)
-            : base(provider, dbMappingName, DalBridge.CustomerExecuteNonQuery, DalBridge.CustomerExecuteScalar, DalBridge.CustomerExecuteQuery, DalBridge.CustomerExecuteQueryTable)
+            : base(provider, dbMappingName)
         {
 #if DEBUG
             TraceSwitch.Level = TraceLevel.Info;
+            //AntData.ORM.Common.Configuration.Linq.GenerateExpressionTest = true;
 #endif
             _lazy = new Lazy<T>(() =>
             {

@@ -8,6 +8,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using AntData.ORM.Dao;
 using JetBrains.Annotations;
 
 namespace AntData.ORM.Data
@@ -22,6 +23,19 @@ namespace AntData.ORM.Data
 	public partial class DataConnection
 	{
 		#region .ctor
+
+	    public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName)
+	    {
+            if (dataProvider == null) throw new ArgumentNullException("dataProvider");
+            AddDataProvider(dataProvider);
+            DataProvider = dataProvider;
+            _mappingSchema = DataProvider.MappingSchema;
+            ConnectionString = dbMappingName;
+	        this.CustomerExecuteNonQuery = DalBridge.CustomerExecuteNonQuery;
+            this.CustomerExecuteScalar = DalBridge.CustomerExecuteScalar;
+            this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
+            this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable;
+        }
 
         public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, IDataReader> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, DataTable> CustomerExecuteQueryTable)
         {
@@ -224,26 +238,7 @@ namespace AntData.ORM.Data
 
 		#region Connection
 
-		bool          _closeConnection;
-		bool          _closeTransaction;
-		IDbConnection _connection;
-
-		public IDbConnection Connection
-		{
-			get
-			{
-				if (_connection == null)
-					_connection = DataProvider.CreateConnection(ConnectionString);
-
-				if (_connection.State == ConnectionState.Closed)
-				{
-					_connection.Open();
-					_closeConnection = true;
-				}
-
-				return _connection;
-			}
-		}
+	
 
 		public event EventHandler OnClosing;
 		public event EventHandler OnClosed;
@@ -253,18 +248,6 @@ namespace AntData.ORM.Data
 			if (OnClosing != null)
 				OnClosing(this, EventArgs.Empty);
 
-
-            //if (Transaction != null && _closeTransaction)
-            //{
-            //    Transaction.Dispose();
-            //    Transaction = null;
-            //}
-
-			if (_connection != null && _closeConnection)
-			{
-				_connection.Dispose();
-				_connection = null;
-			}
 
 			if (OnClosed != null)
 				OnClosed(this, EventArgs.Empty);

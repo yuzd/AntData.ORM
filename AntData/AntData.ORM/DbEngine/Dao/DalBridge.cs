@@ -7,11 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AntData.ORM.Common;
-using AntData.ORM.Dao;
 using AntData.ORM.DbEngine;
+#pragma warning disable 618
 
 
-namespace Arch.Data.ORM.Mysql
+namespace AntData.ORM.Dao
 {
     public class DalBridge
     {

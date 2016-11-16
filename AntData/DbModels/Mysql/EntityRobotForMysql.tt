@@ -10,7 +10,7 @@
 	GenerateDataTypes = true;
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
-    BaseEntityClass = "LinqToDBEntity";
-	LoadMySqlMetadata("127.0.0.1", "hangfire", "root", "123456");
+    BaseEntityClass = "BaseEntity";
+	LoadMySqlMetadata("127.0.0.1", "testorm", "root", "123456");
 	GenerateModel();
 #>

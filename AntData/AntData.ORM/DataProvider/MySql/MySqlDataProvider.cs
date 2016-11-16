@@ -50,10 +50,10 @@ namespace AntData.ORM.DataProvider.MySql
 			MappingSchema.SetDataType(_mySqlDateTimeType, DataType.DateTime2);
 		}
 
-		public override SchemaProvider.ISchemaProvider GetSchemaProvider()
-		{
-			return new MySqlSchemaProvider();
-		}
+		//public override SchemaProvider.ISchemaProvider GetSchemaProvider()
+		//{
+		//	return new MySqlSchemaProvider();
+		//}
 
 		public override ISqlBuilder CreateSqlBuilder()
 		{

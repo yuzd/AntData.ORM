@@ -359,7 +359,7 @@ namespace AntData.ORM.DataProvider
 		}
 
 		public abstract bool            IsCompatibleConnection(IDbConnection connection);
-		public abstract ISchemaProvider GetSchemaProvider     ();
+		//public abstract ISchemaProvider GetSchemaProvider     ();
 
 		protected virtual void SetParameterType(IDbDataParameter parameter, DataType dataType)
 		{

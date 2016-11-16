@@ -52,7 +52,7 @@ void GenerateTypesFromMetadata()
 	Model.Usings.Add("System.Linq");
 	Model.Usings.Add("AntData.ORM");
 	Model.Usings.Add("AntData.ORM.Mapping");
-	Model.Usings.Add("AntData.ORM.Mysql.Base");
+	Model.Usings.Add("AntData.ORM.Linq");
 	if (NamespaceName == null)
 		NamespaceName = "DataModel";
 

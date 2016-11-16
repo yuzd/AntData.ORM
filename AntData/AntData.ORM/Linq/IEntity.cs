@@ -6,7 +6,7 @@
 // <summary></summary>
 //-----------------------------------------------------------------------
 
-namespace AntData.ORM.Mysql.Base
+namespace AntData.ORM.Linq
 {
     /// <summary>
     /// 
@@ -14,5 +14,10 @@ namespace AntData.ORM.Mysql.Base
     public interface IEntity
     {
         System.Linq.IQueryable<T> Get<T>() where T : class;
+    }
+
+    public class BaseEntity
+    {
+        
     }
 }

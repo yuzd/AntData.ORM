@@ -420,7 +420,15 @@ namespace AntData.ORM
 
 			return new Updatable<T> { Query = query };
 		}
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV">如果是string 可以不传 其他类型不传报错</typeparam>
+        /// <param name="source"></param>
+        /// <param name="fieldName">字段名称</param>
+        /// <param name="value">对应的值</param>
+        /// <returns></returns>
         [LinqTunnel]
         public static IUpdatable<T> Set2<T, TV>(
             [NotNull]                this IQueryable<T> source,
@@ -432,7 +440,7 @@ namespace AntData.ORM
             {
                 throw new ArgumentNullException("fieldName");
             }
-            var expression = AntData.ORM.Expressions.Extensions.GenerateMemberExpression<T, string>(fieldName);
+            var expression = AntData.ORM.Expressions.Extensions.GenerateMemberExpression<T, TV>(fieldName);
             var query = source.Provider.CreateQuery<T>(
                 Expression.Call(
                     null,
@@ -478,7 +486,7 @@ namespace AntData.ORM
             }
 
             var query = ((Updatable<T>)source).Query;
-            var expression = AntData.ORM.Expressions.Extensions.GenerateMemberExpression<T, string>(fieldName);
+            var expression = AntData.ORM.Expressions.Extensions.GenerateMemberExpression<T, TV>(fieldName);
             query = query.Provider.CreateQuery<T>(
                 Expression.Call(
                     null,
