@@ -42,10 +42,11 @@ namespace AntData.ORM.DbEngine.DB
         {
             get
             {
-                connectionStringLock.EnterReadLock();
-                String result = m_ConnectionString;
-                connectionStringLock.ExitReadLock();
-                return result;
+                // 原来是 重新读取All In One中的连接串
+               // connectionStringLock.EnterReadLock();
+                //String result = m_ConnectionString;
+                //connectionStringLock.ExitReadLock();
+                return m_ConnectionString;
             }
         }
 
@@ -301,7 +302,6 @@ namespace AntData.ORM.DbEngine.DB
         /// 执行返回数据集指令
         /// </summary>
         /// <param name="statement">指令</param>
-        /// <param name="tableNames">填充表名称</param>
         /// <returns>数据集</returns>
         public DataSet ExecuteDataSet(Statement statement)
         {
