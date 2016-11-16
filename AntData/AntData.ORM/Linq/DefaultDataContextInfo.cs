@@ -27,11 +27,6 @@ namespace AntData.ORM.Linq
 			return _dataProvider.GetSqlOptimizer();
 		}
 
-		public IDataContextInfo Clone(bool forNestedQuery)
-		{
-			return new DataContextInfo(DataContext.Clone(forNestedQuery));
-		}
-
-		static readonly IDataProvider _dataProvider = DataConnection.GetDataProvider(DataConnection.DefaultConfiguration);
+		static readonly IDataProvider _dataProvider = DataConnection.GetDataProvider("");
 	}
 }

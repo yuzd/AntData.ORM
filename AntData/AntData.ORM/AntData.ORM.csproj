@@ -57,41 +57,36 @@
     <Compile Include="Common\Option.cs" />
     <Compile Include="Common\Tools.cs" />
     <Compile Include="CompiledQuery.cs" />
-    <Compile Include="Configuration\DataProviderElement.cs" />
-    <Compile Include="Configuration\DataProviderElementCollection.cs" />
-    <Compile Include="Configuration\ElementBase.cs" />
-    <Compile Include="Configuration\ElementCollectionBase.cs" />
-    <Compile Include="Configuration\LinqToDBSection.cs" />
-    <Compile Include="Dao\BaseDao.cs" />
-    <Compile Include="Dao\BaseDaoFactory.cs" />
-    <Compile Include="Dao\Common\DALExtStatementConstant.cs" />
-    <Compile Include="Dao\Common\Util\AssemblyUtil.cs" />
-    <Compile Include="Dao\Common\Util\CommonUtil.cs" />
-    <Compile Include="Dao\Common\Util\ConnectionLocatorManager.cs" />
-    <Compile Include="Dao\Common\Util\ExceptionUtil.cs" />
-    <Compile Include="Dao\Common\Util\ExecutorManager.cs" />
-    <Compile Include="Dao\Common\Util\HintsUtil.cs" />
-    <Compile Include="Dao\Common\Util\ParameterUtility.cs" />
-    <Compile Include="Dao\Common\Util\RWSplittingManager.cs" />
-    <Compile Include="Dao\Common\Util\ShardingUtil.cs" />
-    <Compile Include="Dao\Common\Util\SplitUtil.cs" />
-    <Compile Include="Dao\Common\Util\TypeUtils.cs" />
-    <Compile Include="Dao\DalException.cs" />
-    <Compile Include="Dao\sql\IDataBridge.cs" />
-    <Compile Include="Dao\sql\imp\IColumn.cs" />
-    <Compile Include="Dao\sql\imp\IConstraint.cs" />
-    <Compile Include="Dao\sql\imp\IDAttribute.cs" />
-    <Compile Include="Dao\sql\imp\IQuery.cs" />
-    <Compile Include="Dao\sql\imp\ITable.cs" />
-    <Compile Include="Dao\sql\imp\Timing.cs" />
-    <Compile Include="Dao\sql\OrmUtil.cs" />
-    <Compile Include="Dao\sql\SqlBuilder.cs" />
-    <Compile Include="Dao\sql\SqlColumn.cs" />
-    <Compile Include="Dao\sql\SqlOrder.cs" />
-    <Compile Include="Dao\sql\SqlTable.cs" />
-    <Compile Include="Dao\sql\SqlTableFactory.cs" />
-    <Compile Include="Dao\sql\SqlTrigger.cs" />
-    <Compile Include="Dao\sql\SqlUtils.cs" />
+    <Compile Include="DbEngine\Dao\BaseDao.cs" />
+    <Compile Include="DbEngine\Dao\BaseDaoFactory.cs" />
+    <Compile Include="DbEngine\Dao\Common\DALExtStatementConstant.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\AssemblyUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\CommonUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\ConnectionLocatorManager.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\ExceptionUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\ExecutorManager.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\HintsUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\ParameterUtility.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\ShardingUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\SplitUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\TypeUtils.cs" />
+    <Compile Include="DbEngine\Dao\DalException.cs" />
+    <Compile Include="DbEngine\Dao\sql\IDataBridge.cs" />
+    <Compile Include="DbEngine\Dao\sql\imp\IColumn.cs" />
+    <Compile Include="DbEngine\Dao\sql\imp\IConstraint.cs" />
+    <Compile Include="DbEngine\Dao\sql\imp\IDAttribute.cs" />
+    <Compile Include="DbEngine\Dao\sql\imp\IQuery.cs" />
+    <Compile Include="DbEngine\Dao\sql\imp\ITable.cs" />
+    <Compile Include="DbEngine\Dao\sql\imp\Timing.cs" />
+    <Compile Include="DbEngine\Dao\sql\OrmUtil.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlColumn.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlOrder.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlTable.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlTableFactory.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlTrigger.cs" />
+    <Compile Include="DbEngine\Dao\sql\SqlUtils.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="DataContextTransaction.cs" />
     <Compile Include="DataExtensions.cs" />
@@ -405,6 +400,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

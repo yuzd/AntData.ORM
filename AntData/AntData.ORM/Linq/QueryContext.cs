@@ -40,7 +40,7 @@ namespace AntData.ORM.Linq
 				}
 			}
 
-			var ctx = new DataContextContext { DataContextInfo = RootDataContext.Clone(true), InUse = true };
+			var ctx = new DataContextContext { DataContextInfo = RootDataContext, InUse = true };
 
 			_contexts.Add(ctx);
 

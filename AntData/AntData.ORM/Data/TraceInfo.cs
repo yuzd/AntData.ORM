@@ -36,10 +36,7 @@ namespace AntData.ORM.Data
 					var sqlProvider = DataConnection.DataProvider.CreateSqlBuilder();
 					var sb          = new StringBuilder();
 
-					sb.Append("-- ").Append(DataConnection.ConfigurationString);
-
-					if (DataConnection.ConfigurationString != DataConnection.DataProvider.Name)
-						sb.Append(' ').Append(DataConnection.DataProvider.Name);
+					sb.Append("-- ").Append(DataConnection.ConnectionString);
 
 					if (DataConnection.DataProvider.Name != sqlProvider.Name)
 						sb.Append(' ').Append(sqlProvider.Name);

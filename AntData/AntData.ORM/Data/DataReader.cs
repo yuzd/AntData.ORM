@@ -37,7 +37,7 @@ namespace AntData.ORM.Data
 
 			ReadNumber++;
 
-			return CommandInfo.ExecuteQuery<T>(Reader, CommandInfo.DataConnection.Command.CommandText + "$$$" + ReadNumber);
+			return CommandInfo.ExecuteQuery<T>(Reader, CommandInfo.DataConnection.LastQuery + "$$$" + ReadNumber);
 		}
 
 		#endregion
@@ -61,7 +61,7 @@ namespace AntData.ORM.Data
 
 			ReadNumber++;
 
-			var sql = CommandInfo.DataConnection.Command.CommandText + "$$$" + ReadNumber;
+			var sql = CommandInfo.DataConnection.LastQuery + "$$$" + ReadNumber;
 
 			return CommandInfo.ExecuteScalar<T>(Reader, sql);
 		}

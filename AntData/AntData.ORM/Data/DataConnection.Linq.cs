@@ -168,11 +168,6 @@ namespace AntData.ORM.Data
 			if (pq.Commands.Length == 1)
 			{
 				InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
-
-				if (pq.Parameters != null)
-					foreach (var p in pq.Parameters)
-						Command.Parameters.Add(p);
-
 				return ExecuteNonQuery();
 			}
 			else
@@ -180,10 +175,6 @@ namespace AntData.ORM.Data
 				for (var i = 0; i < pq.Commands.Length; i++)
 				{
 					InitCommand(CommandType.Text, pq.Commands[i], null, i == 0 ? pq.QueryHints : null);
-
-					if (i == 0 && pq.Parameters != null)
-						foreach (var p in pq.Parameters)
-							Command.Parameters.Add(p);
 
 					if (i < pq.Commands.Length - 1 && pq.Commands[i].StartsWith("DROP"))
 					{
@@ -210,49 +201,16 @@ namespace AntData.ORM.Data
             var pq = (PreparedQuery)query;
 
             InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
-
-            if (pq.Parameters != null)
-                foreach (var p in pq.Parameters)
-                    Command.Parameters.Add(p);
-
-            IDbDataParameter idparam = null;
-
-            if (DataProvider.SqlProviderFlags.IsIdentityParameterRequired)
-            {
-                var sql = pq.SelectQuery;
-
-                if (sql.IsInsert && sql.Insert.WithIdentity)
-                {
-                    idparam = Command.CreateParameter();
-
-                    idparam.ParameterName = "IDENTITY_PARAMETER";
-                    idparam.Direction = ParameterDirection.Output;
-                    idparam.Direction = ParameterDirection.Output;
-                    idparam.DbType = DbType.Decimal;
-
-                    Command.Parameters.Add(idparam);
-                }
-            }
-
-            if (pq.Commands.Length == 1)
-            {
-                if (idparam != null)
-                {
-                    // так сделано потому, что фаерберд провайдер не возвращает никаких параметров через ExecuteReader
-                    // остальные провайдеры должны поддерживать такой режим
-                    ExecuteNonQuery();
-
-                    return idparam.Value;
-                }
-
-                return ExecuteScalar();
-            }
-
             if (Identity)
             {
                 InitCommand(CommandType.Text,pq.Commands[0] + ";" + pq.Commands[1], null, null);
                 return ExecuteScalar();
             }
+            if (pq.Commands.Length == 1)
+            {
+                return ExecuteScalar();
+            }
+
             ExecuteNonQuery();
 
             InitCommand(CommandType.Text, pq.Commands[1], null, null);
@@ -265,40 +223,8 @@ namespace AntData.ORM.Data
 
 			InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
 
-			if (pq.Parameters != null)
-				foreach (var p in pq.Parameters)
-					Command.Parameters.Add(p);
-
-			IDbDataParameter idparam = null;
-
-			if (DataProvider.SqlProviderFlags.IsIdentityParameterRequired)
-			{
-				var sql = pq.SelectQuery;
-
-				if (sql.IsInsert && sql.Insert.WithIdentity)
-				{
-					idparam = Command.CreateParameter();
-
-					idparam.ParameterName = "IDENTITY_PARAMETER";
-					idparam.Direction     = ParameterDirection.Output;
-					idparam.Direction     = ParameterDirection.Output;
-					idparam.DbType        = DbType.Decimal;
-
-					Command.Parameters.Add(idparam);
-				}
-			}
-
 			if (pq.Commands.Length == 1)
 			{
-				if (idparam != null)
-				{
-					// так сделано потому, что фаерберд провайдер не возвращает никаких параметров через ExecuteReader
-					// остальные провайдеры должны поддерживать такой режим
-					ExecuteNonQuery();
-
-					return idparam.Value;
-				}
-
 				return ExecuteScalar();
 			}
 
@@ -314,10 +240,6 @@ namespace AntData.ORM.Data
 			var pq = (PreparedQuery)query;
 
 			InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
-
-            //if (pq.Parameters != null)
-            //    foreach (var p in pq.Parameters)
-            //        Command.Parameters.Add(p);
 
 			return ExecuteReader();
 		}
@@ -338,10 +260,8 @@ namespace AntData.ORM.Data
 
 			var sb = new StringBuilder();
 
-			sb.Append("-- ").Append(ConfigurationString);
+			sb.Append("-- ").Append(ConnectionString);
 
-			if (ConfigurationString != DataProvider.Name)
-				sb.Append(' ').Append(DataProvider.Name);
 
 			if (DataProvider.Name != sqlProvider.Name)
 				sb.Append(' ').Append(sqlProvider.Name);
@@ -411,13 +331,7 @@ namespace AntData.ORM.Data
 			return query;
 		}
 
-		IDataContext IDataContext.Clone(bool forNestedQuery)
-		{
-            //if (forNestedQuery && _connection != null && IsMarsEnabled)
-            //    return new DataConnection(DataProvider, _connection) { _mappingSchema = _mappingSchema, Transaction = Transaction };
 
-			return (DataConnection)Clone();
-		}
 
 		string IDataContext.ContextID
 		{

@@ -15,106 +15,19 @@ namespace AntData.ORM.Data
 	using System.Text;
 
 	using Common;
-	using Configuration;
 	using DataProvider;
 
 	using Mapping;
 
-	public partial class DataConnection : ICloneable
+	public partial class DataConnection
 	{
 		#region .ctor
-
-        public DataConnection()
-            : this(null)
-        {
-        }
-
-        public DataConnection(string configurationString)
-        {
-            InitConfig();
-
-            ConfigurationString = configurationString ?? DefaultConfiguration;
-
-            if (ConfigurationString == null)
-                throw new LinqToDBException("Configuration string is not provided.");
-
-            var ci = GetConfigurationInfo(ConfigurationString);
-
-            DataProvider = ci.DataProvider;
-            ConnectionString = ci.ConnectionString;
-            _mappingSchema = DataProvider.MappingSchema;
-        }
-
-        //public DataConnection([JetBrains.Annotations.NotNull] string providerName, [JetBrains.Annotations.NotNull] string connectionString)
-        //{
-        //    if (providerName == null) throw new ArgumentNullException("providerName");
-        //    if (connectionString == null) throw new ArgumentNullException("connectionString");
-
-        //    IDataProvider dataProvider;
-
-        //    if (!_dataProviders.TryGetValue(providerName, out dataProvider))
-        //        throw new LinqToDBException("DataProvider '{0}' not found.".Args(providerName));
-
-        //    InitConfig();
-
-        //    DataProvider = dataProvider;
-        //    ConnectionString = connectionString;
-        //    _mappingSchema = DataProvider.MappingSchema;
-        //}
-
-        //public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, [JetBrains.Annotations.NotNull] string connectionString)
-        //{
-        //    if (dataProvider == null) throw new ArgumentNullException("dataProvider");
-        //    if (connectionString == null) throw new ArgumentNullException("connectionString");
-
-        //    InitConfig();
-
-        //    DataProvider = dataProvider;
-        //    _mappingSchema = DataProvider.MappingSchema;
-        //    ConnectionString = connectionString;
-        //}
-
-        //public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, [JetBrains.Annotations.NotNull] IDbConnection connection)
-        //{
-        //    if (dataProvider == null) throw new ArgumentNullException("dataProvider");
-        //    if (connection == null) throw new ArgumentNullException("connection");
-
-        //    InitConfig();
-
-        //    if (!Configuration.AvoidSpecificDataProviderAPI && !dataProvider.IsCompatibleConnection(connection))
-        //        throw new LinqToDBException(
-        //            "DataProvider '{0}' and connection '{1}' are not compatible.".Args(dataProvider, connection));
-
-        //    DataProvider = dataProvider;
-        //    _mappingSchema = DataProvider.MappingSchema;
-        //    _connection = connection;
-        //}
-
-        //public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, [JetBrains.Annotations.NotNull] IDbTransaction transaction)
-        //{
-        //    if (dataProvider == null) throw new ArgumentNullException("dataProvider");
-        //    if (transaction == null) throw new ArgumentNullException("transaction");
-
-        //    InitConfig();
-
-        //    if (!Configuration.AvoidSpecificDataProviderAPI && !dataProvider.IsCompatibleConnection(transaction.Connection))
-        //        throw new LinqToDBException(
-        //            "DataProvider '{0}' and connection '{1}' are not compatible.".Args(dataProvider, transaction.Connection));
-
-        //    DataProvider = dataProvider;
-        //    _mappingSchema = DataProvider.MappingSchema;
-        //    _connection = transaction.Connection;
-        //    Transaction = transaction;
-        //    _closeTransaction = false;
-        //}
-
 
         public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, IDataReader> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, DataTable> CustomerExecuteQueryTable)
         {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
-            InitConfig();
-
+            AddDataProvider(dataProvider);
             DataProvider = dataProvider;
             _mappingSchema = DataProvider.MappingSchema;
             ConnectionString = dbMappingName;
@@ -127,7 +40,6 @@ namespace AntData.ORM.Data
 
 		#region Public Properties
 
-		public string        ConfigurationString { get; private set; }
 		public IDataProvider DataProvider        { get; private set; }
 		public string        ConnectionString    { get; private set; }
 
@@ -141,7 +53,7 @@ namespace AntData.ORM.Data
 			{
 				if (!_id.HasValue)
 				{
-					var key = MappingSchema.ConfigurationID + "." + (ConfigurationString ?? ConnectionString ?? Connection.ConnectionString);
+					var key = MappingSchema.ConfigurationID + "." + ConnectionString;
 					int id;
 
 					if (!_configurationIDs.TryGetValue(key, out id))
@@ -167,8 +79,6 @@ namespace AntData.ORM.Data
 			set { _isMarsEnabled = value; }
 		}
 
-		public static string DefaultConfiguration { get; set; }
-		public static string DefaultDataProvider  { get; set; }
 
 		private static Action<TraceInfo> _onTrace = OnTraceInternal;
 		public  static Action<TraceInfo>  OnTrace
@@ -193,7 +103,10 @@ namespace AntData.ORM.Data
             set { _onCustomerTraceConnection = value; }
 		}
 
-
+        public static IDataProvider GetDataProvider([JetBrains.Annotations.NotNull] string providerName)
+        {
+            return _dataProviders[providerName];
+        }
 
         private Func<string, string, Dictionary<string, CustomerParam>, IDictionary,int > CustomerExecuteNonQuery { get; set; }
 
@@ -261,20 +174,7 @@ namespace AntData.ORM.Data
 
 		#endregion
 
-		#region Configuration
 
-		static IDataProvider FindProvider(string configuration, IEnumerable<KeyValuePair<string,IDataProvider>> ps, IDataProvider defp)
-		{
-			foreach (var p in ps.OrderByDescending(kv => kv.Key.Length))
-				if (configuration == p.Key || configuration.StartsWith(p.Key + '.'))
-					return p.Value;
-
-			foreach (var p in ps.OrderByDescending(kv => kv.Value.Name.Length))
-				if (configuration == p.Value.Name || configuration.StartsWith(p.Value.Name + '.'))
-					return p.Value;
-
-			return defp;
-		}
 
 		static DataConnection()
 		{
@@ -293,68 +193,10 @@ namespace AntData.ORM.Data
             //LinqToDB.DataProvider.Informix.  InformixTools.  GetDataProvider();
             //LinqToDB.DataProvider.SapHana.   SapHanaTools.   GetDataProvider(); 
 
-			var section = LinqToDBSection.Instance;
-
-			if (section != null)
-			{
-				DefaultConfiguration = section.DefaultConfiguration;
-				DefaultDataProvider  = section.DefaultDataProvider;
-
-				foreach (DataProviderElement provider in section.DataProviders)
-				{
-					var dataProviderType = Type.GetType(provider.TypeName, true);
-					var providerInstance = (IDataProviderFactory)Activator.CreateInstance(dataProviderType);
-
-					if (!string.IsNullOrEmpty(provider.Name))
-						AddDataProvider(provider.Name, providerInstance.GetDataProvider(provider.Attributes));
-				}
-			}
+			
 		}
 
-		static readonly List<Func<ConnectionStringSettings,IDataProvider>> _providerDetectors =
-			new List<Func<ConnectionStringSettings,IDataProvider>>();
 
-		public static void AddProviderDetector(Func<ConnectionStringSettings,IDataProvider> providerDetector)
-		{
-			_providerDetectors.Add(providerDetector);
-		}
-
-		internal static bool IsMachineConfig(ConnectionStringSettings css)
-		{
-			string source;
-
-			try
-			{
-				source = css.ElementInformation.Source;
-			}
-			catch (Exception)
-			{
-				source = "";
-			}
-
-			return source == null || source.EndsWith("machine.config", StringComparison.OrdinalIgnoreCase);
-		}
-
-		static void InitConnectionStrings()
-		{
-			foreach (ConnectionStringSettings css in ConfigurationManager.ConnectionStrings)
-			{
-				_configurations[css.Name] = new ConfigurationInfo(css);
-
-				if (DefaultConfiguration == null && !IsMachineConfig(css))
-				{
-					DefaultConfiguration = css.Name;
-				}
-			}
-		}
-
-		static int _isInitialized;
-
-		static void InitConfig()
-		{
-			if (Interlocked.Exchange(ref _isInitialized, 1) == 0)
-				InitConnectionStrings();
-		}
 
 		static readonly ConcurrentDictionary<string,IDataProvider> _dataProviders =
 			new ConcurrentDictionary<string,IDataProvider>();
@@ -377,142 +219,8 @@ namespace AntData.ORM.Data
 			AddDataProvider(dataProvider.Name, dataProvider);
 		}
 
-		public static IDataProvider GetDataProvider([JetBrains.Annotations.NotNull] string configurationString)
-		{
-			InitConfig();
 
-			return GetConfigurationInfo(configurationString).DataProvider;
-		}
-
-		class ConfigurationInfo
-		{
-			public ConfigurationInfo(string connectionString, IDataProvider dataProvider)
-			{
-				ConnectionString = connectionString;
-				DataProvider     = dataProvider;
-			}
-
-			public ConfigurationInfo(ConnectionStringSettings connectionStringSettings)
-			{
-				ConnectionString = connectionStringSettings.ConnectionString;
-
-				_connectionStringSettings = connectionStringSettings;
-			}
-
-			public  string ConnectionString;
-
-			private readonly ConnectionStringSettings _connectionStringSettings;
-
-			private IDataProvider _dataProvider;
-			public  IDataProvider  DataProvider
-			{
-				get { return _dataProvider ?? (_dataProvider = GetDataProvider(_connectionStringSettings)); }
-				set { _dataProvider = value; }
-			}
-
-			static IDataProvider GetDataProvider(ConnectionStringSettings css)
-			{
-				var configuration = css.Name;
-				var providerName  = css.ProviderName;
-				var dataProvider  = _providerDetectors.Select(d => d(css)).FirstOrDefault(dp => dp != null);
-
-				if (dataProvider == null)
-				{
-					var defaultDataProvider = DefaultDataProvider != null ? _dataProviders[DefaultDataProvider] : null;
-
-					if (string.IsNullOrEmpty(providerName))
-						dataProvider = FindProvider(configuration, _dataProviders, defaultDataProvider);
-					else if (_dataProviders.ContainsKey(providerName))
-						dataProvider = _dataProviders[providerName];
-					else if (_dataProviders.ContainsKey(configuration))
-						dataProvider = _dataProviders[configuration];
-					else
-					{
-						var providers = _dataProviders.Where(dp => dp.Value.ConnectionNamespace == providerName).ToList();
-
-						switch (providers.Count)
-						{
-							case 0  : dataProvider = defaultDataProvider;                                        break;
-							case 1  : dataProvider = providers[0].Value;                                         break;
-							default : dataProvider = FindProvider(configuration, providers, providers[0].Value); break;
-						}
-					}
-				}
-
-				if (dataProvider != null && DefaultConfiguration == null && !IsMachineConfig(css))
-				{
-					DefaultConfiguration = css.Name;
-				}
-
-				return dataProvider;
-			}
-		}
-
-		static ConfigurationInfo GetConfigurationInfo(string configurationString)
-		{
-			ConfigurationInfo ci;
-
-			if (_configurations.TryGetValue(configurationString ?? DefaultConfiguration, out ci))
-				return ci;
-
-			throw new LinqToDBException("Configuration '{0}' is not defined.".Args(configurationString));
-		}
-
-		public static void SetConnectionStrings(System.Configuration.Configuration config)
-		{
-			foreach (ConnectionStringSettings css in config.ConnectionStrings.ConnectionStrings)
-			{
-				_configurations[css.Name] = new ConfigurationInfo(css);
-
-				if (DefaultConfiguration == null && !IsMachineConfig(css))
-				{
-					DefaultConfiguration = css.Name;
-				}
-			}
-		}
-
-		static readonly ConcurrentDictionary<string,ConfigurationInfo> _configurations =
-			new ConcurrentDictionary<string, ConfigurationInfo>();
-
-		public static void AddConfiguration(
-			[JetBrains.Annotations.NotNull] string configuration,
-			[JetBrains.Annotations.NotNull] string connectionString,
-			IDataProvider dataProvider = null)
-		{
-			if (configuration    == null) throw new ArgumentNullException("configuration");
-			if (connectionString == null) throw new ArgumentNullException("connectionString");
-
-			_configurations[configuration] = new ConfigurationInfo(
-				connectionString,
-				dataProvider ?? FindProvider(configuration, _dataProviders, _dataProviders[DefaultDataProvider]));
-		}
-
-		public static void SetConnectionString(
-			[JetBrains.Annotations.NotNull] string configuration,
-			[JetBrains.Annotations.NotNull] string connectionString)
-		{
-			if (configuration    == null) throw new ArgumentNullException("configuration");
-			if (connectionString == null) throw new ArgumentNullException("connectionString");
-
-			InitConfig();
-
-			_configurations[configuration].ConnectionString = connectionString;
-		}
-
-		[Pure]
-		public static string GetConnectionString(string configurationString)
-		{
-			InitConfig();
-
-			ConfigurationInfo ci;
-
-			if (_configurations.TryGetValue(configurationString, out ci))
-				return ci.ConnectionString;
-
-			throw new LinqToDBException("Configuration '{0}' is not defined.".Args(configurationString));
-		}
-
-		#endregion
+	
 
 		#region Connection
 
@@ -545,7 +253,6 @@ namespace AntData.ORM.Data
 			if (OnClosing != null)
 				OnClosing(this, EventArgs.Empty);
 
-			DisposeCommand();
 
             //if (Transaction != null && _closeTransaction)
             //{
@@ -597,37 +304,11 @@ namespace AntData.ORM.Data
 			set { _commandTimeout = value;     }
 		}
 
-		private IDbCommand _command;
-		public  IDbCommand  Command
-		{
-			get { return _command ?? (_command = CreateCommand()); }
-			set { _command = value; }
-		}
+		
 
         internal Dictionary<string, CustomerParam> Params = new Dictionary<string, CustomerParam>();
 
-        public IDbCommand CreateCommand()
-		{
-
-			var command = Connection.CreateCommand();
-
-            if (_commandTimeout.HasValue)
-				command.CommandTimeout = _commandTimeout.Value;
-
-            //if (Transaction != null)
-            //    command.Transaction = Transaction;
-
-			return command;
-		}
-
-		public void DisposeCommand()
-		{
-			if (_command != null)
-			{
-				DataProvider.DisposeCommand(this);
-				_command = null;
-			}
-		}
+       
 
 		internal int ExecuteNonQuery()
 		{
@@ -648,60 +329,6 @@ namespace AntData.ORM.Data
 		    }
             this.Dispose();
             return result;
-            //return baseDao.ExecNonQuery(sqlString);
-            if (TraceSwitch.Level == TraceLevel.Off)
-				return Command.ExecuteNonQuery();
-
-			if (OnTraceConnection == null)
-				return Command.ExecuteNonQuery();
-
-			if (TraceSwitch.TraceInfo)
-			{
-				OnTraceConnection(new TraceInfo
-				{
-					BeforeExecute  = true,
-					TraceLevel     = TraceLevel.Info,
-					DataConnection = this,
-					Command        = Command,
-				});
-			}
-
-			var now = DateTime.Now;
-
-			try
-			{
-				var ret = Command.ExecuteNonQuery();
-
-				if (TraceSwitch.TraceInfo)
-				{
-					OnTraceConnection(new TraceInfo
-					{
-						TraceLevel      = TraceLevel.Info,
-						DataConnection  = this,
-						Command         = Command,
-						ExecutionTime   = DateTime.Now - now,
-						RecordsAffected = ret,
-					});
-				}
-
-				return ret;
-			}
-			catch (Exception ex)
-			{
-				if (TraceSwitch.TraceError)
-				{
-					OnTraceConnection(new TraceInfo
-					{
-						TraceLevel     = TraceLevel.Error,
-						DataConnection = this,
-						Command        = Command,
-						ExecutionTime  = DateTime.Now - now,
-						Exception      = ex,
-					});
-				}
-
-				throw;
-			}
 		}
 
 		object ExecuteScalar()
@@ -722,59 +349,6 @@ namespace AntData.ORM.Data
             }
             this.Dispose();
             return result;
-            //return baseDao.ExecScalar(sqlString);
-            if (TraceSwitch.Level == TraceLevel.Off)
-				return Command.ExecuteScalar();
-
-			if (OnTraceConnection == null)
-				return Command.ExecuteScalar();
-
-			if (TraceSwitch.TraceInfo)
-			{
-				OnTraceConnection(new TraceInfo
-				{
-					BeforeExecute  = true,
-					TraceLevel     = TraceLevel.Info,
-					DataConnection = this,
-					Command        = Command,
-				});
-			}
-
-			var now = DateTime.Now;
-
-			try
-			{
-				var ret = Command.ExecuteScalar();
-
-				if (TraceSwitch.TraceInfo)
-				{
-					OnTraceConnection(new TraceInfo
-					{
-						TraceLevel     = TraceLevel.Info,
-						DataConnection = this,
-						Command        = Command,
-						ExecutionTime  = DateTime.Now - now,
-					});
-				}
-
-				return ret;
-			}
-			catch (Exception ex)
-			{
-				if (TraceSwitch.TraceError)
-				{
-					OnTraceConnection(new TraceInfo
-					{
-						TraceLevel     = TraceLevel.Error,
-						DataConnection = this,
-						Command        = Command,
-						ExecutionTime  = DateTime.Now - now,
-						Exception      = ex,
-					});
-				}
-
-				throw;
-			}
 		}
 
 		internal IDataReader ExecuteReader()
@@ -793,11 +367,8 @@ namespace AntData.ORM.Data
                     SqlText = sqlString
                 });
             }
-             this.Dispose();
+            this.Dispose();
 		    return result;
-            OnTraceConnection(new TraceInfo());
-            //return baseDao.SelectDataReader(sqlString);
-			return ExecuteReader(CommandBehavior.Default);
 		}
 
 		internal IDataReader ExecuteReader(CommandBehavior commandBehavior)
@@ -818,60 +389,6 @@ namespace AntData.ORM.Data
             }
             this.Dispose();
             return result;
-            OnTraceConnection(new TraceInfo());
-           // return baseDao.SelectDataReader(sqlString);
-            if (TraceSwitch.Level == TraceLevel.Off)
-				return Command.ExecuteReader(commandBehavior);
-
-			if (OnTraceConnection == null)
-				return Command.ExecuteReader(commandBehavior);
-
-			if (TraceSwitch.TraceInfo)
-			{
-				OnTraceConnection(new TraceInfo
-				{
-					BeforeExecute  = true,
-					TraceLevel     = TraceLevel.Info,
-					DataConnection = this,
-					Command        = Command,
-				});
-			}
-
-			var now = DateTime.Now;
-
-			try
-			{
-				var ret = Command.ExecuteReader(commandBehavior);
-
-				if (TraceSwitch.TraceInfo)
-				{
-					OnTraceConnection(new TraceInfo
-					{
-						TraceLevel     = TraceLevel.Info,
-						DataConnection = this,
-						Command        = Command,
-						ExecutionTime  = DateTime.Now - now,
-					});
-				}
-
-				return ret;
-			}
-			catch (Exception ex)
-			{
-				if (TraceSwitch.TraceError)
-				{
-					OnTraceConnection(new TraceInfo
-					{
-						TraceLevel     = TraceLevel.Error,
-						DataConnection = this,
-						Command        = Command,
-						ExecutionTime  = DateTime.Now - now,
-						Exception      = ex,
-					});
-				}
-
-				throw;
-			}
 		}
 
         internal DataTable ExecuteDataTable(CommandBehavior commandBehavior)
@@ -893,10 +410,7 @@ namespace AntData.ORM.Data
             this.Dispose();
             return result;
         }
-		public static void ClearObjectReaderCache()
-		{
-			CommandInfo.ClearObjectReaderCache();
-		}
+		
 
 		#endregion
 
@@ -1011,29 +525,7 @@ namespace AntData.ORM.Data
 
 		#endregion
 
-		#region ICloneable Members
-
-		DataConnection(string configurationString, IDataProvider dataProvider, string connectionString, IDbConnection connection, MappingSchema mappingSchema)
-		{
-			ConfigurationString = configurationString;
-			DataProvider        = dataProvider;
-			ConnectionString    = connectionString;
-			_connection         = connection;
-			_mappingSchema      = mappingSchema;
-			_closeConnection    = true;
-		}
-
-		public object Clone()
-		{
-			var connection =
-				_connection == null       ? null :
-				_connection is ICloneable ? (IDbConnection)((ICloneable)_connection).Clone() :
-				                            DataProvider.CreateConnection(ConnectionString);
-
-			return new DataConnection(ConfigurationString, DataProvider, ConnectionString, connection, MappingSchema);
-		}
 		
-		#endregion
 
 		#region System.IDisposable Members
 

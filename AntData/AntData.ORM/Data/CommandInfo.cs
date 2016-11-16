@@ -74,103 +74,54 @@ namespace AntData.ORM.Data
 					yield return objectReader(rd);
 		}
 
-		#endregion
+        #endregion
 
-		#region Query with object reader async
+        #region Query
 
-#if !NOASYNC
+        public IEnumerable<T> QueryProc<T>()
+        {
+            CommandType = CommandType.StoredProcedure;
+            return Query<T>();
+        }
 
-		public Task<List<T>> QueryToListAsync<T>(Func<IDataReader,T> objectReader)
-		{
-			return QueryToListAsync(objectReader, CancellationToken.None);
-		}
+        public IEnumerable<T> Query<T>()
+        {
+            DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
 
-		public async Task<List<T>> QueryToListAsync<T>(Func<IDataReader,T> objectReader, CancellationToken cancellationToken)
-		{
-			var list = new List<T>();
-			await QueryForEachAsync(objectReader, list.Add, cancellationToken);
-			return list;
-		}
+            if (Parameters != null && Parameters.Length > 0)
+                SetParameters(DataConnection, Parameters);
 
-		public Task<T[]> QueryToArrayAsync<T>(Func<IDataReader,T> objectReader)
-		{
-			return QueryToArrayAsync(objectReader, CancellationToken.None);
-		}
+            using (var rd = DataConnection.ExecuteReader(CommandBehavior))
+            {
+                if (rd.Read())
+                {
+                    var objectReader = GetObjectReader<T>(DataConnection, rd, DataConnection.LastQuery);
+                    var isFaulted = false;
 
-		public async Task<T[]> QueryToArrayAsync<T>(Func<IDataReader,T> objectReader, CancellationToken cancellationToken)
-		{
-			var list = new List<T>();
-			await QueryForEachAsync(objectReader, list.Add, cancellationToken);
-			return list.ToArray();
-		}
+                    do
+                    {
+                        T result;
 
-		public Task QueryForEachAsync<T>(Func<IDataReader,T> objectReader, Action<T> action)
-		{
-			return QueryForEachAsync(objectReader, action, CancellationToken.None);
-		}
+                        try
+                        {
+                            result = objectReader(rd);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            if (isFaulted)
+                                throw;
 
-		public async Task QueryForEachAsync<T>(Func<IDataReader,T> objectReader, Action<T> action, CancellationToken cancellationToken)
-		{
-			await DataConnection.InitCommandAsync(CommandType, CommandText, Parameters, cancellationToken);
-
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			using (var rd = await DataConnection.ExecuteReaderAsync(CommandBehavior, cancellationToken))
-				while (await rd.ReadAsync(cancellationToken))
-					action(objectReader(rd));
-		}
-
-#endif
-
-		#endregion
-
-		#region Query
-
-		public IEnumerable<T> QueryProc<T>()
-		{
-			CommandType = CommandType.StoredProcedure;
-			return Query<T>();
-		}
-
-		public IEnumerable<T> Query<T>()
-		{
-			DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
-
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			using (var rd = DataConnection.ExecuteReader(CommandBehavior))
-			{
-				if (rd.Read())
-				{
-					var objectReader = GetObjectReader<T>(DataConnection, rd, DataConnection.LastQuery);
-					var isFaulted    = false;
-
-					do
-					{
-						T result;
-
-						try
-						{
-							result = objectReader(rd);
-						}
-						catch (InvalidCastException)
-						{
-							if (isFaulted)
-								throw;
-
-							isFaulted    = true;
+                            isFaulted = true;
                             objectReader = GetObjectReader2<T>(DataConnection, rd, DataConnection.LastQuery);
-							result       = objectReader(rd);
-						}
+                            result = objectReader(rd);
+                        }
 
-						yield return result;
+                        yield return result;
 
-					} while (rd.Read());
-				}
-			}
-		}
+                    } while (rd.Read());
+                }
+            }
+        }
 
         public DataTable QueryTable()
         {
@@ -181,87 +132,10 @@ namespace AntData.ORM.Data
 
             return DataConnection.ExecuteDataTable(CommandBehavior);
         }
-		#endregion
+        #endregion
+        #region Query with template
 
-		#region Query async
-
-#if !NOASYNC
-
-		public Task<List<T>> QueryToListAsync<T>()
-		{
-			return QueryToListAsync<T>(CancellationToken.None);
-		}
-
-		public async Task<List<T>> QueryToListAsync<T>(CancellationToken cancellationToken)
-		{
-			var list = new List<T>();
-			await QueryForEachAsync<T>(list.Add, cancellationToken);
-			return list;
-		}
-
-		public Task<T[]> QueryToArrayAsync<T>()
-		{
-			return QueryToArrayAsync<T>(CancellationToken.None);
-		}
-
-		public async Task<T[]> QueryToArrayAsync<T>(CancellationToken cancellationToken)
-		{
-			var list = new List<T>();
-			await QueryForEachAsync<T>(list.Add, cancellationToken);
-			return list.ToArray();
-		}
-
-		public Task QueryForEachAsync<T>(Action<T> action)
-		{
-			return QueryForEachAsync(action, CancellationToken.None);
-		}
-
-		public async Task QueryForEachAsync<T>(Action<T> action, CancellationToken cancellationToken)
-		{
-			await DataConnection.InitCommandAsync(CommandType, CommandText, Parameters, cancellationToken);
-
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			using (var rd = await DataConnection.ExecuteReaderAsync(CommandBehavior, cancellationToken))
-			{
-				if (await rd.ReadAsync(cancellationToken))
-				{
-					var objectReader = GetObjectReader<T>(DataConnection, rd, DataConnection.Command.CommandText);
-					var isFaulted    = false;
-
-					do
-					{
-						T result;
-
-						try
-						{
-							result = objectReader(rd);
-						}
-						catch (InvalidCastException)
-						{
-							if (isFaulted)
-								throw;
-
-							isFaulted    = true;
-							objectReader = GetObjectReader2<T>(DataConnection, rd, DataConnection.Command.CommandText);
-							result       = objectReader(rd);
-						}
-
-						action(result);
-
-					} while (await rd.ReadAsync(cancellationToken));
-				}
-			}
-		}
-
-#endif
-
-		#endregion
-
-		#region Query with template
-
-		public IEnumerable<T> Query<T>(T template)
+        public IEnumerable<T> Query<T>(T template)
 		{
 			return Query<T>();
 		}
@@ -300,40 +174,7 @@ namespace AntData.ORM.Data
 
 		#endregion
 
-		#region Execute async
-
-#if !NOASYNC
-
-		public Task<int> ExecuteProcAsync()
-		{
-			CommandType = CommandType.StoredProcedure;
-			return ExecuteAsync(CancellationToken.None);
-		}
-
-		public Task<int> ExecuteProcAsync(CancellationToken cancellationToken)
-		{
-			CommandType = CommandType.StoredProcedure;
-			return ExecuteAsync(cancellationToken);
-		}
-
-		public Task<int> ExecuteAsync()
-		{
-			return ExecuteAsync(CancellationToken.None);
-		}
-
-		public async Task<int> ExecuteAsync(CancellationToken cancellationToken)
-		{
-			await DataConnection.InitCommandAsync(CommandType, CommandText, Parameters, cancellationToken);
-
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			return await DataConnection.ExecuteNonQueryAsync(cancellationToken);
-		}
-
-#endif
-
-		#endregion
+		
 
 		#region Execute scalar
 
@@ -381,43 +222,7 @@ namespace AntData.ORM.Data
 
 		#endregion
 
-		#region Execute scalar async
 
-#if !NOASYNC
-
-		public Task<T> ExecuteAsync<T>()
-		{
-			return ExecuteAsync<T>(CancellationToken.None);
-		}
-
-		public async Task<T> ExecuteAsync<T>(CancellationToken cancellationToken)
-		{
-			await DataConnection.InitCommandAsync(CommandType, CommandText, Parameters, cancellationToken);
-
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			using (var rd = await DataConnection.ExecuteReaderAsync(CommandBehavior, cancellationToken))
-			{
-				if (await rd.ReadAsync(cancellationToken))
-				{
-					try
-					{
-						return GetObjectReader<T>(DataConnection, rd, CommandText)(rd);
-					}
-					catch (InvalidCastException)
-					{
-						return GetObjectReader2<T>(DataConnection, rd, CommandText)(rd);
-					}
-				}
-			}
-
-			return default(T);
-		}
-
-#endif
-
-		#endregion
 
 		#region ExecuteReader
 
@@ -487,76 +292,7 @@ namespace AntData.ORM.Data
 
 		#endregion
 
-		#region ExecuteReader async
-
-#if !NOASYNC
-
-		public Task<DataReaderAsync> ExecuteReaderAsync()
-		{
-			return ExecuteReaderAsync(CancellationToken.None);
-		}
-
-		public async Task<DataReaderAsync> ExecuteReaderAsync(CancellationToken cancellationToken)
-		{
-			await DataConnection.InitCommandAsync(CommandType, CommandText, Parameters, cancellationToken);
-
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			return new DataReaderAsync { CommandInfo = this, Reader = await DataConnection.ExecuteReaderAsync(CommandBehavior, cancellationToken) };
-		}
-
-		internal async Task ExecuteQueryAsync<T>(DbDataReader rd, string sql, Action<T> action, CancellationToken cancellationToken)
-		{
-			if (await rd.ReadAsync(cancellationToken))
-			{
-				var objectReader = GetObjectReader<T>(DataConnection, rd, sql);
-				var isFaulted    = false;
-
-				do
-				{
-					T result;
-
-					try
-					{
-						result = objectReader(rd);
-					}
-					catch (InvalidCastException)
-					{
-						if (isFaulted)
-							throw;
-
-						isFaulted    = true;
-						objectReader = GetObjectReader2<T>(DataConnection, rd, sql);
-						result       = objectReader(rd);
-					}
-
-					action(result);
-
-				} while (await rd.ReadAsync(cancellationToken));
-			}
-		}
-
-		internal async Task<T> ExecuteScalarAsync<T>(DbDataReader rd, string sql, CancellationToken cancellationToken)
-		{
-			if (await rd.ReadAsync(cancellationToken))
-			{
-				try
-				{
-					return GetObjectReader<T>(DataConnection, rd, sql)(rd);
-				}
-				catch (InvalidCastException)
-				{
-					return GetObjectReader2<T>(DataConnection, rd, sql)(rd);
-				}
-			}
-
-			return default(T);
-		}
-
-#endif
-
-		#endregion
+		
 
 		#region SetParameters
 
@@ -586,26 +322,6 @@ namespace AntData.ORM.Data
 			}
 		}
 
-		static void RebindParameters(DataConnection dataConnection, DataParameter[] parameters)
-		{
-			var dbParameters = dataConnection.Command.Parameters;
-
-			for (var i = 0; i < parameters.Length; i++)
-			{
-				var dataParameter = parameters[i];
-
-				if (dataParameter.Direction.HasValue &&
-					(dataParameter.Direction == ParameterDirection.Output || dataParameter.Direction == ParameterDirection.InputOutput))
-				{
-					var dbParameter = (IDbDataParameter)dbParameters[i];
-
-					if (!object.Equals(dataParameter.Value, dbParameter.Value))
-					{
-						dataParameter.Value = dbParameter.Value;
-					}
-				}
-			}
-		}
 
 		struct ParamKey : IEquatable<ParamKey>
 		{

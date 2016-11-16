@@ -15,6 +15,5 @@ namespace AntData.ORM.Linq
 
 		ISqlBuilder      CreateSqlBuilder ();
 		ISqlOptimizer    GetSqlOptimizer  ();
-		IDataContextInfo Clone(bool forNestedQuery);
 	}
 }

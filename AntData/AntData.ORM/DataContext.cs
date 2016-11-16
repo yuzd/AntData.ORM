@@ -13,17 +13,7 @@ namespace AntData.ORM
 
 	public class DataContext : IDataContext
 	{
-		public DataContext() : this(DataConnection.DefaultConfiguration)
-		{
-		}
-
-		public DataContext(string configurationString)
-		{
-			DataProvider        = DataConnection.GetDataProvider(configurationString);
-			ConfigurationString = configurationString ?? DataConnection.DefaultConfiguration;
-			ContextID           = DataProvider.Name;
-			MappingSchema       = DataProvider.MappingSchema;
-		}
+	
 
 		public DataContext([JetBrains.Annotations.NotNull] IDataProvider dataProvider, [JetBrains.Annotations.NotNull] string connectionString)
 		{
@@ -106,21 +96,31 @@ namespace AntData.ORM
 		{
 			if (_dataConnection == null)
 			{
-				_dataConnection = ConnectionString != null
-                    ? new DataConnection(ConfigurationString)
-					: new DataConnection(ConfigurationString);
+                throw new ArgumentException(" Datacontent._dataConnection cannot be null.");
+    //            if (string.IsNullOrEmpty(ConnectionString))
+			 //   {
+    //                throw new ArgumentException(" Datacontent.ConnectionString cannot be empty.");
+    //            }
+			 //   if (DataProvider == null)
+			 //   {
+    //                throw new ArgumentException(" Datacontent.DataProvider cannot be null.");
+    //            }
+               
+				//_dataConnection = ConnectionString != null
+    //                ? new DataConnection(ConfigurationString)
+				//	: new DataConnection(ConfigurationString);
 
-				if (_queryHints != null && _queryHints.Count > 0)
-				{
-					_dataConnection.QueryHints.AddRange(_queryHints);
-					_queryHints = null;
-				}
+				//if (_queryHints != null && _queryHints.Count > 0)
+				//{
+				//	_dataConnection.QueryHints.AddRange(_queryHints);
+				//	_queryHints = null;
+				//}
 
-				if (_nextQueryHints != null && _nextQueryHints.Count > 0)
-				{
-					_dataConnection.NextQueryHints.AddRange(_nextQueryHints);
-					_nextQueryHints = null;
-				}
+				//if (_nextQueryHints != null && _nextQueryHints.Count > 0)
+				//{
+				//	_dataConnection.NextQueryHints.AddRange(_nextQueryHints);
+				//	_nextQueryHints = null;
+				//}
 			}
 
 			return _dataConnection;
@@ -220,35 +220,7 @@ namespace AntData.ORM
 			return str;
 		}
 
-		DataContext(int n) {}
-
-        IDataContext IDataContext.Clone(bool forNestedQuery)
-        {
-        //    //var dc = new DataContext(0)
-        //    //{
-        //    //    ConfigurationString = ConfigurationString,
-        //    //    ConnectionString    = ConnectionString,
-        //    //    KeepConnectionAlive = KeepConnectionAlive,
-        //    //    DataProvider        = DataProvider,
-        //    //    ContextID           = ContextID,
-        //    //    MappingSchema       = MappingSchema,
-        //    //    InlineParameters    = InlineParameters,
-        //    //};
-
-        //    //if (forNestedQuery && _dataConnection != null && _dataConnection.IsMarsEnabled)
-        //    //    dc._dataConnection = _dataConnection.Transaction != null ?
-        //    //        new DataConnection(DataProvider, _dataConnection.Transaction) :
-        //    //        new DataConnection(DataProvider, _dataConnection.Connection);
-
-        //    //dc.QueryHints.    AddRange(QueryHints);
-        //    //dc.NextQueryHints.AddRange(NextQueryHints);
-
-        //    //return dc;
-
-        //    //throw NotSupportedException("aa");
-            return  new DataConnection();
-        }
-
+	
 		public event EventHandler OnClosing;
 
 		void IDisposable.Dispose()

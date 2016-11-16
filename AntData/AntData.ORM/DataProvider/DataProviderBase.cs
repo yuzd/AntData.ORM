@@ -85,20 +85,7 @@ namespace AntData.ORM.DataProvider
 		public    abstract ISqlBuilder   CreateSqlBuilder();
 		public    abstract ISqlOptimizer GetSqlOptimizer ();
 
-		public virtual void InitCommand(DataConnection dataConnection, CommandType commandType, string commandText, DataParameter[] parameters)
-		{
-			dataConnection.Command.CommandType = commandType;
-
-			if (dataConnection.Command.Parameters.Count != 0)
-				dataConnection.Command.Parameters.Clear();
-
-			dataConnection.Command.CommandText = commandText;
-		}
-
-		public virtual void DisposeCommand(DataConnection dataConnection)
-		{
-			dataConnection.Command.Dispose();
-		}
+		
 
 		public virtual object GetConnectionInfo(DataConnection dataConnection, string parameterName)
 		{

@@ -23,7 +23,7 @@ namespace AntDataUnitTest
                     var sqlText = info.SqlText;
                     var parms = info.CustomerParams;
                 };
-                string aaa = "3";
+                string aaa = "Succeeded";
                 var aa = DbContent.Tables.Jobs.Where(r => r.StateName.Equals(aaa)).Skip(1).Take(2).ToList();
                 Assert.AreEqual(aa.Count > 0, true);
             }

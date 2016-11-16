@@ -32,7 +32,6 @@ namespace AntData.ORM
 		void                ReleaseQuery       (object query);
 
 		string              GetSqlText         (object query);
-		IDataContext        Clone              (bool forNestedQuery);
 
 		event EventHandler  OnClosing;
 	}

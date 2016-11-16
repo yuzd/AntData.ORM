@@ -35,10 +35,7 @@ namespace AntData.ORM.Linq
 			return DataContext.GetSqlOptimizer();
 		}
 
-		public IDataContextInfo Clone(bool forNestedQuery)
-		{
-			return new DataContextInfo(DataContext.Clone(forNestedQuery));
-		}
+	
 
 		public static IDataContextInfo Create(IDataContext dataContext)
 		{
