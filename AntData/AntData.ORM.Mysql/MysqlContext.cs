@@ -31,6 +31,7 @@ namespace Arch.Data.ORM.Mysql
 #if DEBUG
             TraceSwitch.Level = TraceLevel.Info;
             //AntData.ORM.Common.Configuration.Linq.GenerateExpressionTest = true;
+            AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
 #endif
             _lazy = new Lazy<T>(() =>
             {

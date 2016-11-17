@@ -93,7 +93,7 @@ void GenerateTypesFromMetadata()
 	        IsReadonly = true
 	    });
 		
-		DataContextObject.Members.Add(new Method(null, "IQueryable<T> Get<T>", null, new List<string>{"return this.con.GetTable<T>();"}) { AfterSignature = { " where T : class" }  });
+		DataContextObject.Members.Add(new Method(null, "ITable<T> Get<T>", null, new List<string>{"return this.con.GetTable<T>();"}) { AfterSignature = { " where T : class" }  });
 		DataContextObject.Members.Add(new Method(null, DataContextObject.Name, new[] { "IDataContext con" }, body) {  });
 		
 	}
@@ -138,7 +138,7 @@ void GenerateTypesFromMetadata()
 	MemberBase dcProp = t.IsProviderSpecific ?
 			GenerateProviderSpecificTable(t) :
 			new Property(
-				string.Format("IQueryable<{0}>", ToPascalCase(t.TypeName)),
+				string.Format("ITable<{0}>", ToPascalCase(t.TypeName)),
 				ToPascalCase(t.DataContextPropertyName),
 				new[] { string.Format((schema == null ? "this" : "_dataContext") + ".Get<{0}>()", ToPascalCase(t.TypeName)) },
 				null);
@@ -395,7 +395,7 @@ void GenerateTypesFromMetadata()
 
 					SetPropertyValue(key, "IsNotifying", true);
 					SetPropertyValue(key, "IsEditable",  true);
-
+					key.Name = ToPascalCase(key.Name);
 					associations.Members.Add(key);
 				}
 

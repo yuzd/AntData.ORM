@@ -105,6 +105,7 @@ namespace AntDataUnitTest
             var insertResult = DB.InsertWithIdentity(p);
             var id = Convert.ToInt64(insertResult);
             Assert.AreEqual(id > 0, true);
+            Assert.AreEqual(p.Id, id);
 
         }
 
@@ -147,6 +148,46 @@ namespace AntDataUnitTest
             var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).DynamicOrderBy("Id", "desc").Skip(1).Take(1).ToList();
             Assert.AreEqual(updateResult.Count > 0, true);
 
+        }
+
+        [TestMethod]
+        public void TestMethod2_02()
+        {
+            var list = (from p in DB.Tables.People
+                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                        select p).ToList();
+
+            Assert.AreEqual(list.Count,2);
+        }
+
+        [TestMethod]
+        public void TestMethod2_03()
+        {
+            var list = (from p in DB.Tables.People
+                        from s in DB.Tables.Schools.Where(r=>r.Id.Equals(p.SchoolId)).DefaultIfEmpty()
+                        select p).ToList();
+
+            Assert.AreEqual(list.Count > 2, true);
+        }
+
+        [TestMethod]
+        public void TestMethod2_04()
+        {
+            var p = DB.Tables.People.LoadWith(r=>r.Personsschool).FirstOrDefault(r => r.Name.Equals("nainaigu"));
+
+            Assert.IsNotNull(p);
+            Assert.IsNotNull(p.Personsschool);
+            Assert.IsNotNull(p.Personsschool.Name);
+        }
+
+        [TestMethod]
+        public void TestMethod2_05()
+        {
+            var p = DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefault(r => r.Name.Equals("北京大学"));
+
+            Assert.IsNotNull(p);
+            Assert.IsNotNull(p.Persons);
+            Assert.IsFalse(p.Persons.Any());
         }
     }
 }

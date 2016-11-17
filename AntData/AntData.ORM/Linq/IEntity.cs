@@ -13,7 +13,7 @@ namespace AntData.ORM.Linq
     /// </summary>
     public interface IEntity
     {
-        System.Linq.IQueryable<T> Get<T>() where T : class;
+       ITable<T> Get<T>() where T : class;
     }
 
     public class BaseEntity
