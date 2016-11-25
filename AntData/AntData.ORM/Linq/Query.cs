@@ -141,11 +141,6 @@ namespace AntData.ORM.Linq
 						if (Configuration.Linq.GenerateExpressionTest)
 						{
 							var testFile = new ExpressionTestGenerator().GenerateSource(expr);
-#if !SILVERLIGHT && !NETFX_CORE
-							DataConnection.WriteTraceLine(
-								"Expression test code generated: '" + testFile + "'.", 
-								DataConnection.TraceSwitch.DisplayName);
-#endif
 						}
 
 						try
@@ -156,11 +151,6 @@ namespace AntData.ORM.Linq
 						{
 							if (!Configuration.Linq.GenerateExpressionTest)
 							{
-#if !SILVERLIGHT && !NETFX_CORE
-								DataConnection.WriteTraceLine(
-									"To generate test code to diagnose the problem set 'LinqToDB.Common.Configuration.Linq.GenerateExpressionTest = true'.",
-									DataConnection.TraceSwitch.DisplayName);
-#endif
 							}
 
 							throw;
@@ -527,8 +517,9 @@ namespace AntData.ORM.Linq
 			public SelectQuery  SelectQuery { get; set; }
 			public object       Context     { get; set; }
 			public List<string> QueryHints  { get; set; }
+            public Dictionary<string, CustomerParam> Params { get; set; }
 
-			public SqlParameter[] GetParameters()
+            public SqlParameter[] GetParameters()
 			{
 				var ps = new SqlParameter[Parameters.Count];
 

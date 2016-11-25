@@ -65,11 +65,11 @@ namespace AntData.ORM.Data
 		public IEnumerable<T> Query<T>(Func<IDataReader,T> objectReader)
 		{
 			DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
+            if (Parameters != null && Parameters.Length > 0)
+                param = SetParameters(DataConnection, Parameters);
 
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			using (var rd = DataConnection.ExecuteReader(CommandBehavior))
+			using (var rd = DataConnection.ExecuteReader(CommandBehavior, CommandText, param))
 				while (rd.Read())
 					yield return objectReader(rd);
 		}
@@ -87,15 +87,15 @@ namespace AntData.ORM.Data
         public IEnumerable<T> Query<T>()
         {
             DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
-
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
             if (Parameters != null && Parameters.Length > 0)
-                SetParameters(DataConnection, Parameters);
+                param = SetParameters(DataConnection, Parameters);
 
-            using (var rd = DataConnection.ExecuteReader(CommandBehavior))
+            using (var rd = DataConnection.ExecuteReader(CommandBehavior, CommandText, param))
             {
                 if (rd.Read())
                 {
-                    var objectReader = GetObjectReader<T>(DataConnection, rd, DataConnection.LastQuery);
+                    var objectReader = GetObjectReader<T>(DataConnection, rd, CommandText);
                     var isFaulted = false;
 
                     do
@@ -112,7 +112,7 @@ namespace AntData.ORM.Data
                                 throw;
 
                             isFaulted = true;
-                            objectReader = GetObjectReader2<T>(DataConnection, rd, DataConnection.LastQuery);
+                            objectReader = GetObjectReader2<T>(DataConnection, rd, CommandText);
                             result = objectReader(rd);
                         }
 
@@ -126,11 +126,11 @@ namespace AntData.ORM.Data
         public DataTable QueryTable()
         {
             DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
-
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
             if (Parameters != null && Parameters.Length > 0)
-                SetParameters(DataConnection, Parameters);
+                param = SetParameters(DataConnection, Parameters);
 
-            return DataConnection.ExecuteDataTable(CommandBehavior);
+            return DataConnection.ExecuteDataTable(CommandBehavior, CommandText, param);
         }
         #endregion
         #region Query with template
@@ -160,11 +160,12 @@ namespace AntData.ORM.Data
 			DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
 
 			var hasParameters = Parameters != null && Parameters.Length > 0;
+            Dictionary < string, CustomerParam > param = new Dictionary<string, CustomerParam>();
 
-			if (hasParameters)
-				SetParameters(DataConnection, Parameters);
+            if (hasParameters)
+                param = SetParameters(DataConnection, Parameters);
 
-			var commandResult = DataConnection.ExecuteNonQuery();
+			var commandResult = DataConnection.ExecuteNonQuery(CommandText, param);
 
             //if (hasParameters)
             //    RebindParameters(DataConnection, Parameters);
@@ -187,11 +188,11 @@ namespace AntData.ORM.Data
 		public T Execute<T>()
 		{
 			DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
+            if (Parameters != null && Parameters.Length > 0)
+                param = SetParameters(DataConnection, Parameters);
 
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			using (var rd = DataConnection.ExecuteReader(CommandBehavior))
+			using (var rd = DataConnection.ExecuteReader(CommandBehavior, CommandText, param))
 			{
 				if (rd.Read())
 				{
@@ -235,11 +236,11 @@ namespace AntData.ORM.Data
 		public DataReader ExecuteReader()
 		{
 			DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
+            if (Parameters != null && Parameters.Length > 0)
+                param = SetParameters(DataConnection, Parameters);
 
-			if (Parameters != null && Parameters.Length > 0)
-				SetParameters(DataConnection, Parameters);
-
-			return new DataReader { CommandInfo = this, Reader = DataConnection.ExecuteReader(CommandBehavior) };
+			return new DataReader { CommandInfo = this, Reader = DataConnection.ExecuteReader(CommandBehavior, CommandText, param) };
 		}
 
 		internal IEnumerable<T> ExecuteQuery<T>(IDataReader rd, string sql)
@@ -296,10 +297,11 @@ namespace AntData.ORM.Data
 
 		#region SetParameters
 
-		static void SetParameters(DataConnection dataConnection, DataParameter[] parameters)
+		static Dictionary<string, CustomerParam> SetParameters(DataConnection dataConnection, DataParameter[] parameters)
 		{
-			if (parameters == null)
-				return;
+		    var result = new Dictionary<string, CustomerParam>();
+            if (parameters == null)
+				return result;
 
 			foreach (var parameter in parameters)
 			{
@@ -317,9 +319,10 @@ namespace AntData.ORM.Data
 
 			    p.ParameterName = parameter.Name;
                 p.DbType = DataTypeConvert.Convert(dataType);
-                dataConnection.Params.Add(parameter.Name.StartsWith("@")? parameter.Name : "@" + parameter.Name, p);
+                result.Add(parameter.Name.StartsWith("@")? parameter.Name : "@" + parameter.Name, p);
 				//dataConnection.Command.Parameters.Add(p);
 			}
+		    return result;
 		}
 
 

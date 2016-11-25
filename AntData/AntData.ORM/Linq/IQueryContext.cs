@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AntData.ORM.Common;
 
 namespace AntData.ORM.Linq
 {
@@ -10,6 +11,7 @@ namespace AntData.ORM.Linq
 		SelectQuery    SelectQuery { get; }
 		object         Context     { get; set; }
 		List<string>   QueryHints  { get; }
+        Dictionary<string, CustomerParam> Params { get; }
 		SqlParameter[] GetParameters();
 	}
 }

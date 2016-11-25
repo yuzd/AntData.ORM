@@ -43,6 +43,7 @@ namespace AntData.ORM.Data
 			public SelectQuery        SelectQuery;
 			public ISqlBuilder        SqlProvider;
 			public List<string>       QueryHints;
+		    public Dictionary<string, CustomerParam> Params;
 		}
 
 		#region SetQuery
@@ -57,7 +58,8 @@ namespace AntData.ORM.Data
 					SqlParameters = query.SelectQuery.Parameters,
 					SelectQuery   = query.SelectQuery,
 					QueryHints    = query.QueryHints,
-				 };
+                    Params = query.Params
+                };
 			}
 
 			var sql    = query.SelectQuery.ProcessParameters();
@@ -94,7 +96,8 @@ namespace AntData.ORM.Data
 				SelectQuery   = sql,
 				SqlProvider   = sqlProvider,
 				QueryHints    = query.QueryHints,
-			};
+                Params = query.Params
+            };
 		}
 
 		protected virtual SelectQuery ProcessQuery(SelectQuery selectQuery)
@@ -112,8 +115,9 @@ namespace AntData.ORM.Data
 			var ordered = DataProvider.SqlProviderFlags.IsParameterOrderDependent;
 			var c       = ordered ? pq.SqlParameters.Count : parameters.Length;
 			var parms   = new List<IDbDataParameter>(c);
+           
 
-			if (ordered)
+            if (ordered)
 			{
 				for (var i = 0; i < pq.SqlParameters.Count; i++)
 				{
@@ -122,7 +126,7 @@ namespace AntData.ORM.Data
 					if (sqlp.IsQueryParameter)
 					{
 						var parm = parameters.Length > i && object.ReferenceEquals(parameters[i], sqlp) ? parameters[i] : parameters.First(p => object.ReferenceEquals(p, sqlp));
-						AddParameter(parms, parm.Name, parm);
+                        pq.Params.Add("@" + parm.Name,AddParameter(parms, parm.Name, parm));
 					}
 				}
 			}
@@ -130,17 +134,20 @@ namespace AntData.ORM.Data
 			{
 				foreach (var parm in parameters)
 				{
-					if (parm.IsQueryParameter && pq.SqlParameters.Contains(parm))
-						AddParameter(parms, parm.Name, parm);
+				    if (parm.IsQueryParameter && pq.SqlParameters.Contains(parm))
+				    {
+                        pq.Params.Add("@" + parm.Name, AddParameter(parms, parm.Name, parm));
+                    }
+						
 				}
 			}
 
 			pq.Parameters = parms.ToArray();
 		}
 
-		void AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
+        CustomerParam AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
 		{
-
+		   
             var p = new CustomerParam();
 			var dataType = parm.DataType;
 
@@ -154,8 +161,8 @@ namespace AntData.ORM.Data
 
 			DataProvider.SetParameter(p, name, dataType, parm.Value);
 		    p.DbType = DataTypeConvert.Convert(dataType);
-            Params.Add("@" + name,p);
-		}
+		    return p;
+		;}
 
 		#endregion
 
@@ -168,7 +175,7 @@ namespace AntData.ORM.Data
 			if (pq.Commands.Length == 1)
 			{
 				InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
-				return ExecuteNonQuery();
+				return ExecuteNonQuery(pq.Commands[0],pq.Params);
 			}
 			else
 			{
@@ -180,7 +187,7 @@ namespace AntData.ORM.Data
 					{
 						try
 						{
-							ExecuteNonQuery();
+							ExecuteNonQuery(pq.Commands[i],pq.Params);
 						}
 						catch (Exception)
 						{
@@ -188,7 +195,7 @@ namespace AntData.ORM.Data
 					}
 					else
 					{
-						ExecuteNonQuery();
+						ExecuteNonQuery(pq.Commands[i], pq.Params);
 					}
 				}
 
@@ -204,18 +211,18 @@ namespace AntData.ORM.Data
             if (Identity)
             {
                 InitCommand(CommandType.Text,pq.Commands[0] + ";" + pq.Commands[1], null, null);
-                return ExecuteScalar();
+                return ExecuteScalar(pq.Commands[0] + ";" + pq.Commands[1],pq.Params);
             }
             if (pq.Commands.Length == 1)
             {
-                return ExecuteScalar();
+                return ExecuteScalar(pq.Commands[0], pq.Params);
             }
 
-            ExecuteNonQuery();
+            ExecuteNonQuery(pq.Commands[0], pq.Params);
 
             InitCommand(CommandType.Text, pq.Commands[1], null, null);
 
-            return ExecuteScalar();
+            return ExecuteScalar(pq.Commands[1], pq.Params);
         }
 		object IDataContext.ExecuteScalar(object query)
 		{
@@ -225,14 +232,14 @@ namespace AntData.ORM.Data
 
 			if (pq.Commands.Length == 1)
 			{
-				return ExecuteScalar();
+				return ExecuteScalar(pq.Commands[0],pq.Params);
 			}
 
-			ExecuteNonQuery();
+			ExecuteNonQuery(pq.Commands[0], pq.Params);
 
 			InitCommand(CommandType.Text, pq.Commands[1], null, null);
 
-			return ExecuteScalar();
+			return ExecuteScalar(pq.Commands[1], pq.Params);
 		}
 
 		IDataReader IDataContext.ExecuteReader(object query)
@@ -241,7 +248,7 @@ namespace AntData.ORM.Data
 
 			InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
 
-			return ExecuteReader();
+			return ExecuteReader(pq.Commands[0], pq.Params);
 		}
 
 		void IDataContext.ReleaseQuery(object query)
@@ -322,8 +329,8 @@ namespace AntData.ORM.Data
 		object IDataContext.SetQuery(IQueryContext queryContext)
 		{
 			var query = GetCommand(queryContext);
-
-			GetParameters(queryContext, query);
+            query.Params = new Dictionary<string, CustomerParam>();
+            GetParameters(queryContext, query);
 
 //			if (TraceSwitch.TraceInfo)
 //				WriteTraceLine(((IDataContext)this).GetSqlText(query).Replace("\r", ""), TraceSwitch.DisplayName);

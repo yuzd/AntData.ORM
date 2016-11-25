@@ -142,54 +142,7 @@ namespace AntData.ORM.DataProvider
 			return (obj,action) => eventInfo.AddEventHandler(obj, dgt(action));
 		}
 
-		protected void TraceAction(DataConnection dataConnection, string commandText, Func<int> action)
-		{
-			if (DataConnection.TraceSwitch.TraceInfo && dataConnection.OnTraceConnection != null)
-			{
-				dataConnection.OnTraceConnection(new TraceInfo
-				{
-					BeforeExecute  = true,
-					TraceLevel     = TraceLevel.Info,
-					DataConnection = dataConnection,
-					CommandText    = commandText,
-				});
-			}
-
-			var now = DateTime.Now;
-
-			try
-			{
-				var count = action();
-
-				if (DataConnection.TraceSwitch.TraceInfo && dataConnection.OnTraceConnection != null)
-				{
-					dataConnection.OnTraceConnection(new TraceInfo
-					{
-						TraceLevel      = TraceLevel.Info,
-						DataConnection  = dataConnection,
-						CommandText     = commandText,
-						ExecutionTime   = DateTime.Now - now,
-						RecordsAffected = count,
-					});
-				}
-			}
-			catch (Exception ex)
-			{
-				if (DataConnection.TraceSwitch.TraceError && dataConnection.OnTraceConnection != null)
-				{
-					dataConnection.OnTraceConnection(new TraceInfo
-					{
-						TraceLevel     = TraceLevel.Error,
-						DataConnection = dataConnection,
-						CommandText    = commandText,
-						ExecutionTime  = DateTime.Now - now,
-						Exception      = ex,
-					});
-				}
-
-				throw;
-			}
-		}
+		
 
 		#endregion
 

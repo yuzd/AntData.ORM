@@ -265,6 +265,7 @@ namespace AntData.ORM.DataProvider
 			public object         Context     { get; set; }
 			public SqlParameter[] SqlParameters;
 			public List<string>   QueryHints  { get; set; }
+            public Dictionary<string, CustomerParam> Params { get; set; }
 
 			public SqlParameter[] GetParameters()
 			{

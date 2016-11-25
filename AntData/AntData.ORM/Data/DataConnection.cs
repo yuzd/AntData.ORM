@@ -94,20 +94,7 @@ namespace AntData.ORM.Data
 		}
 
 
-		private static Action<TraceInfo> _onTrace = OnTraceInternal;
-		public  static Action<TraceInfo>  OnTrace
-		{
-			get { return _onTrace; }
-			set { _onTrace = value ?? OnTraceInternal; }
-		}
-
-		private Action<TraceInfo> _onTraceConnection = OnTrace;
-		[JetBrains.Annotations.CanBeNull]
-		internal  Action<TraceInfo>  OnTraceConnection
-		{
-			get { return _onTraceConnection;  }
-			set { _onTraceConnection = value; }
-		}
+		
 
         private Action<CustomerTraceInfo> _onCustomerTraceConnection;
 		[JetBrains.Annotations.CanBeNull]
@@ -129,60 +116,8 @@ namespace AntData.ORM.Data
         private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, IDataReader> CustomerExecuteQuery { get; set; }
 
         private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, DataTable> CustomerExecuteQueryTable { get; set; }
-	    static void OnTraceInternal(TraceInfo info)
-		{
-			if (info.BeforeExecute)
-			{
-				WriteTraceLine(info.SqlText, TraceSwitch.DisplayName);
-			}
-			else if (info.TraceLevel == TraceLevel.Error)
-			{
-				var sb = new StringBuilder();
+	  
 
-				for (var ex = info.Exception; ex != null; ex = ex.InnerException)
-				{
-					sb
-						.AppendLine()
-						.AppendFormat("Exception: {0}", ex.GetType())
-						.AppendLine()
-						.AppendFormat("Message  : {0}", ex.Message)
-						.AppendLine()
-						.AppendLine(ex.StackTrace)
-						;
-				}
-
-				WriteTraceLine(sb.ToString(), TraceSwitch.DisplayName);
-			}
-			else if (info.RecordsAffected != null)
-			{
-				WriteTraceLine("Execution time: {0}. Records affected: {1}.\r\n".Args(info.ExecutionTime, info.RecordsAffected), TraceSwitch.DisplayName);
-			}
-			else
-			{
-				WriteTraceLine("Execution time: {0}\r\n".Args(info.ExecutionTime), TraceSwitch.DisplayName);
-			}
-		}
-
-		private static TraceSwitch _traceSwitch;
-		public  static TraceSwitch  TraceSwitch
-		{
-			get
-			{
-				return _traceSwitch ?? (_traceSwitch = new TraceSwitch("DataConnection", "DataConnection trace switch",
-#if DEBUG
-				"Warning"
-#else
-				"Off"
-#endif
-				));
-			}
-			set { _traceSwitch = value; }
-		}
-
-        //public static void TurnTraceSwitchOn(TraceLevel traceLevel = TraceLevel.Info)
-        //{
-        //    TraceSwitch = new TraceSwitch("DataConnection", "DataConnection trace switch", traceLevel.ToString());
-        //}
 
 		public static Action<string,string> WriteTraceLine = (message, displayName) => Debug.WriteLine(message, displayName);
 
@@ -234,28 +169,6 @@ namespace AntData.ORM.Data
 		}
 
 
-	
-
-		#region Connection
-
-	
-
-		public event EventHandler OnClosing;
-		public event EventHandler OnClosed;
-
-		public virtual void Close()
-		{
-			if (OnClosing != null)
-				OnClosing(this, EventArgs.Empty);
-
-
-			if (OnClosed != null)
-				OnClosed(this, EventArgs.Empty);
-		}
-
-		#endregion
-
-	    internal string sqlString = string.Empty;
 		#region Command
 
 		public string LastQuery;
@@ -269,7 +182,6 @@ namespace AntData.ORM.Data
                 sql = sqlProvider.ApplyQueryHints(sql, queryHints);
                 queryHints.Clear();
             }
-            sqlString = sql;
 		    LastQuery = sql;
 		    //DataProvider.InitCommand(this, commandType, sql, parameters);
 		    //LastQuery = Command.CommandText;
@@ -289,11 +201,10 @@ namespace AntData.ORM.Data
 
 		
 
-        internal Dictionary<string, CustomerParam> Params = new Dictionary<string, CustomerParam>();
 
        
 
-		internal int ExecuteNonQuery()
+		internal int ExecuteNonQuery(string sqlString, Dictionary<string, CustomerParam> Params)
 		{
 
             var dic = new Dictionary<string, object>();
@@ -314,7 +225,7 @@ namespace AntData.ORM.Data
             return result;
 		}
 
-		object ExecuteScalar()
+		object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
@@ -334,7 +245,7 @@ namespace AntData.ORM.Data
             return result;
 		}
 
-		internal IDataReader ExecuteReader()
+		internal IDataReader ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
@@ -354,7 +265,7 @@ namespace AntData.ORM.Data
 		    return result;
 		}
 
-		internal IDataReader ExecuteReader(CommandBehavior commandBehavior)
+		internal IDataReader ExecuteReader(CommandBehavior commandBehavior, string sqlString, Dictionary<string, CustomerParam> Params)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
@@ -374,7 +285,7 @@ namespace AntData.ORM.Data
             return result;
 		}
 
-        internal DataTable ExecuteDataTable(CommandBehavior commandBehavior)
+        internal DataTable ExecuteDataTable(CommandBehavior commandBehavior, string sqlString, Dictionary<string, CustomerParam> Params)
         {
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
@@ -396,83 +307,6 @@ namespace AntData.ORM.Data
 		
 
 		#endregion
-
-		#region Transaction
-
-        //public IDbTransaction Transaction { get; private set; }
-		
-        //public virtual DataConnectionTransaction BeginTransaction()
-        //{
-        //    // If transaction is open, we dispose it, it will rollback all changes.
-        //    //
-        //    if (Transaction != null)
-        //        Transaction.Dispose();
-
-        //    // Create new transaction object.
-        //    //
-        //    Transaction = Connection.BeginTransaction();
-
-        //    _closeTransaction = true;
-
-        //    // If the active command exists.
-        //    //
-        //    if (_command != null)
-        //        _command.Transaction = Transaction;
-
-        //    return new DataConnectionTransaction(this);
-        //}
-
-        //public virtual DataConnectionTransaction BeginTransaction(IsolationLevel isolationLevel)
-        //{
-        //    // If transaction is open, we dispose it, it will rollback all changes.
-        //    //
-        //    if (Transaction != null)
-        //        Transaction.Dispose();
-
-        //    // Create new transaction object.
-        //    //
-        //    Transaction = Connection.BeginTransaction(isolationLevel);
-
-        //    _closeTransaction = true;
-
-        //    // If the active command exists.
-        //    //
-        //    if (_command != null)
-        //        _command.Transaction = Transaction;
-
-        //    return new DataConnectionTransaction(this);
-        //}
-
-        //public virtual void CommitTransaction()
-        //{
-        //    if (Transaction != null)
-        //    {
-        //        Transaction.Commit();
-
-        //        if (_closeTransaction)
-        //        {
-        //            Transaction.Dispose();
-        //            Transaction = null;
-        //        }
-        //    }
-        //}
-
-        //public virtual void RollbackTransaction()
-        //{
-        //    if (Transaction != null)
-        //    {
-        //        Transaction.Rollback();
-
-        //        if (_closeTransaction)
-        //        {
-        //            Transaction.Dispose();
-        //            Transaction = null;
-        //        }
-        //    }
-        //}
-
-		#endregion
-
 
 
 		#region MappingSchema
@@ -498,7 +332,9 @@ namespace AntData.ORM.Data
 			get { return _nextQueryHints ?? (_nextQueryHints = new List<string>()); }
 		}
 
-		public DataConnection AddMappingSchema(MappingSchema mappingSchema)
+	    public event EventHandler OnClosing;
+
+	    public DataConnection AddMappingSchema(MappingSchema mappingSchema)
 		{
 			_mappingSchema = new MappingSchema(mappingSchema, _mappingSchema);
 			_id            = null;
@@ -514,10 +350,7 @@ namespace AntData.ORM.Data
 
 		public void Dispose()
 		{
-            this.Params = new Dictionary<string, CustomerParam>();
-		    this.sqlString = string.Empty;
 		    this.LastQuery = string.Empty;
-			Close();
 		}
 
 		#endregion

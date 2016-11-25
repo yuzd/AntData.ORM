@@ -130,7 +130,6 @@ namespace AntData.ORM
 		{
 			if (_dataConnection != null)
 			{
-				LastQuery = _dataConnection.LastQuery;
 
 				if (LockDbManagerCounter == 0 && KeepConnectionAlive == false)
 				{

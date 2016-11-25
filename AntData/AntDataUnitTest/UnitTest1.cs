@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using AntData.ORM;
 using AntData.ORM.Data;
 using Arch.Data.ORM.Mysql;
@@ -120,7 +121,8 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod1_07()
         {
-            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy(r => r.Id).ToList();
+            string name = "yuzd";
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals(name)).OrderBy(r => r.Id).ToList();
             Assert.AreEqual(updateResult.Count > 0, true);
 
         }
@@ -157,7 +159,7 @@ namespace AntDataUnitTest
                         join s in DB.Tables.Schools on p.SchoolId equals s.Id
                         select p).ToList();
 
-            Assert.AreEqual(list.Count,2);
+            Assert.AreNotEqual(list.Count,2);
         }
 
         [TestMethod]
@@ -189,5 +191,19 @@ namespace AntDataUnitTest
             Assert.IsNotNull(p.Persons);
             Assert.IsFalse(p.Persons.Any());
         }
+
+        [TestMethod]
+        public async Task TestMethod2_06()
+        {
+            var name = "yuzd";
+            var raa = DB.Tables.People.Where(r => r.Name.Equals(name));
+            var aa = raa.Where(r => r.Age.Equals(10));
+            var a1 = raa.CountAsync();
+            var a2 = aa.CountAsync();
+            var a11 = await a1;
+            var a12 = await a2;
+
+        }
+
     }
 }

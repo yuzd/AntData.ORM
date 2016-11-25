@@ -29,7 +29,6 @@ namespace Arch.Data.ORM.Mysql
             : base(provider, dbMappingName)
         {
 #if DEBUG
-            TraceSwitch.Level = TraceLevel.Info;
             //AntData.ORM.Common.Configuration.Linq.GenerateExpressionTest = true;
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
 #endif
