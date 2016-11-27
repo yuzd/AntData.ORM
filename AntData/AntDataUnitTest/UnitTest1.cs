@@ -28,7 +28,7 @@ namespace AntDataUnitTest
             {
                 string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
                        (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
-                Debug.Write(sql);
+                Debug.Write(sql + Environment.NewLine);
             }
             catch (Exception)
             {
@@ -253,9 +253,15 @@ namespace AntDataUnitTest
         public async Task TestMethod3_02()
         {
             var name = "yuzd";
-            var list = await DB.Query<MyClass>("select * from person where name=@name", new DataParameter { Name = "name", Value = name }).ToListAsync();
-            Assert.IsNotNull(list);
-            Assert.AreEqual(list.Count > 0, true);
+            var age = 20;
+            var name2 = "nainaigu";
+            var age2 = 18;
+            var list =  DB.Query<MyClass>("select * from person where name=@name and age=@age", new DataParameter { Name = "name", Value = name },new DataParameter {Name = "age",Value = age}).ToListAsync();
+            var list2 =  DB.Query<MyClass>("select * from person where name=@name and age=@age", new DataParameter { Name = "name", Value = name2 }, new DataParameter { Name = "age", Value = age2 }).ToListAsync();
+            var list3 =  DB.Query<MyClass>("select * from person where name=@name", new DataParameter { Name = "name", Value = name }).ToListAsync();
+            Assert.AreEqual((await list).Count > 0, true);
+            Assert.AreEqual((await list2).Count > 0, true);
+            Assert.AreEqual((await list3).Count > 0, true);
         }
     }
 }
