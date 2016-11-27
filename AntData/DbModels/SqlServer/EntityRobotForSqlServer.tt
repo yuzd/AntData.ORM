@@ -1,0 +1,15 @@
+﻿<#@ template language="C#" debug="True" hostSpecific="True"                       #>
+<#@ output extension=".cs"                                              #>
+<#@ include file="..\Templates\LinqToDB.SqlServer.Tools.ttinclude" #>
+<#@ include file="..\Templates\PluralizationService.ttinclude" #>
+<#
+	NamespaceName = "DbModels.SqlServer";
+	GenerateConstructors     = true;
+    GenerateFindExtensions = false;
+	GenerateDataTypes = true;
+    IsCompactColumns = false;
+    BaseDataContextClass = "IEntity";
+    BaseEntityClass = "BaseEntity";
+	LoadSqlServerMetadata(@"server=YUZD\SERVERQ;database=Test;uid=sa;pwd=p@ssw0rd;");
+	GenerateModel();
+#>

@@ -129,7 +129,7 @@ namespace AntData.ORM.Data
 		{
 			_configurationIDs = new ConcurrentDictionary<string,int>();
 
-            //LinqToDB.DataProvider.SqlServer. SqlServerTools. GetDataProvider();
+            AntData.ORM.DataProvider.SqlServer. SqlServerTools. GetDataProvider();
             //LinqToDB.DataProvider.Access.    AccessTools.    GetDataProvider();
             //LinqToDB.DataProvider.SqlCe.     SqlCeTools.     GetDataProvider();
             //LinqToDB.DataProvider.Firebird.  FirebirdTools.  GetDataProvider();

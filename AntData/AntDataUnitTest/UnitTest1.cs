@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AntData.ORM;
 using AntData.ORM.Data;
+using AntData.ORM.DataProvider.MySql;
 using AntData.ORM.Mapping;
-using Arch.Data.ORM.Mysql;
 using DbModels.Mysql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,11 +15,11 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTest1
     {
-        private static MysqlContext<Entitys> DB;
+        private static DbContext<Entitys> DB;
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            DB = new MysqlContext<Entitys>("testorm");
+            DB = new DbContext<Entitys>("testorm", new MySqlDataProvider());
             DB.OnCustomerTraceConnection = OnCustomerTraceConnection;
         }
 
