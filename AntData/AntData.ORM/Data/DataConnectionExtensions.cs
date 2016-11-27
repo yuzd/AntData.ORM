@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-
+using AntData.ORM.Mapping;
 using JetBrains.Annotations;
 
 namespace AntData.ORM.Data
@@ -111,11 +111,36 @@ namespace AntData.ORM.Data
 			return new CommandInfo(connection, sql, parameters).Query(template);
 		}
 
-		#endregion
+        #endregion
 
-		#region Execute
+        #region Query SQL
 
-		public static int Execute(this DataConnection connection, string sql)
+        public static DataTable QueryTable(this DataConnection connection, SQL sql)
+        {
+            return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).QueryTable();
+        }
+        public static IEnumerable<T> Query<T>(this DataConnection connection, SQL sql)
+        {
+            return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).Query<T>();
+        }
+        public static IEnumerable<T> Query<T>(this DataConnection connection, T template, SQL sql)
+        {
+            return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).Query(template);
+        }
+        public static int Execute(this DataConnection connection, SQL sql)
+        {
+            return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).Execute();
+        }
+
+        public static T Execute<T>(this DataConnection connection, SQL sql)
+        {
+            return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).Execute<T>();
+        }
+        #endregion
+
+        #region Execute
+
+        public static int Execute(this DataConnection connection, string sql)
 		{
 			return new CommandInfo(connection, sql).Execute();
 		}
@@ -201,13 +226,13 @@ namespace AntData.ORM.Data
 
 		#region BulkCopy
 
-		public static BulkCopyRowsCopied BulkCopy<T>([NotNull] this DataConnection dataConnection, BulkCopyOptions options, IEnumerable<T> source)
+		public static BulkCopyRowsCopied BulkCopy<T>([JetBrains.Annotations.NotNull] this DataConnection dataConnection, BulkCopyOptions options, IEnumerable<T> source)
 		{
 			if (dataConnection == null) throw new ArgumentNullException("dataConnection");
 			return dataConnection.DataProvider.BulkCopy(dataConnection, options, source);
 		}
 
-		public static BulkCopyRowsCopied BulkCopy<T>([NotNull] this DataConnection dataConnection, int maxBatchSize, IEnumerable<T> source)
+		public static BulkCopyRowsCopied BulkCopy<T>([JetBrains.Annotations.NotNull] this DataConnection dataConnection, int maxBatchSize, IEnumerable<T> source)
 		{
 			if (dataConnection == null) throw new ArgumentNullException("dataConnection");
 
@@ -217,7 +242,7 @@ namespace AntData.ORM.Data
 				source);
 		}
 
-		public static BulkCopyRowsCopied BulkCopy<T>([NotNull] this DataConnection dataConnection, IEnumerable<T> source)
+		public static BulkCopyRowsCopied BulkCopy<T>([JetBrains.Annotations.NotNull] this DataConnection dataConnection, IEnumerable<T> source)
 		{
 			if (dataConnection == null) throw new ArgumentNullException("dataConnection");
 
@@ -227,7 +252,7 @@ namespace AntData.ORM.Data
 				source);
 		}
 
-		public static BulkCopyRowsCopied BulkCopy<T>([NotNull] this ITable<T> table, BulkCopyOptions options, IEnumerable<T> source)
+		public static BulkCopyRowsCopied BulkCopy<T>([JetBrains.Annotations.NotNull] this ITable<T> table, BulkCopyOptions options, IEnumerable<T> source)
 		{
 			if (table == null) throw new ArgumentNullException("table");
 

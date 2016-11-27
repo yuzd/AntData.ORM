@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AntData.ORM;
 using AntData.ORM.Data;
+using AntData.ORM.Mapping;
 using Arch.Data.ORM.Mysql;
 using DbModels.Mysql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -262,6 +263,84 @@ namespace AntDataUnitTest
             Assert.AreEqual((await list).Count > 0, true);
             Assert.AreEqual((await list2).Count > 0, true);
             Assert.AreEqual((await list3).Count > 0, true);
+        }
+
+        [TestMethod]
+        public void TestMethod3_04()
+        {
+            var name = "yuzd";
+            var list = DB.Query(new MyClass(), "select * from person where name=@name", 
+                new DataParameter { Name = "name", Value = name }).ToList();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count > 0, true);
+        }
+
+        [TestMethod]
+        public void TestMethod3_05()
+        {
+            var name = "yuzd";
+            var list = DB.Query(new {Id= 0 ,Name = "",Age = 0}, "select * from person where name=@name",
+                new DataParameter { Name = "name", Value = name }).ToList();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count > 0, true);
+        }
+
+        [TestMethod]
+        public void TestMethod3_06()
+        {
+            var name = "yuzd";
+            SQL sql = "select * from person where name=@name";
+            sql = sql["name", name];
+            var list = DB.Query<MyClass>(sql).ToList();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count > 0, true);
+        }
+
+        [TestMethod]
+        public async Task TestMethod3_07()
+        {
+            var name = "yuzd";
+            SQL sql = "select * from person where name=@name";
+            sql = sql["name", name];
+            var list = await DB.Query<MyClass>(sql).ToListAsync();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count > 0, true);
+
+        }
+
+        [TestMethod]
+        public void TestMethod3_08()
+        {
+            var name = "yuzd";
+            SQL sql = "select * from person where name=@name";
+            sql = sql["name", name];
+            var list =  DB.QueryTable(sql);
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Rows.Count > 0, true);
+
+        }
+
+        [TestMethod]
+        public void TestMethod3_09()
+        {
+            var name = "yuzd";
+            var age = 20;
+            SQL sql = "select count(*) from person where 1=1";
+            if (!string.IsNullOrEmpty(name))
+            {
+                sql += " and name = @name";
+                sql = sql["name", name];
+            }
+            if (age > 0)
+            {
+                sql += " and age = @age";
+                sql = sql["age", age];
+            }
+            
+            var list = DB.Execute<long>(sql);
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list > 0, true);
+
         }
     }
 }
