@@ -205,5 +205,57 @@ namespace AntDataUnitTest
 
         }
 
+        [TestMethod]
+        public async Task TestMethod2_07()
+        {
+            var name = "yuzd";
+            var raa = await  DB.Tables.People.FirstOrDefaultAsync(r => r.Name.Equals(name));
+            Assert.IsNotNull(raa);
+
+        }
+
+        [TestMethod]
+        public async Task TestMethod2_08()
+        {
+            var name = "yuzd";
+            var raa = await DB.Tables.People.Where(r => r.Name.Equals(name)).ToListAsync();
+            Assert.AreEqual(raa.Count>0,true);
+
+        }
+
+        [TestMethod]
+        public async Task TestMethod2_09()
+        {
+            var name = "yuzd";
+            var list = await (from p in DB.Tables.People
+                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                        select p).ToListAsync();
+            Assert.AreEqual(list.Count > 0, true);
+
+        }
+
+        public class MyClass
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
+        }
+
+        [TestMethod]
+        public void TestMethod3_01()
+        {
+            var name = "yuzd";
+            var list = DB.Query<MyClass>("select * from person where name=@name",new DataParameter {Name = "name",Value = name}).ToList();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count>0,true);
+        }
+
+        [TestMethod]
+        public async Task TestMethod3_02()
+        {
+            var name = "yuzd";
+            var list = await DB.Query<MyClass>("select * from person where name=@name", new DataParameter { Name = "name", Value = name }).ToListAsync();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count > 0, true);
+        }
     }
 }

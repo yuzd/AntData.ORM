@@ -171,11 +171,36 @@ namespace AntData.ORM
 				options);
 		}
 
-		#endregion
+        public static Task<List<TSource>> ToListAsync<TSource>(this IEnumerable<TSource> source)
+        {
+            return GetTask(source.ToList);
+        }
 
-		#region ToArrayAsync
+        public static Task<List<TSource>> ToListAsync<TSource>(this IEnumerable<TSource> source, CancellationToken token)
+        {
+            return GetTask(
+                () => source.AsEnumerable().TakeWhile(_ => !token.IsCancellationRequested).ToList(),
+                token);
+        }
 
-		public static Task<TSource[]> ToArrayAsync<TSource>(this IQueryable<TSource> source)
+        public static Task<List<TSource>> ToListAsync<TSource>(this IEnumerable<TSource> source, TaskCreationOptions options)
+        {
+            return GetTask(source.ToList, options);
+        }
+
+        public static Task<List<TSource>> ToListAsync<TSource>(
+            this IEnumerable<TSource> source, CancellationToken token, TaskCreationOptions options)
+        {
+            return GetTask(
+                () => source.AsEnumerable().TakeWhile(_ => !token.IsCancellationRequested).ToList(),
+                token,
+                options);
+        }
+        #endregion
+
+        #region ToArrayAsync
+
+        public static Task<TSource[]> ToArrayAsync<TSource>(this IQueryable<TSource> source)
 		{
 			return GetTask(source.ToArray);
 		}
