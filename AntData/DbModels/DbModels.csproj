@@ -86,7 +86,6 @@
     <None Include="Templates\LinqToDB.SqlServer.ttinclude" />
     <None Include="Templates\LinqToDB.Tools.ttinclude" />
     <None Include="Templates\LinqToDB.ttinclude" />
-    <None Include="Templates\MultipleOutputHelper.ttinclude" />
     <None Include="Templates\PluralizationService.ttinclude" />
     <None Include="Templates\T4Model.ttinclude" />
   </ItemGroup>
