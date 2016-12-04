@@ -36,10 +36,19 @@ namespace AntData.ORM.DataProvider.SqlServer
 		{
 			StringBuilder
 				.AppendLine()
-				.AppendLine("SELECT SCOPE_IDENTITY()");
+				.AppendLine(";SELECT SCOPE_IDENTITY()");
 		}
+        public override int CommandCount(SelectQuery selectQuery)
+        {
+            return selectQuery.IsInsert && selectQuery.Insert.WithIdentity ? 2 : 1;
+        }
 
-		protected override void BuildOrderByClause()
+        protected override void BuildCommand(int commandNumber)
+        {
+            StringBuilder.AppendLine("SELECT SCOPE_IDENTITY()");
+        }
+
+        protected override void BuildOrderByClause()
 		{
 			if (!BuildAlternativeSql || !NeedSkip)
 				base.BuildOrderByClause();

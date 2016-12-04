@@ -20,29 +20,22 @@ namespace AntData.ORM.Linq
 			Init(dataContext == null ? null : new DataContextInfo(dataContext), expression);
 		}
 
-#if !SILVERLIGHT
+        public Table()
+        {
+            Init(null, null);
+        }
 
-		public Table()
-		{
-			Init(null, null);
-		}
-
-#endif
-		public string DatabaseName;
+        public string DatabaseName;
 		public string SchemaName;
 		public string TableName;
 
-		#region Overrides
+        #region Overrides
 
-#if OVERRIDETOSTRING
+        public override string ToString()
+        {
+            return "Table(" + typeof(T).Name + ")";
+        }
 
-		public override string ToString()
-		{
-			return "Table(" + typeof(T).Name + ")";
-		}
-
-#endif
-
-		#endregion
-	}
+        #endregion
+    }
 }

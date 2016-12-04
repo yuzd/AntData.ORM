@@ -170,7 +170,7 @@ namespace AntData.ORM.DataProvider.SqlServer
 					}
 
 					break;
-			}
+            }
 
 			base.SetParameter(parameter, name, dataType, value);
 		}

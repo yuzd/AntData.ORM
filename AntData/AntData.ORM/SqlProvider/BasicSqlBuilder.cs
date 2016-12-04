@@ -207,9 +207,9 @@ namespace AntData.ORM.SqlProvider
 				BuildStep = Step.OrderByClause; BuildOrderByClause();
 				BuildStep = Step.OffsetLimit;   BuildOffsetLimit  ();
 			}
-
-			if (SelectQuery.Insert.WithIdentity)
-				BuildGetIdentity();
+            //保持和mysql一致分成2个命令
+			//if (SelectQuery.Insert.WithIdentity)
+			//	BuildGetIdentity();
 		}
 
 		protected virtual void BuildUnknownQuery()

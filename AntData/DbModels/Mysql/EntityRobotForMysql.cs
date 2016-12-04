@@ -35,6 +35,8 @@ namespace DbModels.Mysql
 	[Table("person")]
 	public partial class Person : BaseEntity
 	{
+		#region Column
+
 		/// <summary>
 		/// 主键
 		/// </summary>
@@ -42,9 +44,19 @@ namespace DbModels.Mysql
 		public long Id { get; set; } // bigint(20)
 
 		/// <summary>
+		/// 最后更新时间
+		/// </summary>
+		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		public DateTime DataChangeLastTime // datetime
+		{
+			get { return _DataChangeLastTime; }
+			set { _DataChangeLastTime = value; }
+		}
+
+		/// <summary>
 		/// 姓名
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50),    Nullable]
+		[Column("Name",                DataType=DataType.VarChar,  Length=50), NotNull]
 		public string Name { get; set; } // varchar(50)
 
 		/// <summary>
@@ -58,6 +70,14 @@ namespace DbModels.Mysql
 		/// </summary>
 		[Column("SchoolId",            DataType=DataType.Int64)   ,    Nullable]
 		public long? SchoolId { get; set; } // bigint(20)
+
+		#endregion
+
+		#region Field
+
+		private DateTime _DataChangeLastTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+
+		#endregion
 
 		#region Associations
 
@@ -73,6 +93,8 @@ namespace DbModels.Mysql
 	[Table("school")]
 	public partial class School : BaseEntity
 	{
+		#region Column
+
 		/// <summary>
 		/// 主键
 		/// </summary>
@@ -91,6 +113,24 @@ namespace DbModels.Mysql
 		[Column("Address",             DataType=DataType.VarChar,  Length=100),    Nullable]
 		public string Address { get; set; } // varchar(100)
 
+		/// <summary>
+		/// 最后更新时间
+		/// </summary>
+		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		public DateTime DataChangeLastTime // datetime
+		{
+			get { return _DataChangeLastTime; }
+			set { _DataChangeLastTime = value; }
+		}
+
+		#endregion
+
+		#region Field
+
+		private DateTime _DataChangeLastTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+
+		#endregion
+
 		#region Associations
 
 		/// <summary>
@@ -100,5 +140,20 @@ namespace DbModels.Mysql
 		public IEnumerable<Person> Persons { get; set; }
 
 		#endregion
+	}
+
+	public static partial class TableExtensions
+	{
+		public static Person FindByBk(this ITable<Person> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static School FindByBk(this ITable<School> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
 	}
 }

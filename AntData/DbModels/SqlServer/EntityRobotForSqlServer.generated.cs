@@ -17,14 +17,8 @@ namespace DbModels.SqlServer
 	/// </summary>
 	public partial class Entitys : IEntity
 	{
-		/// <summary>
-		/// 订单表
-		/// </summary>
-		public ITable<QOrder> QOrders { get { return this.Get<QOrder>(); } }
-		/// <summary>
-		/// 用户表
-		/// </summary>
-		public ITable<QUser>  QUsers  { get { return this.Get<QUser>(); } }
+		public ITable<Person> People  { get { return this.Get<Person>(); } }
+		public ITable<School> Schools { get { return this.Get<School>(); } }
 
 		private readonly IDataContext con;
 
@@ -40,65 +34,113 @@ namespace DbModels.SqlServer
 		}
 	}
 
-	/// <summary>
-	/// 订单表
-	/// </summary>
-	[Table(Schema="dbo", Name="QOrder")]
-	public partial class QOrder : BaseEntity
+	[Table(Schema="dbo", Name="person")]
+	public partial class Person : BaseEntity
 	{
-		/// <summary>
-		/// 主键
-		/// </summary>
-		[Column("Guid",      DataType=DataType.VarChar, Length=50), NotNull]
-		public string Guid { get; set; } // varchar(50)
+		#region Column
+
+		[Column("Id",                  DataType=DataType.Int64)   , PrimaryKey, Identity]
+		public long Id { get; set; } // bigint
+
+		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		public DateTime DataChangeLastTime // datetime
+		{
+			get { return _DataChangeLastTime; }
+			set { _DataChangeLastTime = value; }
+		}
+
+		[Column("Name",                DataType=DataType.VarChar,  Length=50),    Nullable]
+		public string Name { get; set; } // varchar(50)
+
+		[Column("Age",                 DataType=DataType.Int32)   ,    Nullable]
+		public int? Age { get; set; } // int
+
+		[Column("SchoolId",            DataType=DataType.Int64)   ,    Nullable]
+		public long? SchoolId { get; set; } // bigint
+
+		#endregion
+
+		#region Field
+
+		private DateTime _DataChangeLastTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+
+		#endregion
+
+		#region Associations
 
 		/// <summary>
-		/// 用户Id
+		/// FK_persons_school
 		/// </summary>
-		[Column("QUserId",   DataType=DataType.VarChar, Length=50),    Nullable]
-		public string QUserId { get; set; } // varchar(50)
+		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, KeyName="FK_persons_school", BackReferenceName="persons")]
+		public School Personsschool { get; set; }
 
-		/// <summary>
-		/// 订单名称
-		/// </summary>
-		[Column("OrderName", DataType=DataType.VarChar, Length=50),    Nullable]
-		public string OrderName { get; set; } // varchar(50)
+		#endregion
 	}
 
-	/// <summary>
-	/// 用户表
-	/// </summary>
-	[Table(Schema="dbo", Name="QUser")]
-	public partial class QUser : BaseEntity
+	[Table(Schema="dbo", Name="school")]
+	public partial class School : BaseEntity
 	{
+		#region Column
+
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("Guid",       DataType=DataType.VarChar,  Length=36), PrimaryKey, NotNull]
-		public string Guid { get; set; } // varchar(36)
+		[Column("Id",                  DataType=DataType.Int64)   , PrimaryKey, Identity]
+		public long Id { get; set; } // bigint
 
 		/// <summary>
-		/// 用户名称
+		/// 学校名称
 		/// </summary>
-		[Column("UserName",   DataType=DataType.VarChar,  Length=50),    Nullable]
-		public string UserName { get; set; } // varchar(50)
+		[Column("Name",                DataType=DataType.VarChar,  Length=50),    Nullable]
+		public string Name { get; set; } // varchar(50)
 
 		/// <summary>
-		/// 地址
+		/// 学校地址
 		/// </summary>
-		[Column("Address",    DataType=DataType.VarChar,  Length=50),    Nullable]
-		public string Address { get; set; } // varchar(50)
+		[Column("Address",             DataType=DataType.VarChar,  Length=100),    Nullable]
+		public string Address { get; set; } // varchar(100)
 
 		/// <summary>
-		/// 更新时间
+		/// 最后更新时间
 		/// </summary>
-		[Column("UpdateTime", DataType=DataType.DateTime),    Nullable]
-		public DateTime? UpdateTime { get; set; } // datetime
+		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		public DateTime DataChangeLastTime // datetime
+		{
+			get { return _DataChangeLastTime; }
+			set { _DataChangeLastTime = value; }
+		}
+
+		#endregion
+
+		#region Field
+
+		private DateTime _DataChangeLastTime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+
+		#endregion
+
+		#region Associations
 
 		/// <summary>
-		/// 创建时间
+		/// FK_persons_school_BackReference
 		/// </summary>
-		[Column("CreateTime", DataType=DataType.DateTime),    Nullable]
-		public DateTime? CreateTime { get; set; } // datetime
+		[Association(ThisKey="Id", OtherKey="SchoolId", CanBeNull=true, IsBackReference=true)]
+		public IEnumerable<Person> Persons { get; set; }
+
+		#endregion
+	}
+
+	public static partial class TableExtensions
+	{
+		public static Person FindByBk(this ITable<Person> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static School FindByBk(this ITable<School> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
 	}
 }

@@ -15,21 +15,25 @@ namespace AntData.ORM.Linq
 	abstract class ExpressionQuery<T> : IExpressionQuery<T>
 	{
 		#region Init
-
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="dataContextInfo">如果为空获取默认的</param>
+        /// <param name="expression"></param>
 		protected void Init(IDataContextInfo dataContextInfo, Expression expression)
 		{
-#if SILVERLIGHT || NETFX_CORE
-			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-
-			DataContextInfo = dataContextInfo;
-#else
-			DataContextInfo = dataContextInfo ?? new DefaultDataContextInfo();
-#endif
-			Expression      = expression      ?? Expression.Constant(this);
+            DataContextInfo = dataContextInfo ?? new DefaultDataContextInfo();
+            Expression      = expression      ?? Expression.Constant(this);
 		}
 
-		[NotNull] public Expression       Expression      { get; set; }
-		[NotNull] public IDataContextInfo DataContextInfo { get; set; }
+		[NotNull]
+        public Expression       Expression      { get; set; }
+
+	    public Type ElementType { get; }
+	    public IQueryProvider Provider { get; }
+
+	    [NotNull]
+        public IDataContextInfo DataContextInfo { get; set; }
 
 		internal  Query<T> Info;
 		internal  object[] Parameters;
@@ -67,100 +71,96 @@ namespace AntData.ORM.Linq
 			}
 		}
 
-		#endregion
+        #endregion
 
-		#region Execute
+        #region Impl
 
-		IEnumerable<T> Execute(IDataContextInfo dataContextInfo, Expression expression)
-		{
-			return GetQuery(expression, true).GetIEnumerable(null, dataContextInfo, expression, Parameters);
-		}
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Execute(DataContextInfo, Expression).GetEnumerator();
+        }
 
-		Query<T> GetQuery(Expression expression, bool cache)
-		{
-			if (cache && Info != null)
-				return Info;
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Execute(DataContextInfo, Expression).GetEnumerator();
+        }
+        object IQueryProvider.Execute(Expression expression)
+        {
+            return GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
+        }
 
-			var info = Query<T>.GetQuery(DataContextInfo, expression);
+        public IQueryable CreateQuery(Expression expression)
+        {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
 
-			if (cache)
-				Info = info;
+            var elementType = expression.Type.GetItemType() ?? expression.Type;
 
-			return info;
-		}
+            try
+            {
+                return (IQueryable)Activator.CreateInstance(typeof(ExpressionQueryImpl<>).MakeGenericType(elementType), new object[] { DataContextInfo, expression });
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw ex.InnerException;
+            }
+        }
 
-		#endregion
+        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+        {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
 
-		#region IQueryable Members
+            return new ExpressionQueryImpl<TElement>(DataContextInfo, expression);
+        }
 
-		Type IQueryable.ElementType
-		{
-			get { return typeof(T); }
-		}
+        public object Execute(Expression expression)
+        {
+            return GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
+        }
 
-		Expression IQueryable.Expression
-		{
-			get { return Expression; }
-		}
+        public TResult Execute<TResult>(Expression expression)
+        {
+            return (TResult)GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
+        }
+        #endregion
 
-		IQueryProvider IQueryable.Provider
-		{
-			get { return this; }
-		}
+        #region IQueryable Members
 
-		#endregion
+        Type IQueryable.ElementType
+        {
+            get { return typeof(T); }
+        }
 
-		#region IQueryProvider Members
+        Expression IQueryable.Expression
+        {
+            get { return Expression; }
+        }
 
-		IQueryable<TElement> IQueryProvider.CreateQuery<TElement>(Expression expression)
-		{
-			if (expression == null)
-				throw new ArgumentNullException("expression");
+        IQueryProvider IQueryable.Provider
+        {
+            get { return this; }
+        }
 
-			return new ExpressionQueryImpl<TElement>(DataContextInfo, expression);
-		}
+        #endregion
+        #region Private
 
-		IQueryable IQueryProvider.CreateQuery(Expression expression)
-		{
-			if (expression == null)
-				throw new ArgumentNullException("expression");
+        IEnumerable<T> Execute(IDataContextInfo dataContextInfo, Expression expression)
+        {
+            return GetQuery(expression, true).GetIEnumerable(null, dataContextInfo, expression, Parameters);
+        }
+        Query<T> GetQuery(Expression expression, bool cache)
+        {
+            if (cache && Info != null)
+                return Info;
 
-			var elementType = expression.Type.GetItemType() ?? expression.Type;
+            var info = Query<T>.GetQuery(DataContextInfo, expression);
 
-			try
-			{
-				return (IQueryable)Activator.CreateInstance(typeof(ExpressionQueryImpl<>).MakeGenericType(elementType), new object[] { DataContextInfo, expression });
-			}
-			catch (TargetInvocationException ex)
-			{
-				throw ex.InnerException;
-			}
-		}
+            if (cache)
+                Info = info;
 
-		TResult IQueryProvider.Execute<TResult>(Expression expression)
-		{
-			return (TResult)GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
-		}
-
-		object IQueryProvider.Execute(Expression expression)
-		{
-			return GetQuery(expression, false).GetElement(null, DataContextInfo, expression, Parameters);
-		}
-
-		#endregion
-
-		#region IEnumerable Members
-
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return Execute(DataContextInfo, Expression).GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return Execute(DataContextInfo, Expression).GetEnumerator();
-		}
-
-		#endregion
-	}
+            return info;
+        } 
+        #endregion
+    }
 }

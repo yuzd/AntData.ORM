@@ -9,6 +9,7 @@ using AntData.ORM.DataProvider.MySql;
 using AntData.ORM.Mapping;
 using DbModels.Mysql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MySql.Data.MySqlClient;
 
 namespace AntDataUnitTest
 {
@@ -44,12 +45,14 @@ namespace AntDataUnitTest
                 new Person
                 {
                     Name = "yuzd",
-                    Age = 27
+                    Age = 27,
+                    SchoolId = 1
                 },
                 new Person
                 {
                     Name = "nainaigu",
-                    Age = 18
+                    Age = 18,
+                    SchoolId = 2
                 }
             };
 
@@ -101,7 +104,8 @@ namespace AntDataUnitTest
             Person p = new Person
             {
                 Name = "yuzd",
-                Age = 27
+                Age = 27,
+                SchoolId = 1
             };
 
             var insertResult = DB.InsertWithIdentity(p);
@@ -160,7 +164,7 @@ namespace AntDataUnitTest
                         join s in DB.Tables.Schools on p.SchoolId equals s.Id
                         select p).ToList();
 
-            Assert.AreNotEqual(list.Count,2);
+            Assert.IsTrue(list.Count>0);
         }
 
         [TestMethod]
@@ -170,7 +174,7 @@ namespace AntDataUnitTest
                         from s in DB.Tables.Schools.Where(r=>r.Id.Equals(p.SchoolId)).DefaultIfEmpty()
                         select p).ToList();
 
-            Assert.AreEqual(list.Count > 2, true);
+            Assert.IsTrue(list.Count >0);
         }
 
         [TestMethod]
@@ -190,7 +194,7 @@ namespace AntDataUnitTest
 
             Assert.IsNotNull(p);
             Assert.IsNotNull(p.Persons);
-            Assert.IsFalse(p.Persons.Any());
+            Assert.IsTrue(p.Persons.Any());
         }
 
         [TestMethod]
@@ -341,6 +345,34 @@ namespace AntDataUnitTest
             Assert.IsNotNull(list);
             Assert.AreEqual(list > 0, true);
 
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(MySqlException))]
+        public void TestMethod4_01()
+        {
+            Person p = new Person
+            {
+                Age = 27
+            };
+           
+            DB.UseTransaction(con =>
+            {
+                con.Tables.Schools.Where(r=>r.Name.Equals("上海大学")).Set(r=>r.Address,"no update").Update();
+                con.Insert(p);
+                return true;
+            });
+           
+        }
+
+
+        [TestMethod]
+        public void TestMethod4_02()
+        {
+            var p = DB.Tables.People.FindByBk(69);
+            Assert.IsNotNull(p);
+            var s = DB.Tables.Schools.FindByBk(1);
+            Assert.IsNotNull(s);
         }
     }
 }

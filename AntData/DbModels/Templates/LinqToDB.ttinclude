@@ -196,8 +196,9 @@ void GenerateTypesFromMetadata()
 				aProp.Comment.AddRange(comments);
 		}
 
-		var columns        = new MemberGroup { IsCompact = IsCompactColumns };
+		var columns        = new MemberGroup { IsCompact = IsCompactColumns , Region = "Column"  };
 		var columnAliases  = new MemberGroup { IsCompact = IsCompactColumnAliases, Region = "Alias members" };
+		var spcialColumn  = new MemberGroup { IsCompact = true, Region = "Field" };
 		var nPKs           = t.Columns.Values.Count(c => c.IsPrimaryKey);
 		var allNullable    = t.Columns.Values.All  (c => c.IsNullable || c.IsIdentity);
 		var nameMaxLen     = t.Columns.Values.Max  (c => c.MemberName != c.ColumnName ? 0 : c.ColumnName.Length);
@@ -206,8 +207,8 @@ void GenerateTypesFromMetadata()
 
 		foreach (var c in t.Columns.Values)
 		{
-			if(new string[]{"Tid","DataChange_LastTime"}.Contains(c.ColumnName)) continue;
-			// Column.
+			//if(new string[]{"Tid","DataChange_LastTime"}.Contains(c.ColumnName)) continue;
+			// 字段.
 			//
 			var ca = new Attribute("Column");
 			var canBeReplaced = true;
@@ -265,7 +266,7 @@ void GenerateTypesFromMetadata()
 
 			c.Attributes.Add(ca);
 
-			// PK.
+			// 主键PK.
 			//
 			if (c.IsPrimaryKey)
 			{
@@ -282,7 +283,7 @@ void GenerateTypesFromMetadata()
 				canBeReplaced = false;
 			}
 
-			// Identity.
+			// 自增Identity.
 			//
 			if (c.IsIdentity)
 			{
@@ -299,9 +300,27 @@ void GenerateTypesFromMetadata()
 			// Nullable.
 			//
 			if (c.IsNullable)
+            {
 				c.Attributes.Add(new Attribute((allNullable ? "" : "   ") + "Nullable"));
+            }
 			else if (!c.IsIdentity)
+            {
+			   //非空类型
 				c.Attributes.Add(new Attribute("NotNull"));
+				//如果还是DateTime类型的话 给个默认值
+				//spcialColumn
+				if(c.Type == "DateTime"){
+					c.IsAuto = false;
+					c.GetBody.AddRange(new[] { "_" + c.MemberName });
+					c.SetBody.AddRange(new[] { "_" +c.MemberName + " = value;"});
+					var dt = new Field(c.Type,"_" +c.ColumnName);
+					dt.InitValue = "System.Data.SqlTypes.SqlDateTime.MinValue.Value";
+					//dt.IsReadonly = true;
+					dt.AccessModifier = AccessModifier.Private;
+					spcialColumn.Members.Add(dt);
+                }
+				
+            }
 
 			var columnComments = new List<string>();
 
@@ -348,9 +367,15 @@ void GenerateTypesFromMetadata()
 
 		t.Members.Add(columns);
 
+		
+		if (spcialColumn.Members.Count > 0)
+			t.Members.Add(spcialColumn);
+
 		if (columnAliases.Members.Count > 0)
 			t.Members.Add(columnAliases);
 
+
+		//主外键
 		if (GenerateAssociations)
 		{
 			var keys = t.ForeignKeys.Values.ToList();
@@ -403,6 +428,7 @@ void GenerateTypesFromMetadata()
 			}
 		}
 
+		//生成扩展方法
 		if (GenerateFindExtensions && nPKs > 0)
 		{
 			var PKs         = t.Columns.Values.Where(c => c.IsPrimaryKey).ToList();
@@ -412,7 +438,7 @@ void GenerateTypesFromMetadata()
 			tableExtensions.Members.Add(
 				new Method(
 					t.TypeName,
-					"Find",
+					"FindByBk",
 					new[] { (string.Format("this ITable<{0}> table", t.TypeName)) }
 						.Union(PKs.Select(c => c.Type + " " + c.MemberName)),
 					new[] { "return table.FirstOrDefault(t =>" }
@@ -449,6 +475,7 @@ void GenerateTypesFromMetadata()
 		if (schema.Aliases.Members.Count > 0)
 			schema.Type.Members.Add(defAliases);
 
+    //存储过程
 	if (Procedures.Count > 0)
 	{
 		Model.Usings.Add("System.Collections.Generic");

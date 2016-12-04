@@ -6,7 +6,7 @@
 
 	NamespaceName = "DbModels.Mysql";
 	GenerateConstructors     = true;
-    GenerateFindExtensions = false;
+    GenerateFindExtensions = true;
 	GenerateDataTypes = true;
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";

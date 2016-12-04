@@ -24,15 +24,26 @@ namespace AntData.ORM
 		Expression          GetReaderExpression(MappingSchema mappingSchema, IDataReader reader, int idx, Expression readerExpression, Type toType);
 		bool?               IsDBNullAllowed    (IDataReader reader, int idx);
 
-		object              SetQuery           (IQueryContext queryContext);
-		int                 ExecuteNonQuery    (object query);
-		object              ExecuteScalar      (object query);
+        #region 执行sql
+
+        object SetQuery(IQueryContext queryContext);
+        int ExecuteNonQuery(object query);
+        object ExecuteScalar(object query);
         object ExecuteScalar(object query, bool Identity);
-		IDataReader         ExecuteReader      (object query);
-		void                ReleaseQuery       (object query);
+        IDataReader ExecuteReader(object query);
+        void ReleaseQuery(object query);
 
-		string              GetSqlText         (object query);
+        #endregion
+        /// <summary>
+        /// 获取Sql文
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        string              GetSqlText         (object query);
 
+        /// <summary>
+        /// 关闭事件
+        /// </summary>
 		event EventHandler  OnClosing;
 	}
 }

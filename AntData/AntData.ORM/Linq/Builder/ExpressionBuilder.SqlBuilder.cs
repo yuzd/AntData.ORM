@@ -1881,7 +1881,7 @@ namespace AntData.ORM.Linq.Builder
 			Expression          expression,
 			ParameterExpression expressionParam,
 			ParameterExpression parametersParam,
-			string              name)
+			string              name,DataType dataType = DataType.Undefined)
 		{
 			var type        = accessorExpression.Type;
 			var defaultType = Converter.GetDefaultMappingFromEnumType(dataContext.MappingSchema, type);
@@ -1905,7 +1905,7 @@ namespace AntData.ORM.Linq.Builder
 			{
 				Expression   = expression,
 				Accessor     = mapper.Compile(),
-				SqlParameter = new SqlParameter(accessorExpression.Type, name, null) { IsQueryParameter = !dataContext.InlineParameters }
+				SqlParameter = new SqlParameter(accessorExpression.Type, name, null) { IsQueryParameter = !dataContext.InlineParameters,DataType = dataType }
 			};
 		}
 

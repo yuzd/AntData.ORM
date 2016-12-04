@@ -73,7 +73,7 @@ namespace AntData.ORM.Data
 
 			var sqlProvider = DataProvider.CreateSqlBuilder();
 
-			var cc = sqlProvider.CommandCount(sql);
+			var cc = sqlProvider.CommandCount(sql);//获取自增的时候 才会是2
 			var sb = new StringBuilder();
 
 			var commands = new string[cc];
