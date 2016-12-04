@@ -90,10 +90,11 @@ namespace AntData.ORM.DbEngine
         public StatementType StatementType { get; set; }
 
         /// <summary>
-        /// 逻辑数据库
+        /// 逻辑数据库 根据这个从DataBaseSet找到
         /// </summary>
         public String DatabaseSet { get; set; }
 
+  
         /// <summary>
         /// All in one的Key名称
         /// </summary>

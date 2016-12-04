@@ -211,7 +211,7 @@ namespace AntData.ORM.Data
             if (Identity)
             {
                 InitCommand(CommandType.Text,pq.Commands[0] + ";" + pq.Commands[1], null, null);
-                return ExecuteScalar(pq.Commands[0] + ";" + pq.Commands[1],pq.Params);
+                return ExecuteScalar(pq.Commands[0] + ";" + pq.Commands[1],pq.Params,true);//执行Insert
             }
             if (pq.Commands.Length == 1)
             {

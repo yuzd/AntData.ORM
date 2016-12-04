@@ -21,7 +21,6 @@ namespace AntData.ORM.Data
 		public string          CommandText;
 		public DataParameter[] Parameters;
 		public CommandType     CommandType = CommandType.Text;
-		public CommandBehavior CommandBehavior;
 
 		#region Init
 
@@ -69,7 +68,7 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-			using (var rd = DataConnection.ExecuteReader(CommandBehavior, CommandText, param))
+			using (var rd = DataConnection.ExecuteReader( CommandText, param))
 				while (rd.Read())
 					yield return objectReader(rd);
 		}
@@ -91,7 +90,7 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-            using (var rd = DataConnection.ExecuteReader(CommandBehavior, CommandText, param))
+            using (var rd = DataConnection.ExecuteReader( CommandText, param))
             {
                 if (rd.Read())
                 {
@@ -130,7 +129,7 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-            return DataConnection.ExecuteDataTable(CommandBehavior, CommandText, param);
+            return DataConnection.ExecuteDataTable(CommandText, param);
         }
         #endregion
         #region Query with template
@@ -192,7 +191,7 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-			using (var rd = DataConnection.ExecuteReader(CommandBehavior, CommandText, param))
+			using (var rd = DataConnection.ExecuteReader(CommandText, param))
 			{
 				if (rd.Read())
 				{
@@ -240,7 +239,7 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-			return new DataReader { CommandInfo = this, Reader = DataConnection.ExecuteReader(CommandBehavior, CommandText, param) };
+			return new DataReader { CommandInfo = this, Reader = DataConnection.ExecuteReader( CommandText, param) };
 		}
 
 		internal IEnumerable<T> ExecuteQuery<T>(IDataReader rd, string sql)

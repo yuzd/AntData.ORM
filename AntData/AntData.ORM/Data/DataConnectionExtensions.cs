@@ -218,7 +218,6 @@ namespace AntData.ORM.Data
 			return new CommandInfo(connection, sql, parameters)
 			{
 				CommandType     = commandType,
-				CommandBehavior = commandBehavior,
 			}.ExecuteReader();
 		}
 

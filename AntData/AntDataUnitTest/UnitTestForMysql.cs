@@ -96,6 +96,7 @@ namespace AntDataUnitTest
             var p = DB.Tables.People.FirstOrDefault();
             Assert.IsNotNull(p);
             Assert.IsNotNull(p.Age);
+            Debug.WriteLine(p.Name);
         }
 
         [TestMethod]

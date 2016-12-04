@@ -31,12 +31,11 @@ namespace AntData.ORM.Dao.sql
                 OperationType = operationType,
                 Hints = hints,
                 ShardID = shardId,
-                SqlOperationType = sqlType
+                SqlOperationType = sqlType,
             };
         }
 
         #endregion
-
 
         /// <summary>
         /// GetSqlStatement
@@ -71,7 +70,6 @@ namespace AntData.ORM.Dao.sql
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="logicDbName"></param>
         /// <param name="shardingStrategy"></param>

@@ -35,6 +35,9 @@ namespace AntData.ORM.DbEngine
 
         public static NameValueCollection ConnectionStringKeys { get; set; }
 
+        /// <summary>
+        /// 获取配置
+        /// </summary>
         private static void LoadConfig()
         {
             try
@@ -47,8 +50,15 @@ namespace AntData.ORM.DbEngine
             {
                 throw new DalException(Resources.DalConfigNotFoundException, ex);
             }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
+        /// <summary>
+        /// 从配置中获取Providers
+        /// </summary>
         private static void LoadDatabaseProviders()
         {
             var databaseProviders = ConfigurationSection.DatabaseProviders;
@@ -70,6 +80,9 @@ namespace AntData.ORM.DbEngine
             }
         }
 
+        /// <summary>
+        /// 解析DataBaseSet
+        /// </summary>
         private static void LoadAllInOneKeys()
         {
             var databaseSets = ConfigurationSection.DatabaseSets;
@@ -92,6 +105,7 @@ namespace AntData.ORM.DbEngine
             var databaseSets = ConfigurationSection.DatabaseSets;
             if (databaseSets == null)
                 throw new DalException("Missing DatabaseSets.");
+            //一个DataBaseSet可以配置多个 例如主从 或者 分片
             DatabaseSets = new Dictionary<String, DatabaseSetWrapper>();
 
             foreach (DatabaseSetElement databaseSet in databaseSets)
@@ -100,7 +114,7 @@ namespace AntData.ORM.DbEngine
                     throw new DalException("DatabaseProvider doesn't match.");
                 IDatabaseProvider provider = DatabaseProviders[databaseSet.Provider];
 
-                //build set wrapper
+                //build set wrapper 同一个DataBaseSet的Provider必须一致
                 var databaseSetWrapper = new DatabaseSetWrapper
                 {
                     Name = databaseSet.Name,

@@ -17,7 +17,8 @@ namespace AntData.ORM.Dao
     {
         protected static readonly ConcurrentDictionary<string, BaseDao> DaoCache = new ConcurrentDictionary<string, BaseDao>();
 
-        public static IDataReader CustomerExecuteQuery(string dbName, string sql, Dictionary<string, CustomerParam> paras,IDictionary hints=null)
+        [Obsolete("IDataReader一定要在外部关闭可能造成连接泄漏 一定要关闭Idatareader")]
+        public static IDataReader CustomerExecuteQuery(string dbName, string sql, Dictionary<string, CustomerParam> paras,IDictionary hints=null, bool isWrite = false)
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var dic = ConvertStatement(paras);
@@ -25,18 +26,18 @@ namespace AntData.ORM.Dao
             {
                 if (hints!=null && hints.Count > 0)
                 {
-                    return baseDao.SelectDataReader(sql, dic,hints);
+                    return baseDao.SelectDataReader(sql, dic,hints,isWrite);
                 }
-                return baseDao.SelectDataReader(sql, dic);
+                return baseDao.SelectDataReader(sql, dic,isWrite);
             }
             if (hints != null && hints.Count > 0)
             {
-                return baseDao.SelectDataReader(sql, null, hints);
+                return baseDao.SelectDataReader(sql, null, hints,isWrite);
             }
-            return baseDao.SelectDataReader(sql);
+            return baseDao.SelectDataReader(sql,isWrite);
         }
 
-        public static DataTable CustomerExecuteQueryTable(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null)
+        public static DataTable CustomerExecuteQueryTable(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = false)
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var dic = ConvertStatement(paras);
@@ -44,18 +45,18 @@ namespace AntData.ORM.Dao
             {
                 if (hints != null && hints.Count > 0)
                 {
-                    return baseDao.SelectDataTable(sql, dic, hints);
+                    return baseDao.SelectDataTable(sql, dic, hints, isWrite);
                 }
-                return baseDao.SelectDataTable(sql, dic);
+                return baseDao.SelectDataTable(sql, dic, isWrite);
             }
             if (hints != null && hints.Count > 0)
             {
-                return baseDao.SelectDataTable(sql, null, hints);
+                return baseDao.SelectDataTable(sql, null, hints, isWrite);
             }
-            return baseDao.SelectDataTable(sql);
+            return baseDao.SelectDataTable(sql, isWrite);
         }
 
-        public static object CustomerExecuteScalar(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null)
+        public static object CustomerExecuteScalar(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = false)
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var dic = ConvertStatement(paras);
@@ -63,18 +64,18 @@ namespace AntData.ORM.Dao
             {
                 if (hints != null && hints.Count > 0)
                 {
-                    return baseDao.ExecScalar(sql, dic, hints);
+                    return baseDao.ExecScalar(sql, dic, hints, isWrite);
                 }
-                return baseDao.ExecScalar(sql, dic);
+                return baseDao.ExecScalar(sql, dic, isWrite);
             }
             if (hints != null && hints.Count > 0)
             {
-                return baseDao.ExecScalar(sql, null, hints);
+                return baseDao.ExecScalar(sql, null, hints, isWrite);
             }
-            return baseDao.ExecScalar(sql);
+            return baseDao.ExecScalar(sql, isWrite);
         }
 
-        public static int CustomerExecuteNonQuery(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null)
+        public static int CustomerExecuteNonQuery(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = true)
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var dic = ConvertStatement(paras);
@@ -82,15 +83,15 @@ namespace AntData.ORM.Dao
             {
                 if (hints != null && hints.Count > 0)
                 {
-                    return baseDao.ExecNonQuery(sql, dic, hints);
+                    return baseDao.ExecNonQuery(sql, dic, hints, isWrite);
                 }
-                return baseDao.ExecNonQuery(sql, dic);
+                return baseDao.ExecNonQuery(sql, dic, isWrite);
             }
             if (hints != null && hints.Count > 0)
             {
-                return baseDao.ExecNonQuery(sql, null, hints);
+                return baseDao.ExecNonQuery(sql, null, hints, isWrite);
             }
-            return baseDao.ExecNonQuery(sql);
+            return baseDao.ExecNonQuery(sql, isWrite);
         }
 
         public static StatementParameterCollection ConvertStatement(Dictionary<string, CustomerParam> paras)

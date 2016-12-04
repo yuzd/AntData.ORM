@@ -37,7 +37,7 @@ namespace AntData.ORM.Data
             this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable;
         }
 
-        public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, IDataReader> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, DataTable> CustomerExecuteQueryTable)
+        public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable)
         {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
@@ -109,13 +109,13 @@ namespace AntData.ORM.Data
             return _dataProviders[providerName];
         }
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary,int > CustomerExecuteNonQuery { get; set; }
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, int > CustomerExecuteNonQuery { get; set; }
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, object> CustomerExecuteScalar { get; set; }
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar { get; set; }
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, IDataReader> CustomerExecuteQuery { get; set; }
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery { get; set; }
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, DataTable> CustomerExecuteQueryTable { get; set; }
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable { get; set; }
 	  
 
 
@@ -199,12 +199,18 @@ namespace AntData.ORM.Data
 			set { _commandTimeout = value;     }
 		}
 
-		
 
 
-       
 
-		internal int ExecuteNonQuery(string sqlString, Dictionary<string, CustomerParam> Params)
+
+        /// <summary>
+        /// 执行ExecuteNonQuery
+        /// </summary>
+        /// <param name="sqlString">执行sql</param>
+        /// <param name="Params">执行参数</param>
+        /// <param name="isWrite">默认写</param>
+        /// <returns></returns>
+        internal int ExecuteNonQuery(string sqlString, Dictionary<string, CustomerParam> Params,bool isWrite = true)
 		{
 
             var dic = new Dictionary<string, object>();
@@ -212,7 +218,7 @@ namespace AntData.ORM.Data
 		    {
                 dic.Add("TIMEOUT", this.CommandTimeout);
 		    }
-            var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic);
+            var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic, isWrite);
             if (OnCustomerTraceConnection!=null)
 		    {
 		        OnCustomerTraceConnection(new CustomerTraceInfo
@@ -225,14 +231,21 @@ namespace AntData.ORM.Data
             return result;
 		}
 
-		object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params)
+        /// <summary>
+        /// 执行ExecuteScalar
+        /// </summary>
+        /// <param name="sqlString">执行sql</param>
+        /// <param name="Params">执行参数</param>
+        /// <param name="isWrite">默认读</param>
+        /// <returns></returns>
+		object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic);
+            var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic, isWrite);
             if (OnCustomerTraceConnection != null)
             {
                 OnCustomerTraceConnection(new CustomerTraceInfo
@@ -245,14 +258,21 @@ namespace AntData.ORM.Data
             return result;
 		}
 
-		internal IDataReader ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params)
+        /// <summary>
+        /// 执行ExecuteReader
+        /// </summary>
+        /// <param name="sqlString">执行sql</param>
+        /// <param name="Params">执行参数</param>
+        /// <param name="isWrite">默认读</param>
+        /// <returns></returns>
+		internal IDataReader ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic);
+            var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic, isWrite);
             if (OnCustomerTraceConnection != null)
             {
                 OnCustomerTraceConnection(new CustomerTraceInfo
@@ -265,34 +285,22 @@ namespace AntData.ORM.Data
 		    return result;
 		}
 
-		internal IDataReader ExecuteReader(CommandBehavior commandBehavior, string sqlString, Dictionary<string, CustomerParam> Params)
-		{
-            var dic = new Dictionary<string, object>();
-            if (this.CommandTimeout > 0)
-            {
-                dic.Add("TIMEOUT", this.CommandTimeout);
-            }
-            var result = CustomerExecuteQuery(ConnectionString, sqlString, Params,dic);
-            if (OnCustomerTraceConnection != null)
-            {
-                OnCustomerTraceConnection(new CustomerTraceInfo
-                {
-                    CustomerParams = Params,
-                    SqlText = sqlString
-                });
-            }
-            this.Dispose();
-            return result;
-		}
-
-        internal DataTable ExecuteDataTable(CommandBehavior commandBehavior, string sqlString, Dictionary<string, CustomerParam> Params)
+	   
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sqlString">执行sql</param>
+        /// <param name="Params">执行参数</param>
+        /// <param name="isWrite">默认读</param>
+        /// <returns></returns>
+        internal DataTable ExecuteDataTable(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
         {
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic);
+            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic, isWrite);
             if (OnCustomerTraceConnection != null)
             {
                 OnCustomerTraceConnection(new CustomerTraceInfo
