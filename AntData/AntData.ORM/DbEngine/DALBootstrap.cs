@@ -52,7 +52,7 @@ namespace AntData.ORM.DbEngine
             }
             catch (Exception ex)
             {
-                throw;
+                throw new DalException(ex.Message);
             }
         }
 
