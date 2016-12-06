@@ -372,6 +372,12 @@ namespace AntDataUnitTest
             var s = DB.Tables.Schools.FindByBk(1);
             Assert.IsNotNull(s);
         }
+
+        [TestMethod]
+        public void TestMethod4_03()
+        {
+            DB.Merge(DB.Tables.Schools);
+        }
     }
 
 

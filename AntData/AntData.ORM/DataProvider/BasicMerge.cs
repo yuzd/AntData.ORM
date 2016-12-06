@@ -36,7 +36,7 @@ namespace AntData.ORM.DataProvider
 			if (!BuildCommand(dataConnection, predicate, delete, source, tableName, databaseName, schemaName))
 				return 0;
 
-			return Execute(dataConnection);
+			return Execute(dataConnection,Parameters);
 		}
 
 		protected virtual bool BuildCommand<T>(
@@ -254,9 +254,9 @@ namespace AntData.ORM.DataProvider
 					.AppendLine("WHEN NOT MATCHED BY Source {0}THEN".Args(predicate))
 					.AppendLine("\tDELETE")
 					;
-			}
-
-			return true;
+            }
+           
+            return true;
 		}
 
 		class QueryContext : IQueryContext
@@ -414,11 +414,11 @@ namespace AntData.ORM.DataProvider
 			return hasData;
 		}
 
-		protected virtual int Execute(DataConnection dataConnection)
+		protected virtual int Execute(DataConnection dataConnection, List<DataParameter> Parameters1)
 		{
 			var cmd = StringBuilder.AppendLine().ToString();
 
-			return dataConnection.Execute(cmd, Parameters.ToArray());
+			return dataConnection.Execute(cmd, Parameters1.ToArray());
 		}
 	}
 }

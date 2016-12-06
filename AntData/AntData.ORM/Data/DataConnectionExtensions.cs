@@ -311,11 +311,11 @@ namespace AntData.ORM.Data
 				source);
 		}
 
-		#endregion
+        #endregion
 
-		#region Merge
+        #region Merge http://www.cnblogs.com/CareySon/archive/2012/03/07/2383690.html
 
-		public static int Merge<T>(this DataConnection dataConnection, IQueryable<T> source, Expression<Func<T,bool>> predicate,
+        public static int Merge<T>(this DataConnection dataConnection, IQueryable<T> source, Expression<Func<T,bool>> predicate,
 			string tableName = null, string databaseName = null, string schemaName = null)
 			where T : class 
 		{

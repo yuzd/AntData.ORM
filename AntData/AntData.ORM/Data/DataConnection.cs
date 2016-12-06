@@ -22,21 +22,46 @@ namespace AntData.ORM.Data
 
 	public partial class DataConnection
 	{
-		#region .ctor
+        static DataConnection()
+        {
+            _configurationIDs = new ConcurrentDictionary<string, int>();
+            AntData.ORM.DataProvider.SqlServer.SqlServerTools.GetDataProvider();
+            AntData.ORM.DataProvider.MySql.MySqlTools.GetDataProvider();
+        }
 
-	    public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName)
+
+        #region  构造方法
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="dataProvider">设置数据库的信息</param>
+        /// <param name="dbMappingName">逻辑数据库名称</param>
+        public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName)
 	    {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
             AddDataProvider(dataProvider);
             DataProvider = dataProvider;
             _mappingSchema = DataProvider.MappingSchema;
             ConnectionString = dbMappingName;
-	        this.CustomerExecuteNonQuery = DalBridge.CustomerExecuteNonQuery;
+
+            #region 默认实现
+            this.CustomerExecuteNonQuery = DalBridge.CustomerExecuteNonQuery;
             this.CustomerExecuteScalar = DalBridge.CustomerExecuteScalar;
             this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
-            this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable;
+            this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable; 
+            #endregion
         }
 
+
+        /// <summary>
+        /// 可扩展的构造函数 可以自己实现DalBridge的四个方法 然后注入进来
+        /// </summary>
+        /// <param name="dataProvider">设置数据库的信息</param>
+        /// <param name="dbMappingName">逻辑数据库名称</param>
+        /// <param name="CustomerExecuteNonQuery">执行insert update delete 语句(不包括insertWithIdentity)</param>
+        /// <param name="CustomerExecuteScalar">执行查询单个信息(包括insertWithIdentity)</param>
+        /// <param name="CustomerExecuteQuery">执行select 序列化成对象 </param>
+        /// <param name="CustomerExecuteQueryTable">执行select 不走序列化 生成DataTable</param>
         public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable)
         {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
@@ -45,16 +70,20 @@ namespace AntData.ORM.Data
             DataProvider = dataProvider;
             _mappingSchema = DataProvider.MappingSchema;
             ConnectionString = dbMappingName;
+
             this.CustomerExecuteNonQuery = CustomerExecuteNonQuery;
             this.CustomerExecuteScalar = CustomerExecuteScalar;
             this.CustomerExecuteQuery = CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = CustomerExecuteQueryTable;
         }
-		#endregion
+        #endregion
 
-		#region Public Properties
+        #region Public Properties
 
-		public IDataProvider DataProvider        { get; private set; }
+
+        /// <summary>
+        /// 逻辑数据库名称
+        /// </summary>
 		public string        ConnectionString    { get; private set; }
 
 		static readonly ConcurrentDictionary<string,int> _configurationIDs;
@@ -93,85 +122,111 @@ namespace AntData.ORM.Data
 			set { _isMarsEnabled = value; }
 		}
 
+        public event EventHandler OnClosing;
+        #endregion
 
-		
+
+        #region 执行sql后显示Trace
 
         private Action<CustomerTraceInfo> _onCustomerTraceConnection;
-		[JetBrains.Annotations.CanBeNull]
+        [JetBrains.Annotations.CanBeNull]
         public Action<CustomerTraceInfo> OnCustomerTraceConnection
-		{
+        {
             get { return _onCustomerTraceConnection; }
             set { _onCustomerTraceConnection = value; }
-		}
+        }
 
+        public static Action<string, string> WriteTraceLine = (message, displayName) => Debug.WriteLine(message, displayName);
+
+        #endregion
+
+       
+     
+
+        #region 执行sql操作
+        /// <summary>
+        /// 执行insert update delete 语句(不包括insertWithIdentity)
+        /// </summary>
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, int> CustomerExecuteNonQuery { get; set; }
+
+        /// <summary>
+        /// 执行查询单个信息(包括insertWithIdentity)
+        /// </summary>
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar { get; set; }
+
+        /// <summary>
+        /// 执行select 序列化成对象
+        /// </summary>
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery { get; set; }
+
+        /// <summary>
+        /// 执行select 不走序列化 生成DataTable
+        /// </summary>
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable { get; set; }
+
+
+        #endregion
+
+
+
+
+
+
+
+        #region 数据库引擎
+
+        /// <summary>
+        /// 数据库引擎集合
+        /// </summary>
+        static readonly ConcurrentDictionary<string, IDataProvider> _dataProviders = new ConcurrentDictionary<string, IDataProvider>();
+        /// <summary>
+        /// 设置数据库的信息
+        /// 在生成表达式树和SQL语句之前，我们有必要知道数据库的相关信息。比如当前数据库是用什么——Sql Server还是MySql
+        /// </summary>
+        public IDataProvider DataProvider { get; private set; }
+
+        /// <summary>
+        /// 获取默认的数据库的信息
+        /// </summary>
+        /// <param name="providerName">名称</param>
+        /// <returns></returns>
         public static IDataProvider GetDataProvider([JetBrains.Annotations.NotNull] string providerName)
         {
             return _dataProviders[providerName];
         }
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, int > CustomerExecuteNonQuery { get; set; }
+        /// <summary>
+        /// 添加数据库信息
+        /// </summary>
+        /// <param name="providerName">名称</param>
+        /// <param name="dataProvider">类型</param>
+        public static void AddDataProvider([JetBrains.Annotations.NotNull] string providerName, [JetBrains.Annotations.NotNull] IDataProvider dataProvider)
+        {
+            if (providerName == null) throw new ArgumentNullException("providerName");
+            if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar { get; set; }
+            if (string.IsNullOrEmpty(dataProvider.Name))
+                throw new ArgumentException("dataProvider.Name cannot be empty.", "dataProvider");
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery { get; set; }
+            _dataProviders[providerName] = dataProvider;
+        }
 
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable { get; set; }
-	  
+        /// <summary>
+        /// 添加数据库信息
+        /// </summary>
+        /// <param name="dataProvider">类型</param>
+        public static void AddDataProvider([JetBrains.Annotations.NotNull] IDataProvider dataProvider)
+        {
+            if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
-
-		public static Action<string,string> WriteTraceLine = (message, displayName) => Debug.WriteLine(message, displayName);
-
-		#endregion
-
-
-
-		static DataConnection()
-		{
-			_configurationIDs = new ConcurrentDictionary<string,int>();
-
-            AntData.ORM.DataProvider.SqlServer. SqlServerTools. GetDataProvider();
-            //LinqToDB.DataProvider.Access.    AccessTools.    GetDataProvider();
-            //LinqToDB.DataProvider.SqlCe.     SqlCeTools.     GetDataProvider();
-            //LinqToDB.DataProvider.Firebird.  FirebirdTools.  GetDataProvider();
-            AntData.ORM.DataProvider.MySql.MySqlTools.GetDataProvider();
-            //LinqToDB.DataProvider.SQLite.    SQLiteTools.    GetDataProvider();
-            //LinqToDB.DataProvider.Sybase.    SybaseTools.    GetDataProvider();
-            //LinqToDB.DataProvider.Oracle.    OracleTools.    GetDataProvider();
-            //LinqToDB.DataProvider.PostgreSQL.PostgreSQLTools.GetDataProvider();
-            //LinqToDB.DataProvider.DB2.       DB2Tools.       GetDataProvider();
-            //LinqToDB.DataProvider.Informix.  InformixTools.  GetDataProvider();
-            //LinqToDB.DataProvider.SapHana.   SapHanaTools.   GetDataProvider(); 
-
-			
-		}
+            AddDataProvider(dataProvider.Name, dataProvider);
+        } 
+        #endregion
 
 
+        #region Command
 
-		static readonly ConcurrentDictionary<string,IDataProvider> _dataProviders =
-			new ConcurrentDictionary<string,IDataProvider>();
-
-		public static void AddDataProvider([JetBrains.Annotations.NotNull] string providerName, [JetBrains.Annotations.NotNull] IDataProvider dataProvider)
-		{
-			if (providerName == null) throw new ArgumentNullException("providerName");
-			if (dataProvider == null) throw new ArgumentNullException("dataProvider");
-
-			if (string.IsNullOrEmpty(dataProvider.Name))
-				throw new ArgumentException("dataProvider.Name cannot be empty.", "dataProvider");
-
-			_dataProviders[providerName] = dataProvider;
-		}
-
-		public static void AddDataProvider([JetBrains.Annotations.NotNull] IDataProvider dataProvider)
-		{
-			if (dataProvider == null) throw new ArgumentNullException("dataProvider");
-
-			AddDataProvider(dataProvider.Name, dataProvider);
-		}
-
-
-		#region Command
-
-		public string LastQuery;
+        public string LastQuery;
 
 		internal void InitCommand(CommandType commandType, string sql, DataParameter[] parameters, List<string> queryHints)
 		{
@@ -317,7 +372,7 @@ namespace AntData.ORM.Data
 		#endregion
 
 
-		#region MappingSchema
+		#region MappingSchema 转sql
 
 		private MappingSchema _mappingSchema;
 
@@ -340,15 +395,8 @@ namespace AntData.ORM.Data
 			get { return _nextQueryHints ?? (_nextQueryHints = new List<string>()); }
 		}
 
-	    public event EventHandler OnClosing;
+	
 
-	    public DataConnection AddMappingSchema(MappingSchema mappingSchema)
-		{
-			_mappingSchema = new MappingSchema(mappingSchema, _mappingSchema);
-			_id            = null;
-
-			return this;
-		}
 
 		#endregion
 

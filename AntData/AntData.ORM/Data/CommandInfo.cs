@@ -196,12 +196,6 @@ namespace AntData.ORM.Data
 				if (rd.Read())
 				{
 					var objectReader = GetObjectReader<T>(DataConnection, rd, CommandText);
-
-#if DEBUG
-					//var value = rd.GetValue(0);
-					//return default (T);
-#endif
-
 					try
 					{
 						return objectReader(rd);
