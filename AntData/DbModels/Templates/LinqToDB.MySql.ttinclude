@@ -9,11 +9,11 @@ LinqToDB.Data.DataConnection GetMySqlConnection(string connectionString)
 	return LinqToDB.DataProvider.MySql.MySqlTools.CreateDataConnection(connectionString);
 }
 
-LinqToDB.Data.DataConnection GetMySqlConnection(string server, string database, string uid, string password)
+LinqToDB.Data.DataConnection GetMySqlConnection(string server, string database, string uid, string password,string port = "3306")
 {
 	return GetMySqlConnection(string.Format(
-		"Server={0};Port=28747;Database={1};Uid={2};Pwd={3};charset=utf8;",
-		server, database, uid, password));
+		"Server={0};Port={4};Database={1};Uid={2};Pwd={3};charset=utf8;",
+		server, database, uid, password,port));
 }
 
 void LoadMySqlMetadata(string connectionString)
@@ -25,6 +25,11 @@ void LoadMySqlMetadata(string connectionString)
 void LoadMySqlMetadata(string server, string database, string uid, string password)
 {
 	var dataConnection = GetMySqlConnection(server, database, uid, password);
+	LoadMetadata(dataConnection);
+}
+void LoadMySqlMetadata(string server,string port, string database, string uid, string password)
+{
+	var dataConnection = GetMySqlConnection(server, database, uid, password,port);
 	LoadMetadata(dataConnection);
 }
 #>
