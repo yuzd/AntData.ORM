@@ -88,19 +88,22 @@ namespace AntData.ORM.Reflection
 		}
 
 
+        #region 缓存集合
 
-		private static readonly Hashtable s_getterDict = Hashtable.Synchronized(new Hashtable(10240));
-		private static readonly Hashtable s_setterDict = Hashtable.Synchronized(new Hashtable(10240));
-		private static readonly Hashtable s_methodDict = Hashtable.Synchronized(new Hashtable(10240));
-        private static readonly Hashtable s_propertyDict = Hashtable.Synchronized(new Hashtable(10240));
+        private static readonly Hashtable s_getterDict = Hashtable.Synchronized(new Hashtable(10240));
+        private static readonly Hashtable s_setterDict = Hashtable.Synchronized(new Hashtable(10240));
+        private static readonly Hashtable s_methodDict = Hashtable.Synchronized(new Hashtable(10240));
+        private static readonly Hashtable s_propertyDict = Hashtable.Synchronized(new Hashtable(10240)); 
 
-		/// <summary>
-		/// 返回FieldInfo实例反射优化后的GetValue调用结果
-		/// </summary>
-		/// <param name="fieldInfo">FieldInfo对象实例</param>
-		/// <param name="obj">调用参数,用于数组索引器等成员</param>
-		/// <returns>调用结果</returns>
-		public static object FastGetValue(this FieldInfo fieldInfo, object obj)
+        #endregion
+
+        /// <summary>
+        /// 返回FieldInfo实例反射优化后的GetValue调用结果
+        /// </summary>
+        /// <param name="fieldInfo">FieldInfo对象实例</param>
+        /// <param name="obj">调用参数,用于数组索引器等成员</param>
+        /// <returns>调用结果</returns>
+        public static object FastGetValue(this FieldInfo fieldInfo, object obj)
 		{
 			if( fieldInfo == null )
 				throw new ArgumentNullException("fieldInfo");
@@ -233,5 +236,27 @@ namespace AntData.ORM.Reflection
             var attributes = provider.GetCustomAttributes(typeof(T), false);
             return attributes.Length > 0 ? attributes[0] as T : default(T);
         }
-	}
+
+        /// <summary>
+        /// 根据对象的属性名称获取指
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static object EmitGet(this object instance, string propertyName)
+        {
+            return instance.GetType().GetCanWritePropertyInfo().First(r=>r.Name.Equals(propertyName)).FastGetValue(instance);
+        }
+
+        /// <summary>
+        /// 根据对象的属性名称设值
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="value"></param>
+        public static void EmitSet(this object instance, string propertyName, object value)
+        {
+            instance.GetType().GetCanWritePropertyInfo().First(r => r.Name.Equals(propertyName)).FastSetValue(instance,value);
+        }
+    }
 }

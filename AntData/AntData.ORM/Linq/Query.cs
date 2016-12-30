@@ -330,15 +330,6 @@ namespace AntData.ORM.Linq
                     foreach (var p in resourceInfo)
                     {
                         var attributes = p.GetCustomAttributes(typeof(IdentityAttribute), false).ToList();
-                        //foreach (var att in attributes)
-                        //{
-                        //    var column = att as ColumnAttribute;
-                        //    if (column!=null && column.IsPrimaryKey)
-                        //    {
-                        //        isPrimaryKey = true;
-                        //        break;
-                        //    }
-                        //}
                         if(attributes.Count>0)
                         {
                             var pType = p.PropertyType;
