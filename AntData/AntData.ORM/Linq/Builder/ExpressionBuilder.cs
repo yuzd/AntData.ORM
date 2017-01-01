@@ -149,8 +149,8 @@ namespace AntData.ORM.Linq.Builder
 					_reorder = false;
 					_sequenceBuilders = _sequenceBuilders.OrderByDescending(_ => _.BuildCounter).ToList();
 				}
-
-			_query.Init(sequence, CurrentSqlParameters);
+            //CurrentSqlParameters 执行参数
+            _query.Init(sequence, CurrentSqlParameters);
 
 			var param = Expression.Parameter(typeof(Query<T>), "info");
 
@@ -597,6 +597,10 @@ namespace AntData.ORM.Linq.Builder
 		{
 			var sequence  = OptimizeExpression(method.Arguments[0]);
 			var predicate = OptimizeExpression(method.Arguments[1]);
+		    if (predicate.NodeType.Equals(ExpressionType.Constant))
+		    {
+		        return method;
+		    }
 			var lambda    = (LambdaExpression)predicate.Unwrap();
 			var lparam    = lambda.Parameters[0];
 			var lbody     = lambda.Body;

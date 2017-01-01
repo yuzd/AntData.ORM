@@ -929,11 +929,28 @@ namespace AntData.ORM
 					new[] { query.Expression }));
 		}
 
-		#endregion
+        #endregion
 
-		#region Take / Skip / ElementAt
+        static readonly MethodInfo _whereMethodInfo = MemberHelper.MethodOf(() => Where<string>(null, null,null)).GetGenericMethodDefinition();
+        [LinqTunnel]
+        public static IQueryable<TSource> Where<TSource>(
+            [NotNull]                this IQueryable<TSource> source,
+            [NotNull] string whereString, object whereObj = null)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+            if (string.IsNullOrEmpty(whereString)) throw new ArgumentNullException("whereString");
 
-		static readonly MethodInfo _takeMethodInfo = MemberHelper.MethodOf(() => Take<int>(null,null)).GetGenericMethodDefinition();
+            return source.Provider.CreateQuery<TSource>(
+                Expression.Call(
+                    null,
+                    _whereMethodInfo.MakeGenericMethod(new[] { typeof(TSource) }),
+                    new[] { source.Expression, Expression.Constant(whereString, typeof(string)), Expression.Constant(whereObj, typeof(object))  }));
+        }
+
+        
+        #region Take / Skip / ElementAt
+
+        static readonly MethodInfo _takeMethodInfo = MemberHelper.MethodOf(() => Take<int>(null,null)).GetGenericMethodDefinition();
 
 		[LinqTunnel]
 		public static IQueryable<TSource> Take<TSource>(

@@ -162,7 +162,6 @@ namespace AntData.ORM.Reflection
         /// 返回类型可写属性
         /// </summary>
         /// <param name="type">类型</param>
-        /// <param name="containtStaticProperty">是否包含静态属性</param>
         /// <returns>属性</returns>
         public static PropertyInfo[] GetCanWritePropertyInfo(this Type type)
         {
@@ -179,15 +178,33 @@ namespace AntData.ORM.Reflection
             return properties;    
         }
 
-
-		/// <summary>
-		/// 根据指定的MethodInfo以及参数数组，快速调用相关的方法。
-		/// </summary>
-		/// <param name="methodInfo">MethodInfo实例成员</param>
-		/// <param name="obj">目标实例成员</param>
-		/// <param name="parameters">函数参数</param>
-		/// <returns>调用结果</returns>
-		public static object FastInvoke(this MethodInfo methodInfo, object obj, params object[] parameters)
+        /// <summary>
+        /// 返回类型的属性
+        /// </summary>
+        /// <param name="type">类型</param>
+        /// <returns></returns>
+        public static PropertyInfo[] GetCanReadPropertyInfo(this Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+            PropertyInfo[] properties = (PropertyInfo[])s_propertyDict[type];
+            if (properties == null)
+            {
+                properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static).ToArray();
+                s_propertyDict[type] = properties;
+            }
+            return properties;
+        }
+        /// <summary>
+        /// 根据指定的MethodInfo以及参数数组，快速调用相关的方法。
+        /// </summary>
+        /// <param name="methodInfo">MethodInfo实例成员</param>
+        /// <param name="obj">目标实例成员</param>
+        /// <param name="parameters">函数参数</param>
+        /// <returns>调用结果</returns>
+        public static object FastInvoke(this MethodInfo methodInfo, object obj, params object[] parameters)
 		{
 			if( methodInfo == null )
 				throw new ArgumentNullException("methodInfo");

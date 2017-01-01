@@ -735,6 +735,9 @@ namespace AntData.ORM.Expressions
 
 						break;
 					}
+                case ExpressionType.Constant:
+
+                    break;
 			}
 
 			return ex;

@@ -378,6 +378,27 @@ namespace AntDataUnitTest
         {
             DB.Merge(DB.Tables.Schools);
         }
+        [TestMethod]
+        public async Task TestMethod4_04()
+        {
+
+            // var aa = DB.Tables.People.Where(r => r.Age > 10).Where(r=>r.Age < 20).ToList();
+            var bb = DB.Tables.People.Where("age > 10").Where(r => r.Age < 20).ToListAsync();
+            var bbb = DB.Tables.People.Where(r => r.Age < 20).Where("age > 10").ToListAsync();
+            Assert.IsTrue((await bb).Count == (await bbb).Count);
+        }
+
+        [TestMethod]
+        public void TestMethod4_05()
+        {
+            var age = 10;
+            //var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
+            var bb = DB.Tables.People.Where("age > @age", new { age = age }).ToList();
+            var bbb = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).ToList(); ;
+            var bbbd = DB.Tables.People.Where("age > @age", new { age = age }).Where("name = @name", new { name = "nainaigu" }).ToList();
+            var bbbc = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).Where(r => r.Name.Equals("aaa")).ToList();
+            var bbbcc = DB.Tables.People.Where(r => r.SchoolId.Equals(2)).Where("age > @age", new { age = age }).Where(r => r.Name.Equals("nainaigu")).ToList();
+        }
     }
 
 

@@ -23,9 +23,29 @@ namespace AntData.ORM.Linq.Builder
 
 	partial class ExpressionBuilder
 	{
-		#region Build Where
+        #region Build Where
+        public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, string condition, bool checkForSubQuery, bool enforceHaving = false, ConstantExpression whereObj = null)
+        {
+            sequence.SelectQuery.Where.SearchCondition.Conditions.Add(new SelectQuery.Condition (false, condition ));
+            if (whereObj != null && whereObj.Value!=null)
+            {
+                var properties = whereObj.Value.GetType().GetCanReadPropertyInfo();
+                foreach (var p in properties)
+                {
+                    if (CurrentSqlParameters.Select(r=>r.SqlParameter).Any(r=>r.Name.Equals(p.Name)))
+                    {
+                        continue;
+                    }
+                    CurrentSqlParameters.Add(new ParameterAccessor
+                    {
+                        SqlParameter = new SqlParameter(p.PropertyType, p.Name, p.FastGetValue(whereObj.Value))
+                    });
+                }
 
-		public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, LambdaExpression condition, bool checkForSubQuery, bool enforceHaving = false)
+            }
+            return sequence;
+        }
+        public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, LambdaExpression condition, bool checkForSubQuery, bool enforceHaving = false)
 		{
 			var prevParent = sequence.Parent;
 			var ctx        = new ExpressionContext(parent, sequence, condition);

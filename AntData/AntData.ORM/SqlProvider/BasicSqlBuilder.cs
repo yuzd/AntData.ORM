@@ -1069,7 +1069,8 @@ namespace AntData.ORM.SqlProvider
 			return SelectQuery.Where.SearchCondition.Conditions.Count != 0;
 		}
 
-		protected virtual void BuildWhereClause()
+
+        protected virtual void BuildWhereClause()
 		{
 			if (!BuildWhere())
 				return;
@@ -1271,33 +1272,43 @@ namespace AntData.ORM.SqlProvider
 			var len  = StringBuilder.Length;
 			var parentPrecedence = condition.Precedence + 1;
 
-			foreach (var cond in condition.Conditions)
-			{
-				if (isOr != null)
-				{
-					StringBuilder.Append(isOr.Value ? " OR" : " AND");
+		    for (int i = 0; i < condition.Conditions.Count; i++)
+		    {
+		        var cond = condition.Conditions[i];
 
-					if (condition.Conditions.Count < 4 && StringBuilder.Length - len < 50 || condition != SelectQuery.Where.SearchCondition)
-					{
-						StringBuilder.Append(' ');
-					}
-					else
-					{
-						StringBuilder.AppendLine();
-						AppendIndent();
-						len = StringBuilder.Length;
-					}
-				}
+                
+                if (isOr != null)
+                {
+                    StringBuilder.Append(isOr.Value ? " OR" : " AND");
 
-				if (cond.IsNot)
-					StringBuilder.Append("NOT ");
+                    if (condition.Conditions.Count < 4 && StringBuilder.Length - len < 50 || condition != SelectQuery.Where.SearchCondition)
+                    {
+                        StringBuilder.Append(' ');
+                    }
+                    else
+                    {
+                        StringBuilder.AppendLine();
+                        AppendIndent();
+                        len = StringBuilder.Length;
+                    }
+                }
 
-				var precedence = GetPrecedence(cond.Predicate);
+                if (!string.IsNullOrEmpty(cond.StringWhere))
+                {
+                    StringBuilder.Append(" " + cond.StringWhere.Replace("\"", ""));
+                    isOr = cond.IsOr;
+                    continue;
+                }
 
-				BuildPredicate(cond.IsNot ? Precedence.LogicalNegation : parentPrecedence, precedence, cond.Predicate);
+                if (cond.IsNot)
+                    StringBuilder.Append("NOT ");
 
-				isOr = cond.IsOr;
-			}
+                var precedence = GetPrecedence(cond.Predicate);
+
+                BuildPredicate(cond.IsNot ? Precedence.LogicalNegation : parentPrecedence, precedence, cond.Predicate);
+
+                isOr = cond.IsOr;
+            }
 		}
 
 		protected virtual void BuildSearchCondition(int parentPrecedence, SelectQuery.SearchCondition condition)

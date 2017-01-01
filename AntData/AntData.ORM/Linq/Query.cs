@@ -420,6 +420,10 @@ namespace AntData.ORM.Linq
 		{
 			foreach (var p in Queries[idx].Parameters)
 			{
+			    if (p.Accessor==null)
+			    {
+			        continue;
+			    }
 				var value = p.Accessor(expr, parameters);
 
 				if (value is IEnumerable)

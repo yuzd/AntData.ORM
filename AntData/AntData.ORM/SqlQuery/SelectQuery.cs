@@ -1229,13 +1229,20 @@ namespace AntData.ORM.SqlQuery
 
 		public class Condition : IQueryElement, ICloneableElement
 		{
+		    public string StringWhere { get; set; }
 			public Condition(bool isNot, ISqlPredicate predicate)
 			{
 				IsNot     = isNot;
 				Predicate = predicate;
 			}
 
-			public Condition(bool isNot, ISqlPredicate predicate, bool isOr)
+            public Condition(bool isNot, string stringWhere)
+            {
+                IsNot = isNot;
+                StringWhere = stringWhere;
+            }
+
+            public Condition(bool isNot, ISqlPredicate predicate, bool isOr)
 			{
 				IsNot     = isNot;
 				Predicate = predicate;
@@ -1346,12 +1353,13 @@ namespace AntData.ORM.SqlQuery
 			}
 
 			readonly List<Condition> _conditions = new List<Condition>();
-			public   List<Condition>  Conditions
-			{
-				get { return _conditions; }
-			}
 
-			protected override SearchCondition Search
+		    public List<Condition> Conditions
+		    {
+		        get { return _conditions; }
+		    }
+
+		    protected override SearchCondition Search
 			{
 				get { return this; }
 			}
@@ -1397,8 +1405,14 @@ namespace AntData.ORM.SqlQuery
 
 			ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 			{
-				foreach (var condition in Conditions)
-					condition.Predicate.Walk(skipColumns, func);
+			    foreach (var condition in Conditions)
+			    {
+			        if (!string.IsNullOrEmpty(condition.StringWhere))
+			        {
+			            continue;
+			        }
+                    condition.Predicate.Walk(skipColumns, func);
+                }
 
 				return func(this);
 			}

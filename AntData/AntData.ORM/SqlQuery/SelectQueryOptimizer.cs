@@ -446,7 +446,10 @@ namespace AntData.ORM.SqlQuery
 			if (searchCondition.Conditions.Count == 1)
 			{
 				var cond = searchCondition.Conditions[0];
-
+			    if (!string.IsNullOrEmpty(cond.StringWhere))
+			    {
+			        return;
+			    }
 				if (cond.Predicate is SelectQuery.SearchCondition)
 				{
 					var sc = (SelectQuery.SearchCondition)cond.Predicate;
@@ -511,7 +514,10 @@ namespace AntData.ORM.SqlQuery
 			for (var i = 0; i < searchCondition.Conditions.Count; i++)
 			{
 				var cond = searchCondition.Conditions[i];
-
+			    if (!string.IsNullOrEmpty(cond.StringWhere))
+			    {
+			        continue;
+			    }
 				if (cond.Predicate.ElementType == QueryElementType.ExprPredicate)
 				{
 					var expr = (SelectQuery.Predicate.Expr)cond.Predicate;
