@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-
+using AntData.ORM.Linq;
 #if !SILVERLIGHT && !NETFX_CORE
 using System.Data.SqlTypes;
 #endif
@@ -1295,7 +1295,10 @@ namespace AntData.ORM.SqlProvider
 
                 if (!string.IsNullOrEmpty(cond.StringWhere))
                 {
-                    StringBuilder.Append(" " + cond.StringWhere.Replace("\"", ""));
+
+                    var sqlWhere = cond.StringWhere.Replace("\"", "");
+                    convertSqlString(ref sqlWhere);
+                    StringBuilder.Append(" " + sqlWhere);
                     isOr = cond.IsOr;
                     continue;
                 }
@@ -1320,6 +1323,74 @@ namespace AntData.ORM.SqlProvider
 			if (wrap) StringBuilder.Append(')');
 		}
 
+	    private void convertSqlString(ref string sqlString)
+	    {
+            var arr = sqlString.Split(' ').Select(r=>r.ToLower()).ToList();
+            var newArr = new List<string>();
+            var tableList = new List<SelectQuery.TableSource>();
+            var successDic = new Dictionary<string, string>();
+            var temp = string.Empty;
+            foreach (var table in SelectQuery.From.Tables)
+	        {
+                tableList.Add(table);
+	            var newTable = table;
+                while (newTable.Joins.Count>0)
+	            {
+                    newTable = table.Joins[0].Table;
+                    tableList.Add(newTable);
+                }
+            }
+            foreach (var table in tableList)
+	        {
+               
+                SqlTable sqlTable = (SqlTable)table.Source;
+	            var columns = sqlTable.Fields.Keys.Select(r => r.ToLower()).ToList();
+	            var dic = sqlTable.Fields.Keys.ToDictionary(r => r.ToLower(), y => y);
+                foreach (var ar in arr)
+	            {
+	                if (ar.StartsWith("!!"))
+                    {
+                        if(successDic.ContainsKey(ar) && columns.Contains(successDic[ar])) throw new LinqException("字段{0}在多个表中存在,请指定表名称".Args(successDic[ar]));
+                        newArr.Add(ar);
+                        continue;
+	                }
+	                var withTable = ar.Split('.');
+                    if (withTable.Length > 1 && !withTable[0].ToLower().Equals(sqlTable.PhysicalName.ToLower()))
+                    { 
+                        //带有表名称 但是和当前表不一样
+                        newArr.Add(ar);
+                        continue;
+                    }
+                    else
+                    {
+                        //指定了当前表
+                        if (withTable.Length > 1)
+                        {
+                            if(!columns.Contains(withTable[1])) throw new LinqException("字段{0}在表:{1}中不存在".Args(withTable[1], sqlTable.PhysicalName));
+                            temp = "!!" + Convert(table.Alias, ConvertType.NameToQueryTableAlias) + "." +
+                                   Convert(dic[withTable[1]], ConvertType.NameToQueryField);
+                            newArr.Add(temp);
+                            
+                        }
+                        else if (columns.Contains(ar))
+                        {
+                            temp = "!!" + Convert(table.Alias, ConvertType.NameToQueryTableAlias) + "." +
+                                   Convert(dic[ar], ConvertType.NameToQueryField);
+                            newArr.Add(temp);
+                            successDic.Add(temp, ar);
+                        }
+                        else
+                        {
+                            newArr.Add(ar);
+                        }
+                    }
+	               
+                }
+	            arr = newArr;
+                newArr = new List<string>();
+	        }
+            sqlString = string.Join(" ", arr.ToArray()).Replace("!!","");
+        }
 		#endregion
 
 		#region BuildPredicate
@@ -1760,6 +1831,9 @@ namespace AntData.ORM.SqlProvider
 
 			switch (expr.ElementType)
 			{
+                case QueryElementType.SqlString:
+
+                    break;
 				case QueryElementType.SqlField:
 					{
 						var field = (SqlField)expr;

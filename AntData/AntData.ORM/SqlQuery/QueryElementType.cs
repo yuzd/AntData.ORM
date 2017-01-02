@@ -12,7 +12,7 @@ namespace AntData.ORM.SqlQuery
 		SqlValue,
 		SqlDataType,
 		SqlTable,
-
+        SqlString,
 		ExprPredicate,
 		NotExprPredicate,
 		ExprExprPredicate,

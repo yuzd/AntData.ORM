@@ -932,6 +932,14 @@ namespace AntData.ORM
         #endregion
 
         static readonly MethodInfo _whereMethodInfo = MemberHelper.MethodOf(() => Where<string>(null, null,null)).GetGenericMethodDefinition();
+        /// <summary>
+        /// Where扩展查询
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="whereString">查询字符串 注意一定要以半角隔开</param>
+        /// <param name="whereObj">外部指定查询的值</param>
+        /// <returns></returns>
         [LinqTunnel]
         public static IQueryable<TSource> Where<TSource>(
             [NotNull]                this IQueryable<TSource> source,

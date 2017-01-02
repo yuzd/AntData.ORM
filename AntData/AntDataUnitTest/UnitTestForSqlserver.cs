@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AntData.ORM;
 using AntData.ORM.Data;
 using AntData.ORM.DataProvider.SqlServer;
+using AntData.ORM.Linq;
 using AntData.ORM.Mapping;
 using DbModels.SqlServer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -398,6 +399,33 @@ namespace AntDataUnitTest
             var bbbd = DB.Tables.People.Where("age > @age", new { age = age }).Where("name = @name", new { name = "nainaigu" }).ToList();
             var bbbc = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).Where(r => r.Name.Equals("aaa")).ToList();
             var bbbcc = DB.Tables.People.Where(r => r.SchoolId.Equals(2)).Where("age > @age", new { age = age }).Where(r => r.Name.Equals("nainaigu")).ToList();
+        }
+
+        [TestMethod]
+        public void TestMethod4_06()
+        {
+            var age = 10;
+            //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
+            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).Select(r => r.Name).ToList();
+        }
+
+        [TestMethod]
+        public void TestMethod4_07()
+        {
+            var age = 10;
+
+            var list = (from p in DB.Tables.People
+                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                        select new { Name = p.Name, SchoolName = s.Name, Age = p.Age }).Where(r => r.Age > age).Where("school.name = @name", new { name = "nainaigu" }).Where("person.name = @name", new { name = "nainaigu" }).ToList();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LinqException))]
+        public void TestMethod4_08()
+        {
+            var age = 10;
+            //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
+            var bb = DB.Tables.People.Where(r => r.Age > age).Where("person.age2 > @age", new { age = age }).Select(r => r.Name).ToList();
         }
     }
 

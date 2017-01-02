@@ -32,7 +32,7 @@ namespace AntData.ORM.Linq.Builder
                 var properties = whereObj.Value.GetType().GetCanReadPropertyInfo();
                 foreach (var p in properties)
                 {
-                    if (CurrentSqlParameters.Select(r=>r.SqlParameter).Any(r=>r.Name.Equals(p.Name)))
+                    if (CurrentSqlParameters.Select(r=>r.SqlParameter).Any(r=>!string.IsNullOrEmpty(r.Name) && r.Name.Equals(p.Name)))
                     {
                         continue;
                     }
