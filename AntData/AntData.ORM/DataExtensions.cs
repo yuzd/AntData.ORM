@@ -248,12 +248,16 @@ namespace AntData.ORM
 			return Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
 		}
 
-       
-		#endregion
+        public static F InsertWithIdentity<T,F>(this IDataContext dataContext, T obj)
+        {
+            var result = Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
+            return (F)Convert.ChangeType(result, typeof(F));
+        }
+        #endregion
 
-		#region Update
+        #region Update
 
-		public static int Update<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
+        public static int Update<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
 			return Query<T>.Update(dataContextInfo, obj);

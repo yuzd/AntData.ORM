@@ -451,6 +451,23 @@ namespace AntDataUnitTest
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
             var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("age desc, name    asc").ToList();
         }
+
+
+        [TestMethod]
+        public void TestMethod5_03()
+        {
+            Person p = new Person
+            {
+                Name = "yuzd",
+                Age = 27,
+                SchoolId = 1
+            };
+
+            var insertResult = DB.InsertWithIdentity<Person, long>(p);
+            Assert.AreEqual(insertResult > 0, true);
+            Assert.AreEqual(p.Id, insertResult);
+
+        }
     }
 
 
