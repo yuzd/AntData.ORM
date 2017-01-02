@@ -979,7 +979,11 @@ namespace AntData.ORM.SqlProvider
 				var alias = GetTableAlias(ts);
 				BuildPhysicalTable(ts.Source, alias);
 			}
-
+            //是否加nolock
+		    if (this.IsNoLock && StringBuilder.ToString().ToLower().IndexOf("select", StringComparison.Ordinal) > -1)
+		    {
+		        StringBuilder.Append(" (NOLOCK) ");
+		    }
 			if (buildAlias)
 			{
 				if (ts.SqlTableType != SqlTableType.Expression)
@@ -2840,6 +2844,12 @@ namespace AntData.ORM.SqlProvider
 		{
 			get { return _name ?? (_name = GetType().Name.Replace("SqlBuilder", "")); }
 		}
-		#endregion
+
+        /// <summary>
+        /// sqlserver专用
+        /// </summary>
+	    public bool IsNoLock { get; set; }
+
+	    #endregion
 	}
 }

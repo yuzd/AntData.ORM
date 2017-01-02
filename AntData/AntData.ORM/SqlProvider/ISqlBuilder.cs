@@ -21,5 +21,6 @@ namespace AntData.ORM.SqlProvider
 		string           ApplyQueryHints      (string sqlText, List<string> queryHints);
 
 		string           Name { get; }
+		bool           IsNoLock { get; set; }//sqlserver专用
 	}
 }

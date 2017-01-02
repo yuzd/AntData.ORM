@@ -24,6 +24,7 @@ namespace AntDataUnitTest
         {
             DB = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
             DB.OnCustomerTraceConnection = OnCustomerTraceConnection;
+            DB.IsNoLock = true;
         }
 
         private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)
@@ -466,6 +467,16 @@ namespace AntDataUnitTest
             var insertResult = DB.InsertWithIdentity<Person, long>(p);
             Assert.AreEqual(insertResult > 0, true);
             Assert.AreEqual(p.Id, insertResult);
+
+        }
+
+        [TestMethod]
+        public async Task TestMethod5_04()
+        {
+          
+            var name = "yuzd";
+            var raa = await DB.Tables.People.FirstOrDefaultAsync(r => r.Name.Equals(name));
+            Assert.IsNotNull(raa);
 
         }
     }

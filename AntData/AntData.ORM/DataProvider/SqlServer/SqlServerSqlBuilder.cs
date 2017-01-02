@@ -253,14 +253,11 @@ namespace AntData.ORM.DataProvider.SqlServer
 			base.BuildDataType(type, createDbType);
 		}
 
-#if !NETFX_CORE && !SILVERLIGHT
 
-#if !MONO
 		protected override string GetTypeName(IDbDataParameter parameter)
 		{
 			return ((System.Data.SqlClient.SqlParameter)parameter).TypeName;
 		}
-#endif
 
 		protected override string GetUdtTypeName(IDbDataParameter parameter)
 		{
@@ -272,6 +269,5 @@ namespace AntData.ORM.DataProvider.SqlServer
 			return ((System.Data.SqlClient.SqlParameter)parameter).SqlDbType.ToString();
 		}
 
-#endif
 	}
 }

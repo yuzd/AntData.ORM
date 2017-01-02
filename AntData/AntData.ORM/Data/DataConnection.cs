@@ -123,6 +123,11 @@ namespace AntData.ORM.Data
 		}
 
         public event EventHandler OnClosing;
+
+        /// <summary>
+        /// 针对sqlserver
+        /// </summary>
+	    public bool IsNoLock { get; set; }
         #endregion
 
 
