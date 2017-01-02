@@ -1186,51 +1186,8 @@ namespace AntData.ORM
 
 		#endregion
 
-        #region Fields
-        private static readonly MethodInfo s_orderBy = typeof(Queryable).GetMethods().First(m => m.Name == "OrderBy");
-        private static readonly MethodInfo s_orderByDesc = typeof(Queryable).GetMethods().First(m => m.Name == "OrderByDescending");
-        private static readonly string[] s_orderSequence = new string[] { "asc", "desc" };
-        #endregion
+       
 
-        #region dynamicOrderby
-
-        #region Public Methods
-        /// <summary>
-        /// 动态排序
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="property">如果没有指定 默认查询的第一个作为排序 且为asc</param>
-        /// <param name="orderSequence">如果没有指定 默认为asc</param>
-        /// <returns></returns>
-        public static IOrderedQueryable<T> DynamicOrderBy<T>(this IQueryable<T> source, string property, string orderSequence)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(property))
-                {
-                    return source as IOrderedQueryable<T>;
-                }
-                if (string.IsNullOrEmpty(orderSequence) || !s_orderSequence.Contains(orderSequence.ToLower()))
-                {
-                    orderSequence = "asc";
-                }
-                var expr = source.Expression;
-                var p = Expression.Parameter(typeof(T), "x");
-                var propInfo = typeof(T).GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                var sortExpr = Expression.Lambda(Expression.Property(p, propInfo), p);
-                var method = orderSequence.ToLower().Equals("asc") ? s_orderBy.MakeGenericMethod(typeof(T), propInfo.PropertyType) : s_orderByDesc.MakeGenericMethod(typeof(T), propInfo.PropertyType);
-                var call = Expression.Call(method, expr, sortExpr);
-                var newQuery = source.Provider.CreateQuery<T>(call);
-                return newQuery as IOrderedQueryable<T>;
-            }
-            catch (Exception)
-            {
-
-                throw new Exception("OrderBy传参不正确,必须是返回模型中的字段!");
-            }
-        }
-        #endregion 
-        #endregion
+      
 	}
 }

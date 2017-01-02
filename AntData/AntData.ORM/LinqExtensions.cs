@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using AntData.ORM.Common;
 using JetBrains.Annotations;
 
 namespace AntData.ORM
@@ -1067,6 +1067,151 @@ namespace AntData.ORM
 			throw new InvalidOperationException();
 		}
 
-		#endregion
-	}
+        #endregion
+
+        #region dynamicOrderby
+        #region Fields
+        private static readonly MethodInfo s_orderBy = typeof(Queryable).GetMethods().First(m => m.Name == "OrderBy");
+        private static readonly MethodInfo s_orderByDesc = typeof(Queryable).GetMethods().First(m => m.Name == "OrderByDescending");
+        private static readonly string[] s_orderSequence = new string[] { "asc", "desc" };
+        #endregion
+        #region Public Methods
+        /// <summary>
+        /// 动态排序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="property">如果没有指定 默认查询的第一个作为排序 且为asc</param>
+        /// <param name="asc">如果没有指定 默认为asc</param>
+        /// <returns></returns>
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string property, bool asc)
+        {
+            try
+            {
+                string orderSequence = "asc";
+                if (string.IsNullOrEmpty(property))
+                {
+                    return source as IOrderedQueryable<T>;
+                }
+                if (!asc)
+                {
+                    orderSequence = "desc";
+                }
+                var expr = source.Expression;
+                var p = Expression.Parameter(typeof(T), "x");
+                var propInfo = typeof(T).GetProperty(property, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                var sortExpr = Expression.Lambda(Expression.Property(p, propInfo), p);
+                var method = orderSequence.ToLower().Equals("asc") ? s_orderBy.MakeGenericMethod(typeof(T), propInfo.PropertyType) : s_orderByDesc.MakeGenericMethod(typeof(T), propInfo.PropertyType);
+                var call = Expression.Call(method, expr, sortExpr);
+                var newQuery = source.Provider.CreateQuery<T>(call);
+                return newQuery as IOrderedQueryable<T>;
+            }
+            catch (Exception)
+            {
+
+                throw new LinqException("OrderBy传参不正确,必须是返回模型中的字段!");
+            }
+        }
+
+        /// <summary>
+        /// 动态排序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="primarySort">主排序字段</param>
+        /// <param name="secondarySorts">次排除字段</param>
+        /// <returns></returns>
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string primarySort, params string[] secondarySorts)
+        {
+            //Sort by primary column, we have used IOrderedEnumerable to use ThenBy clause
+            IOrderedQueryable<T> sortedCollection = source.OrderBy(Construct<T>(primarySort));
+
+
+            //Sort by all secondayr colummns
+            foreach (string secondarySort in secondarySorts)
+            {
+                sortedCollection = sortedCollection
+                                        .ThenBy(Construct<T>(secondarySort));
+
+            }
+            return sortedCollection;
+        }
+
+        /// <summary>
+        /// 动态排序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="columns">排序字段拼接 例如.OrderBy("id desc,name asc")</param>
+        /// <returns></returns>
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string columns)
+        {
+            if (string.IsNullOrEmpty(columns))
+            {
+                throw new LinqException("排序字段不能为空");
+            }
+            IOrderedQueryable<T> sortedCollection = null;
+            var allColumns = columns.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var cc in allColumns)
+            {
+                var fieldAndseq = cc.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var squence = "asc";
+                if (fieldAndseq.Length > 1)
+                {
+                    squence = fieldAndseq[1].ToLower();
+                    if (!s_orderSequence.Contains(squence)) squence = "asc";
+                    
+                }
+                if (squence.ToLower().Equals("asc"))
+                {
+                    if (sortedCollection == null)
+                    {
+                        sortedCollection = source.OrderBy(Construct<T>(fieldAndseq[0]));
+                    }
+                    else
+                    {
+                        sortedCollection = sortedCollection.ThenBy(Construct<T>(fieldAndseq[0]));
+                    }
+                }
+                else
+                {
+                    if (sortedCollection == null)
+                    {
+                        sortedCollection = source.OrderByDescending(Construct<T>(fieldAndseq[0]));
+                    }
+                    else
+                    {
+                        sortedCollection = sortedCollection.ThenByDescending(Construct<T>(fieldAndseq[0]));
+                    }
+                }
+            }
+            return sortedCollection;
+        }
+        #endregion
+        private static Expression<Func<T, dynamic>> Construct<T>(string propertyName,string defaultProperty = null)
+        {
+            PropertyInfo property = typeof(T).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+            if (property == null && defaultProperty == null)
+            {
+                throw new LinqException("OrderBy传参不正确,字段:{0}不存在!".Args(propertyName));
+            }
+            else
+            {
+                if (defaultProperty != null)
+                    property = typeof(T).GetProperty(defaultProperty, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+                if (property == null) throw new LinqException("OrderBy传参不正确,字段:{0}不存在!".Args(defaultProperty));
+            }
+            
+            ParameterExpression typeExpression = Expression.Parameter(typeof(T), "type");
+
+            MemberExpression propExpression = Expression.Property(typeExpression, property);
+
+            UnaryExpression objectpropExpression = Expression.Convert(propExpression, typeof(object));
+
+            return Expression.Lambda<Func<T, dynamic>>(objectpropExpression, new ParameterExpression[] { typeExpression });
+        }
+        #endregion
+    }
 }

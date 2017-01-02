@@ -154,7 +154,7 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_01()
         {
-            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).DynamicOrderBy("Id", "desc").Skip(1).Take(1).ToList();
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy("Id", false).Skip(1).Take(1).ToList();
             Assert.AreEqual(updateResult.Count > 0, true);
 
         }
@@ -424,6 +424,30 @@ namespace AntDataUnitTest
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
             var bb = DB.Tables.People.Where(r => r.Age > age).Where("person.age2 > @age", new { age = age }).Select(r => r.Name).ToList();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(LinqException))]
+        public void TestMethod4_08()
+        {
+            var age = 10;
+            //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
+            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("aa").ToList();
+        }
+        [TestMethod]
+        public void TestMethod4_09()
+        {
+            var age = 10;
+            //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
+            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("age","name").ToList();
+        }
+
+        [TestMethod]
+        public void TestMethod5_01()
+        {
+            var age = 10;
+            //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
+            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("age desc, name asc").ToList();
         }
     }
 }
