@@ -78,7 +78,13 @@ namespace AntData.ORM.DataProvider.SqlServer
 				.AppendLine();
 		}
 
-		protected override void BuildUpdateTableName()
+	    protected override void BuildSelectQuery()
+	    {
+	        this.IsNoLockSwich = true;//只有sqlserver才会开启这个开关
+	        base.BuildSelectQuery();
+	    }
+
+	    protected override void BuildUpdateTableName()
 		{
 			var table = SelectQuery.Update.Table != null ?
 				(SelectQuery.From.FindTableSource(SelectQuery.Update.Table) ?? SelectQuery.Update.Table) :

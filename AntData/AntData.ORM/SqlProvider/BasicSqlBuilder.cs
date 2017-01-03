@@ -980,7 +980,7 @@ namespace AntData.ORM.SqlProvider
 				BuildPhysicalTable(ts.Source, alias);
 			}
             //是否加nolock
-		    if (this.IsNoLock && StringBuilder.ToString().ToLower().IndexOf("select", StringComparison.Ordinal) > -1)
+		    if (IsNoLockSwich && this.IsNoLock)
 		    {
 		        StringBuilder.Append(" (NOLOCK) ");
 		    }
@@ -2849,7 +2849,7 @@ namespace AntData.ORM.SqlProvider
         /// sqlserver专用
         /// </summary>
 	    public bool IsNoLock { get; set; }
-
-	    #endregion
-	}
+        public bool IsNoLockSwich { get; set; }
+        #endregion
+    }
 }
