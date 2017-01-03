@@ -79,61 +79,139 @@ namespace AntData.ORM.Data
 
         //4.5.1 支持异步的TransactionScopeAsync
         //https://github.com/danielmarbach/async-dolls/blob/master/async-dolls/2-AsyncTransactions/Script.cs
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
         public void UseTransaction(System.Action<DbContext<T>> func)
         {
             using (var scope = new System.Transactions.TransactionScope())
             {
-                func(this);
-                scope.Complete();
+                try
+                {
+                    this.IsInTransaction = true;
+                    func(this);
+                    scope.Complete();
+                }
+                finally
+                {
+                    this.IsInTransaction = false;
+                }
             }
         }
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
         public void UseTransaction(System.Action<DbContext<T>> func, TransactionScopeOption scopeOption)
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption))
             {
-                func(this);
-                scope.Complete();
+                try
+                {
+                    this.IsInTransaction = true;
+                    func(this);
+                    scope.Complete();
+                }
+                finally
+                {
+                    this.IsInTransaction = false;
+                }
             }
         }
 
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
+        /// <param name="options">TransactionOptions</param>
         public void UseTransaction(System.Action<DbContext<T>> func, TransactionScopeOption scopeOption, TransactionOptions options)
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption, options))
             {
-                func(this);
-                scope.Complete();
+                try
+                {
+                    this.IsInTransaction = true;
+                    func(this);
+                    scope.Complete();
+                }
+                finally
+                {
+                    this.IsInTransaction = false;
+                }
             }
         }
 
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
         public void UseTransaction(System.Func<DbContext<T>, bool> func)
         {
             using (var scope = new System.Transactions.TransactionScope())
             {
-                if (func(this))
+                try
                 {
-                    scope.Complete();
+                    this.IsInTransaction = true;
+                    if (func(this))
+                    {
+                        scope.Complete();
+                    }
+                }
+                finally
+                {
+                    this.IsInTransaction = false;
                 }
             }
         }
 
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
         public void UseTransaction(System.Func<DbContext<T>, bool> func, TransactionScopeOption scopeOption)
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption))
             {
-                if (func(this))
+                try
                 {
-                    scope.Complete();
+                    this.IsInTransaction = true;
+                    if (func(this))
+                    {
+                        scope.Complete();
+                    }
+                }
+                finally
+                {
+                    this.IsInTransaction = false;
                 }
             }
         }
 
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
+        /// <param name="options">TransactionOptions</param>
         public void UseTransaction(System.Func<DbContext<T>, bool> func, TransactionScopeOption scopeOption, TransactionOptions options)
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption, options))
             {
-                if (func(this))
+                try
                 {
-                    scope.Complete();
+                    this.IsInTransaction = true;
+                    if (func(this))
+                    {
+                        scope.Complete();
+                    }
+                }
+                finally
+                {
+                    this.IsInTransaction = false;
                 }
             }
         }

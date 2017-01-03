@@ -259,7 +259,10 @@ namespace AntData.ORM.Data
 			set { _commandTimeout = value;     }
 		}
 
-
+        /// <summary>
+        /// 是否在事物中
+        /// </summary>
+	    internal bool IsInTransaction { get; set; }        
 
 
 
@@ -278,7 +281,7 @@ namespace AntData.ORM.Data
 		    {
                 dic.Add("TIMEOUT", this.CommandTimeout);
 		    }
-            var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic, isWrite);
+            var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
             if (OnCustomerTraceConnection!=null)
 		    {
 		        OnCustomerTraceConnection(new CustomerTraceInfo
@@ -305,7 +308,7 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic, isWrite);
+            var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
             if (OnCustomerTraceConnection != null)
             {
                 OnCustomerTraceConnection(new CustomerTraceInfo
@@ -332,7 +335,7 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic, isWrite);
+            var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic, IsInTransaction || isWrite);
             if (OnCustomerTraceConnection != null)
             {
                 OnCustomerTraceConnection(new CustomerTraceInfo
@@ -360,7 +363,7 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic, isWrite);
+            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
             if (OnCustomerTraceConnection != null)
             {
                 OnCustomerTraceConnection(new CustomerTraceInfo
