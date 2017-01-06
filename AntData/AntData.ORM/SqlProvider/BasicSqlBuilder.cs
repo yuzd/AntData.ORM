@@ -274,14 +274,16 @@ namespace AntData.ORM.SqlProvider
 
 			foreach (var col in GetSelectedColumns())
 			{
-				if (!first)
+                //正常 AntData.ORM.SqlQuery.SqlField
+
+                if (!first)
 					StringBuilder.Append(',').AppendLine();
 				first = false;
 
 				var addAlias = true;
 
 				AppendIndent();
-				BuildColumnExpression(col.Expression, col.Alias, ref addAlias);
+                BuildColumnExpression(col.Expression, col.Alias, ref addAlias/*,true*/);
 
 				if (!SkipAlias && addAlias && col.Alias != null)
 					StringBuilder.Append(" as ").Append(Convert(col.Alias, ConvertType.NameToQueryFieldAlias));
@@ -295,9 +297,9 @@ namespace AntData.ORM.SqlProvider
 			StringBuilder.AppendLine();
 		}
 
-		protected virtual void BuildColumnExpression(ISqlExpression expr, string alias, ref bool addAlias)
+		protected virtual void BuildColumnExpression(ISqlExpression expr, string alias, ref bool addAlias/*,bool isSelect = false*/)
 		{
-			BuildExpression(expr, true, true, alias, ref addAlias, true);
+			BuildExpression(expr, true, true, alias, ref addAlias, true/*, isSelect*/);
 		}
 
 		#endregion
@@ -1102,21 +1104,8 @@ namespace AntData.ORM.SqlProvider
 
 			var items = SelectQuery.GroupBy.Items.Where(i => !(i is SqlValue || i is SqlParameter)).ToList();
 
-			if (items.Count == 0)
+			if (items.Count == 0 )
 				return;
-
-//			if (SelectQuery.GroupBy.Items.Count == 1)
-//			{
-//				var item = SelectQuery.GroupBy.Items[0];
-//
-//				if (item is SqlValue || item is SqlParameter)
-//				{
-//					var value = ((SqlValue)item).Value;
-//
-//					if (value is Sql.GroupBy || value is int)
-//						return;
-//				}
-//			}
 
 			AppendIndent();
 
@@ -1127,8 +1116,18 @@ namespace AntData.ORM.SqlProvider
 			for (var i = 0; i < items.Count; i++)
 			{
 				AppendIndent();
-
-				BuildExpression(items[i]);
+			    var item = items[i];
+			    var col = string.Empty;
+			    if (IsColumnString(item,out col))
+			    {
+                    //特殊
+			        convertSqlString(ref col,true);
+                    StringBuilder.Append(" " + col);
+                }
+			    else
+			    {
+                    BuildExpression(item);
+                }
 
 				if (i + 1 < items.Count)
 					StringBuilder.Append(',');
@@ -1139,6 +1138,18 @@ namespace AntData.ORM.SqlProvider
 			Indent--;
 		}
 
+	    private bool IsColumnString(object obj, out string column)
+	    {
+	        column = string.Empty;
+            var ob = obj as SqlField;
+	        if (ob != null && ob.PhysicalName.Equals("columnString"))
+	        {
+                column = ob.Name;
+                return true;
+	        }
+            return false;
+
+	    }
 		#endregion
 
 		#region Having Clause
@@ -1327,9 +1338,10 @@ namespace AntData.ORM.SqlProvider
 			if (wrap) StringBuilder.Append(')');
 		}
 
-	    private void convertSqlString(ref string sqlString)
+	    private void convertSqlString(ref string sqlString,bool isGroup = false)
 	    {
-            var arr = sqlString.Split(' ').Select(r=>r.ToLower()).ToList();
+            var arr = isGroup? sqlString.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(r => r.ToLower()).ToList(): sqlString.Split(' ').Select(r=>r.ToLower()).ToList();
+	        
             var newArr = new List<string>();
             var tableList = new List<SelectQuery.TableSource>();
             var successDic = new Dictionary<string, string>();
@@ -1393,7 +1405,7 @@ namespace AntData.ORM.SqlProvider
 	            arr = newArr;
                 newArr = new List<string>();
 	        }
-            sqlString = string.Join(" ", arr.ToArray()).Replace("!!","");
+            sqlString = string.Join(isGroup ? " , ":" ", arr.ToArray()).Replace("!!","");
         }
 		#endregion
 
@@ -1827,7 +1839,7 @@ namespace AntData.ORM.SqlProvider
 			bool           checkParentheses,
 			string         alias,
 			ref bool       addAlias,
-			bool           throwExceptionIfTableNotFound = true)
+			bool           throwExceptionIfTableNotFound = true/*,bool isSelect = false*/)
 		{
 			// TODO: check the necessity.
 			//
@@ -1942,7 +1954,13 @@ namespace AntData.ORM.SqlProvider
 					break;
 
 				case QueryElementType.SqlValue:
-					BuildValue(null, ((SqlValue)expr).Value);
+                    //if(isSelect)
+                    //{
+                    //    BuildNewValue(null, ((SqlValue)expr).Value as string);
+                    //    addAlias = false;
+                    //    break;
+                    //}
+                    BuildValue(null, ((SqlValue)expr).Value);
 					break;
 
 				case QueryElementType.SqlExpression:
@@ -2050,11 +2068,17 @@ namespace AntData.ORM.SqlProvider
 				ValueToSqlConverter.Convert(StringBuilder, value);
 		}
 
-		#endregion
+	    protected void BuildNewValue(SqlDataType dataType, string value)
+	    {
+	        convertSqlString(ref value,true);
+	        StringBuilder.Append(" " + value + " ");
 
-		#region BuildBinaryExpression
+	    }
+        #endregion
 
-		protected virtual void BuildBinaryExpression(SqlBinaryExpression expr)
+        #region BuildBinaryExpression
+
+        protected virtual void BuildBinaryExpression(SqlBinaryExpression expr)
 		{
 			BuildBinaryExpression(expr.Operation, expr);
 		}

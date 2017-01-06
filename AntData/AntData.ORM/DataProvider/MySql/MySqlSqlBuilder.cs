@@ -215,7 +215,7 @@ namespace AntData.ORM.DataProvider.MySql
 			bool           checkParentheses,
 			string         alias,
 			ref bool       addAlias,
-			bool           throwExceptionIfTableNotFound = true)
+			bool           throwExceptionIfTableNotFound = true/*,bool isSelect = false*/)
 		{
 			return base.BuildExpression(
 				expr,
@@ -223,7 +223,7 @@ namespace AntData.ORM.DataProvider.MySql
 				checkParentheses,
 				alias,
 				ref addAlias,
-				throwExceptionIfTableNotFound);
+				throwExceptionIfTableNotFound/*,isSelect*/);
 		}
 
 		protected override void BuildInsertOrUpdateQuery()

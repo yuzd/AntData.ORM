@@ -83,6 +83,7 @@
     <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
     <Compile Include="DbEngine\Dao\DalBridge.cs" />
     <Compile Include="DbEngine\Dao\DalException.cs" />
+    <Compile Include="Expressions\Dynamic.cs" />
     <Compile Include="Mapping\SQL.cs" />
     <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />
     <Compile Include="DataContext.cs" />

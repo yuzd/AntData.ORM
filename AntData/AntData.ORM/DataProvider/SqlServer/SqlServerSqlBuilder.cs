@@ -96,7 +96,7 @@ namespace AntData.ORM.DataProvider.SqlServer
 				StringBuilder.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias));
 		}
 
-		protected override void BuildColumnExpression(ISqlExpression expr, string alias, ref bool addAlias)
+		protected override void BuildColumnExpression(ISqlExpression expr, string alias, ref bool addAlias/*,bool isSelect = false*/)
 		{
 			var wrap = false;
 
@@ -112,7 +112,7 @@ namespace AntData.ORM.DataProvider.SqlServer
 			}
 
 			if (wrap) StringBuilder.Append("CASE WHEN ");
-			base.BuildColumnExpression(expr, alias, ref addAlias);
+			base.BuildColumnExpression(expr, alias, ref addAlias/*, isSelect*/);
 			if (wrap) StringBuilder.Append(" THEN 1 ELSE 0 END");
 		}
 

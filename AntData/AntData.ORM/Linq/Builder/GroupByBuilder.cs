@@ -75,9 +75,19 @@ namespace AntData.ORM.Linq.Builder
 				key      = new KeyContext(buildInfo.Parent, keySelector, sequence);
 				groupSql = builder.ConvertExpressions(key, keySelector.Body.Unwrap(), ConvertFlags.Key);
 			}
+            else if (groupSql.Length == 1 && groupSql.Any(_ => _.Sql is SelectQuery.Column))
+			{
+			    var columns = (SelectQuery.Column) groupSql[0]. Sql;
+			    var value = columns.Expression as SqlValue;
+			    if (value != null && value.SystemType.Name.Equals("String"))
+			    {
+                   // var allColumns = value.Value.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    sequence.SelectQuery.GroupBy.Items.Add(new SqlField {Name = value.Value.ToString(),PhysicalName ="columnString" });
+                }
+			}
 
 			foreach (var sql in groupSql)
-				sequence.SelectQuery.GroupBy.Expr(sql.Sql);
+				 sequence.SelectQuery.GroupBy.Expr(sql.Sql);
 
 			new QueryVisitor().Visit(sequence.SelectQuery.From, e =>
 			{

@@ -153,7 +153,7 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_01()
         {
-            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy("Id", false).Skip(1).Take(1).ToList();
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy("Id").Skip(1).Take(1).ToList();
             Assert.AreEqual(updateResult.Count > 0, true);
 
         }
@@ -450,7 +450,7 @@ namespace AntDataUnitTest
         {
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("age desc, name    asc").ToList();
+            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderByMultiple("age desc, name    asc").ToList();
         }
 
 
@@ -478,6 +478,21 @@ namespace AntDataUnitTest
             var raa = await DB.Tables.People.FirstOrDefaultAsync(r => r.Name.Equals(name));
             Assert.IsNotNull(raa);
 
+        }
+
+        [TestMethod]
+        public void TestMethod5_05()
+        {
+            var bb = DB.Tables.People.OrderByDescending("name", "age").ToList();
+        }
+
+
+        [TestMethod]
+        public void TestMethod5_06()
+        {
+            var bb = DB.Tables.People.GroupBy("name").Select(r => r.Key).ToList();
+            var bbb = DB.Tables.People.GroupBy(r => new { r.Name, r.Age }).Select(r => r.Key).ToList();
+            var bbbbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => r.Key).ToList();
         }
     }
 
