@@ -1121,7 +1121,7 @@ namespace AntData.ORM
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
         /// <param name="source"></param>
-        /// <param name="column">分组字段</param>
+        /// <param name="column">分组字段 目前只能支持一个</param>
         /// <returns></returns>
         public static IQueryable<IGrouping<object, TSource>> GroupBy<TSource>(this IQueryable<TSource> source, string column)
         {
