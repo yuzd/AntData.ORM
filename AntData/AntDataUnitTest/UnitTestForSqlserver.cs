@@ -494,6 +494,16 @@ namespace AntDataUnitTest
             var bbb = DB.Tables.People.GroupBy(r => new { r.Name, r.Age }).Select(r => r.Key).ToList();
             var bbbbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => r.Key).ToList();
         }
+
+        [TestMethod]
+        public void TestMethod5_07()
+        {
+            //var expression = AntData.ORM.Expressions.Extensions.GenerateMemberExpression<Person, string>("name");
+            var bbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => new { Value = r.ToList() }).ToList();
+
+            var bb = DB.Tables.People.GroupBy(r => r.Age).Select(r => new { Key = r.Key, Value = r.ToList() }).ToList();
+
+        }
     }
 
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using AntData.ORM.Linq;
+using AntData.ORM.Reflection;
 
 namespace AntData.ORM.Expressions
 {
@@ -1615,10 +1617,10 @@ namespace AntData.ORM.Expressions
         #region ExtentionCreateField
         public static Expression<Func<TModel, T>> GenerateMemberExpression<TModel, T>(string fieldName)
         {
-            var fieldPropertyInfo = typeof(TModel).GetProperty(fieldName,BindingFlags.IgnoreCase |  BindingFlags.Public | BindingFlags.Instance);
+            var fieldPropertyInfo = typeof(TModel).GetCanReadPropertyInfo().FirstOrDefault(r=>r.Name.ToLower().Equals(fieldName.ToLower()));
             if (fieldPropertyInfo == null)
             {
-                throw new Exception(typeof(TModel).Name + "找不到属性名称：" + fieldName);
+                throw new LinqException(typeof(TModel).Name + "找不到属性名称：" + fieldName);
             }
             var entityParam = Expression.Parameter(typeof(TModel), "r"); // {e}
             var columnExpr = Expression.MakeMemberAccess(entityParam, fieldPropertyInfo); // {e.fieldName}

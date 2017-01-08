@@ -73,7 +73,7 @@ namespace AntData.ORM.Linq.Builder
 
 		#region BuildExpression
 
-		ParameterExpression _rootExpression;
+	    protected ParameterExpression _rootExpression;
 
 		public virtual Expression BuildExpression(Expression expression, int level)
 		{

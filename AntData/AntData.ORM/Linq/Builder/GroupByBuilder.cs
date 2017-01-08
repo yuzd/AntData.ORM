@@ -77,13 +77,13 @@ namespace AntData.ORM.Linq.Builder
 			}
             else if (groupSql.Length == 1 && groupSql.Any(_ => _.Sql is SelectQuery.Column))
 			{
-			    var columns = (SelectQuery.Column) groupSql[0]. Sql;
-			    var value = columns.Expression as SqlValue;
-			    if (value != null && value.SystemType.Name.Equals("String"))
-			    {
-                   // var allColumns = value.Value.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    sequence.SelectQuery.GroupBy.Items.Add(new SqlField {Name = value.Value.ToString(),PhysicalName ="columnString" });
-                }
+			    //var columns = (SelectQuery.Column) groupSql[0]. Sql;
+			    //var value = columns.Expression as SqlValue;
+			    //if (value != null && value.SystemType.Name.Equals("String"))
+			    //{
+       //            // var allColumns = value.Value.ToString().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+       //             sequence.SelectQuery.GroupBy.Items.Add(new SqlField {Name = value.Value.ToString(),PhysicalName ="columnString" });
+       //         }
 			}
 
 			foreach (var sql in groupSql)
@@ -121,6 +121,12 @@ namespace AntData.ORM.Linq.Builder
 				: base(parent, lambda, sequences)
 			{
 			}
+
+		    public void ClearRootExpression()
+		    {
+		        base._rootExpression = null;
+
+		    }
 		}
 
 		#endregion
@@ -269,8 +275,13 @@ namespace AntData.ORM.Linq.Builder
 					var itemReader      = CompiledQuery.Compile(lambda);
 					var keyExpr         = context._key.BuildExpression(null, 0);
 					var dataReaderLocal = context.Builder.DataReaderLocal;
-
-					if (!Configuration.AvoidSpecificDataProviderAPI && keyExpr.Find(e => e == dataReaderLocal) != null)
+				    if (!keyExpr.GetType().Name.Equals("ConvertFromDataReaderExpression"))
+				    {
+                        //修改Bug
+                        context._key.ClearRootExpression();
+                        keyExpr = context._key.BuildExpression(null, 0);
+                    }
+                    if (!Configuration.AvoidSpecificDataProviderAPI && keyExpr.Find(e => e == dataReaderLocal) != null)
 					{
 						keyExpr = Expression.Block(
 							new[] { context.Builder.DataReaderLocal },
