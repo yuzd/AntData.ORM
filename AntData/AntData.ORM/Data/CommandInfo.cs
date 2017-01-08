@@ -131,6 +131,16 @@ namespace AntData.ORM.Data
 
             return DataConnection.ExecuteDataTable(CommandText, param);
         }
+
+        public async Task<DataTable> QueryTableAsync()
+        {
+            DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
+            if (Parameters != null && Parameters.Length > 0)
+                param = SetParameters(DataConnection, Parameters);
+
+            return await AsyncExtensions.GetTask(() => DataConnection.ExecuteDataTable(CommandText, param),CancellationToken.None);
+        }
         #endregion
         #region Query with template
 

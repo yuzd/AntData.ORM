@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using AntData.ORM.Mapping;
 using JetBrains.Annotations;
 
@@ -82,7 +83,17 @@ namespace AntData.ORM.Data
         {
             return new CommandInfo(connection, sql, parameters).QueryTable();
         }
-		public static IEnumerable<T> QueryProc<T>(this DataConnection connection, string sql, params DataParameter[] parameters)
+
+        public static async Task<DataTable> QueryTableAsync(this DataConnection connection, string sql)
+        {
+            return await new CommandInfo(connection, sql).QueryTableAsync();
+        }
+
+        public static async Task<DataTable> QueryTableAsync(this DataConnection connection, string sql, params DataParameter[] parameters)
+        {
+            return await new CommandInfo(connection, sql, parameters).QueryTableAsync();
+        }
+        public static IEnumerable<T> QueryProc<T>(this DataConnection connection, string sql, params DataParameter[] parameters)
 		{
 			return new CommandInfo(connection, sql, parameters).QueryProc<T>();
 		}
@@ -118,6 +129,11 @@ namespace AntData.ORM.Data
         public static DataTable QueryTable(this DataConnection connection, SQL sql)
         {
             return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).QueryTable();
+        }
+
+        public static async Task<DataTable> QueryTableAsync(this DataConnection connection, SQL sql)
+        {
+            return await new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).QueryTableAsync();
         }
         public static IEnumerable<T> Query<T>(this DataConnection connection, SQL sql)
         {

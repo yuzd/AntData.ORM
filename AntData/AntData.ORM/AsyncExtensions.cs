@@ -14,7 +14,7 @@ namespace AntData.ORM
 	{
 		#region Helpers
 
-		static Task GetActionTask(Action action)
+		internal static Task GetActionTask(Action action)
 		{
 			var task = new Task(action);
 
@@ -23,7 +23,7 @@ namespace AntData.ORM
 			return task;
 		}
 
-		static Task GetActionTask(Action action, CancellationToken token)
+        internal static Task GetActionTask(Action action, CancellationToken token)
 		{
 			var task = new Task(action, token);
 
@@ -32,7 +32,7 @@ namespace AntData.ORM
 			return task;
 		}
 
-		static Task GetActionTask(Action action, TaskCreationOptions options)
+        internal static Task GetActionTask(Action action, TaskCreationOptions options)
 		{
 			var task = new Task(action, options);
 
@@ -41,7 +41,7 @@ namespace AntData.ORM
 			return task;
 		}
 
-		static Task GetTask(Action action, CancellationToken token, TaskCreationOptions options)
+        internal static Task GetTask(Action action, CancellationToken token, TaskCreationOptions options)
 		{
 			var task = new Task(action, token, options);
 
@@ -59,7 +59,7 @@ namespace AntData.ORM
 			return task;
 		}
 
-		static Task<T> GetTask<T>(Func<T> func, CancellationToken token)
+        internal static Task<T> GetTask<T>(Func<T> func, CancellationToken token)
 		{
 			var task = new Task<T>(func, token);
 
@@ -68,7 +68,7 @@ namespace AntData.ORM
 			return task;
 		}
 
-		static Task<T> GetTask<T>(Func<T> func, TaskCreationOptions options)
+        internal static Task<T> GetTask<T>(Func<T> func, TaskCreationOptions options)
 		{
 			var task = new Task<T>(func, options);
 
@@ -77,7 +77,7 @@ namespace AntData.ORM
 			return task;
 		}
 
-		static Task<T> GetTask<T>(Func<T> func, CancellationToken token, TaskCreationOptions options)
+        internal static Task<T> GetTask<T>(Func<T> func, CancellationToken token, TaskCreationOptions options)
 		{
 			var task = new Task<T>(func, token, options);
 

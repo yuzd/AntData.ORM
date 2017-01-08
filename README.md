@@ -1,7 +1,9 @@
 # AntData.ORM
 
+#NUGET
 
 SqlServer：Install-Package AntData.ORM
+
 Mysql：Install-Package AntData.ORM.Mysql
 
 ### 主要特性
@@ -9,3 +11,292 @@ Mysql：Install-Package AntData.ORM.Mysql
 - 目前支持的数据库有mysql 和 sqlserver；
 - t4模板生成db entity 包含注释等;
 - 详细使用方法请参考单元测试
+
+# Instance  DbContext
+
+```csharp
+
+private static DbContext<Entitys> DB  = new DbContext<Entitys>("testorm", new MySqlDataProvider());
+
+//Trance Sql Log
+DB.IsEnableLogTrace = true;
+DB.OnLogTrace = OnCustomerTraceConnection;
+private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)
+{
+	try
+	{
+		string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
+				(current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
+		Debug.Write(sql + Environment.NewLine);
+	}
+	catch (Exception)
+	{
+		//ignore
+	}
+}
+
+```
+
+
+# 1.Select 
+
+##### 1.1 queryable
+```csharp
+
+//FirstOrDefault
+var p = DB.Tables.People.FirstOrDefault();
+var p = await DB.Tables.People.FirstOrDefaultAsync();
+var p = DB.Tables.People.FirstOrDefault(r=>r.Name.Equals("nainaigu"));
+var p = await DB.Tables.People.FirstOrDefaultAsync(r=>r.Name.Equals("nainaigu"));
+
+//select single
+var p = DB.Tables.People.Single(r=>r.Name.Equals("nainaigu"));
+var p = await DB.Tables.People.SingleAsync(r=>r.Name.Equals("nainaigu"));
+var p = DB.Tables.People.SingleOrDefault(r=>r.Name.Equals("nainaigu"));
+var p = await DB.Tables.People.SingleOrDefaultAsync(r=>r.Name.Equals("nainaigu"));
+
+//select single by primarykey
+var p = DB.Tables.People.FindByBk(1);
+
+//select first
+var p = DB.Tables.People.Where(r=>r.Age>10).First();
+var p = await DB.Tables.People.Where(r=>r.Age>10).FirstOrDefault();
+
+//between 11 and 20
+var page1 = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Skip(11).Take(20).ToList();
+var page1 = await DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Skip(11).Take(20).ToListAsync();
+
+//get count
+var count = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Count();
+var count = await DB.Tables.People.Where(r => r.Name.Equals("yuzd")).CountAsync();
+var p = DB.Tables.People.Where(r=>r.Age>10).LongCount();
+var p = await DB.Tables.People.Where(r=>r.Age>10).LongCountAsync();
+
+//skip 2
+var skip = DB.Tables.People.Where(c => c.Age > 10).OrderBy(it => it.Age).Skip(2).ToList();
+
+//take 2
+var take = DB.Tables.People.Where(c => c.Age > 10).OrderBy(it => it.Age).Take(2).ToList();
+
+//Not like 
+string conval = "a";
+var notLike = DB.Tables.People.Where(c => !c.Name.Contains(conval)).ToList();
+
+//Like
+var conval = "三";
+var like = DB.Tables.People.Where(c => c.Name.Contains(conval)).ToList();
+
+//where sql string
+var age = 10;
+var b = DB.Tables.People.Where("age > 10").ToList();
+var bb = DB.Tables.People.Where("age > @age",new {age= age }).ToList();
+var bbb = DB.Tables.People.Where("age > @age and name = @name", new { age = age ,name= "nainaigu" }).ToList();;
+var bbbb = DB.Tables.People.Where("age > @age", new { age = age }).Where("name = @name",new {name="nainaigu"}).ToList();
+var bbbbb = DB.Tables.People.Where("age > @age and name = @name", new { age = age ,name= "nainaigu" }).Where(r=>r.Name.Equals("aaa")).ToList();
+var bbbbbb = DB.Tables.People.Where(r=>r.SchoolId.Equals(2)).Where("age > @age", new { age = age }).Where(r => r.Name.Equals("nainaigu")).ToList();
+var list = (from p in DB.Tables.People
+            join s in DB.Tables.Schools on p.SchoolId equals s.Id
+            select new {Name = p.Name,SchoolName = s.Name,Age = p.Age}
+			).Where(r=>r.Age > age)
+			 .Where("school.name = @name", new { name = "nainaigu" })
+			 .Where("person.name = @name", new { name = "nainaigu" })
+			 .ToList();
+
+//is any
+bool isAny100 = DB.Tables.People.Any(c => c.Id == 100);
+
+
+//get max Age
+var p = DB.Tables.People.Max(r=>r.Age);
+var p = await DB.Tables.People.MaxAsync(r=>r.Age);
+
+//get min Age
+var p = DB.Tables.People.Min(r=>r.Age);
+var p = await  DB.Tables.People.MinAsync(r=>r.Age);
+
+
+//order By 
+var age = 10;
+var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("age","name").ToList();
+var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderByDescending("age","name").ToList();
+var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderByMultiple("age desc, name asc").ToList();
+
+//Page
+var bb = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy("Id").Skip(1).Take(10).ToList();
+var bb = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderBy(r => r.Id).Skip(1).Take(10).ToList();
+var bb = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderByDescending("Id").Skip(1).Take(10).ToList();
+var bb = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderByDescending(r => r.Id).Skip(1).Take(10).ToList();
+
+//In
+var arr = new []{ "nainaigu","yuzd" };
+var listnew = DB.Tables.People.Where(r => arr.Contains(r.Name)).ToList();
+
+//group by
+var b = DB.Tables.People.GroupBy("name").Select(r=>r.Key).ToList();
+var bb = DB.Tables.People.GroupBy(r => r.Name).Select(r => r.Key).ToList();
+var bbb = DB.Tables.People.GroupBy(r=> new {r.Name,r.Age}).Select(r=>r.ToList()).ToList();
+var bbbb = DB.Tables.People.GroupBy(r=> r.Age ).Select(r =>new {Key =r.Key,Value = r.ToList()}).ToList();
+var bbbbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => new {  Value = r.ToList() }).ToList();
+
+
+//inner join
+var list = (from p in DB.Tables.People
+            join s in DB.Tables.Schools on p.SchoolId equals s.Id
+            select p).ToList();
+
+//left join
+var list = (from p in DB.Tables.People
+            from s in DB.Tables.Schools.Where(r=>r.Id.Equals(p.SchoolId)).DefaultIfEmpty()
+            select p).ToList();
+
+
+//express functions
+
+
+
+```
+
+1.2 SqlQuery
+```csharp
+//to list
+var list1 = DB.Query<Person>("select * from person").ToList();
+
+//to list with par
+var name = "yuzd";
+var list = DB.Query<Person>("select * from person where name=@name",new { name = name }).ToList();
+var list = await DB.Query<Person>("select * from person where name=@name",new { name = name }).ToListAsync();
+
+//to DataTable
+DataTable tb = DB.QueryTable("select * from person");
+var tb = await DB.QueryTableAsync("select * from person");
+var name = "yuzd";
+SQL sql = "select * from person where name=@name";
+sql = sql["name", name];
+var list =  DB.QueryTable(sql);
+
+//get int or long or other
+var name = "yuzd";
+var age = 20;
+SQL sql = "select count(*) from person where 1=1";
+if (!string.IsNullOrEmpty(name))
+{
+    sql += " and name = @name";
+    sql = sql["name", name];
+}
+if (age > 0)
+{
+    sql += " and age = @age";
+    sql = sql["age", age];
+}
+            
+var list = DB.Execute<long>(sql);
+
+//customer pt
+
+public class MyClass
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+}
+
+var name = "yuzd";
+var list = DB.Query<MyClass>("select * from person where name=@name",new {name = name}).ToList();
+
+// to anonymous object
+var name = "yuzd";
+var list = DB.Query(new {Id= 0 ,Name = "",Age = 0}, "select * from person where name=@name", new {name = name}).ToList();
+
+```
+
+# 2.Insert
+````csharp
+//insert item
+Person p = new Person
+{
+    Name = "yuzd",
+    Age = 27
+};
+DB.Insert(p);
+
+//insert list
+List<Person> pList = new List<Person>
+{
+    new Person
+    {
+        Name = "yuzd",
+        Age = 27,
+        SchoolId = 1
+    },
+    new Person
+    {
+        Name = "nainaigu",
+        Age = 18,
+        SchoolId = 2
+    }
+};
+
+var insertResult = DB.BulkCopy(pList);
+Assert.AreEqual(insertResult.RowsCopied, 2);
+
+//insert without same columns
+DB.Tables.People.Value(r=>r.Name,"yuzd").Value(r=>r.DataChangeLastTime,DateTime.Now).Insert() // insert  with no 【Age】
+
+//insert with  Identity
+var id = DB.Tables.People.Value(r => r.Name, "yuzd").Value(r => r.DataChangeLastTime, DateTime.Now).InsertWithIdentity();
+Person p = new Person
+{
+    Name = "yuzd",
+    Age = 27,
+    SchoolId = 1
+};
+
+DB.InsertWithIdentity(p);【 now p.Id is the Identity result 】
+
+//if identity is guid
+var guidIdentity = DB.InsertWithIdentity<Person,string>(p);
+
+````
+
+# 3.Update 
+```csharp
+//update specified column
+DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set(r => r.Age, 10).Update() ;
+DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set2<Person, int?>("Age", 20).Update() ;
+
+
+//update  by  entity
+var entity = DB.Tables.People.FirstOrDefault();
+entity.DataChangeLastTime = DateTime.Now;
+DB.Update(entity);
+
+
+```
+
+# 4.Delete
+```csharp
+
+//delete by exp
+DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Delete();
+
+//delete by entity
+var entity = DB.Tables.People.FirstOrDefault();
+DB.Delete(entity);
+
+
+```
+
+# 5.Tran
+```csharp
+Person p = new Person
+{
+    Age = 27
+};
+           
+DB.UseTransaction(con =>
+{
+    con.Tables.Schools.Where(r=>r.Name.Equals("上海大学")).Set(r=>r.Address,"no update").Update();
+    con.Insert(p);
+    return true;
+});
+
+```
