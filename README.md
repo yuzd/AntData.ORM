@@ -6,6 +6,7 @@ SqlServer：Install-Package AntData.ORM
 
 Mysql：Install-Package AntData.ORM.Mysql
 
+QQ Group ：609142508
 
 # How to use CodeGen to auto Create Db models 
 
