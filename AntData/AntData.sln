@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.ORM.Mysql", "AntDat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntDataUnitTest", "AntDataUnitTest\AntDataUnitTest.csproj", "{A0141544-D86B-456D-9300-1C04465FC994}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbModels", "DbModels\DbModels.csproj", "{856DAAFF-D0C6-4C37-8112-E110D8C588B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.DbModels", "AntData.DbModels\AntData.DbModels.csproj", "{856DAAFF-D0C6-4C37-8112-E110D8C588B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.DbModels.TemplateInstaller", "AntData.DbModels.TemplateInstaller\AntData.DbModels.TemplateInstaller.csproj", "{467D10FB-D9C3-4323-B738-641750DE9646}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{856DAAFF-D0C6-4C37-8112-E110D8C588B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{856DAAFF-D0C6-4C37-8112-E110D8C588B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{856DAAFF-D0C6-4C37-8112-E110D8C588B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{467D10FB-D9C3-4323-B738-641750DE9646}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{467D10FB-D9C3-4323-B738-641750DE9646}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{467D10FB-D9C3-4323-B738-641750DE9646}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{467D10FB-D9C3-4323-B738-641750DE9646}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

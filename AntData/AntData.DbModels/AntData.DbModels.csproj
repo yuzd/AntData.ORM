@@ -7,8 +7,8 @@
     <ProjectGuid>{856DAAFF-D0C6-4C37-8112-E110D8C588B1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DbModels</RootNamespace>
-    <AssemblyName>DbModels</AssemblyName>
+    <RootNamespace>AntData.DbModels</RootNamespace>
+    <AssemblyName>AntData.DbModels</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,13 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MySql.Data">
-      <HintPath>..\AntData.ORM.Mysql\DLL\MySql.Data.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
@@ -56,16 +52,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AntData.ORM.Mysql\AntData.ORM.Mysql.csproj">
-      <Project>{793dcff9-618b-4106-9f2e-7280d8da8ccc}</Project>
-      <Name>AntData.ORM.Mysql</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AntData.ORM\AntData.ORM.csproj">
       <Project>{8156e731-ed0a-404e-9a72-fca6988270da}</Project>
       <Name>AntData.ORM</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="code.gen\tools\Arch.Data.ORM.CodeGen.dll" />
+    <Content Include="code.gen\tools\MySql.Data.dll" />
     <Content Include="Mysql\EntityRobotForMysql.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>EntityRobotForMysql.cs</LastGenOutput>

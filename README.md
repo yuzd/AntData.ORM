@@ -12,6 +12,12 @@ Mysql：Install-Package AntData.ORM.Mysql
 - t4模板生成db entity 包含注释等;
 - 详细使用方法请参考单元测试
 
+# How to use CodeGen to auto Create Db models 
+
+Please see:
+
+http://note.youdao.com/noteshare?id=f4958dbc7b42971f64f44675fd116413&sub=8EF852DD85064E02AB187ACA9823D576
+
 # Instance  DbContext
 
 ```csharp

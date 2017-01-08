@@ -1,1 +1,0 @@
-<#@ assembly name="$(SolutionDir)packages\code.gen\tools\Arch.Data.ORM.CodeGen.dll" #>

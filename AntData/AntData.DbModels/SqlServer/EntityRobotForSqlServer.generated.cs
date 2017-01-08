@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using AntData.ORM;
 using AntData.ORM.Linq;
@@ -49,7 +50,7 @@ namespace DbModels.SqlServer
 			set { _DataChangeLastTime = value; }
 		}
 
-		[Column("Name",                DataType=DataType.VarChar,  Length=50),    Nullable]
+		[Column("Name",                DataType=DataType.VarChar,  Length=50), NotNull]
 		public string Name { get; set; } // varchar(50)
 
 		[Column("Age",                 DataType=DataType.Int32)   ,    Nullable]
@@ -137,9 +138,21 @@ namespace DbModels.SqlServer
 				t.Id == Id);
 		}
 
+		public static async Task<Person> FindByBkAsync(this ITable<Person> table, long Id)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Id == Id);
+		}
+
 		public static School FindByBk(this ITable<School> table, long Id)
 		{
 			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static async Task<School> FindByBkAsync(this ITable<School> table, long Id)
+		{
+			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);
 		}
 	}

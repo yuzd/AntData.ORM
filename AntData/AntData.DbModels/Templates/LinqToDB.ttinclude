@@ -447,6 +447,19 @@ void GenerateTypesFromMetadata()
 				{
 					IsStatic = true
 				});
+
+			tableExtensions.Members.Add(
+				new Method(
+					"async Task<" + t.TypeName + ">",
+					"FindByBkAsync",
+					new[] { (string.Format("this ITable<{0}> table", t.TypeName)) }
+						.Union(PKs.Select(c => c.Type + " " + c.MemberName)),
+					new[] { "return await table.FirstOrDefaultAsync(t =>" }
+						.Union(PKs.Select((c,i) => string.Format("\tt.{0}{1} == {0}{3}{2}",
+							c.MemberName, LenDiff(maxNameLen1, c.MemberName), i == nPKs - 1 ? ");" : " &&", i == nPKs - 1 ? "" : LenDiff(maxNameLen2, c.MemberName)))))
+				{
+					IsStatic = true
+				});
 		}
 
 		addType(t);
@@ -480,8 +493,9 @@ void GenerateTypesFromMetadata()
 	{
 		Model.Usings.Add("System.Collections.Generic");
 		Model.Usings.Add("System.Data");
-		Model.Usings.Add("LinqToDB.Data");
-		Model.Usings.Add("LinqToDB.Common");
+		Model.Usings.Add("System.Threading.Tasks");
+		Model.Usings.Add("AntData.ORM.Data");
+		Model.Usings.Add("AntData.ORM.Common");
 
 		var procs = new MemberGroup();
 		var funcs = new MemberGroup();
@@ -687,6 +701,7 @@ void GenerateTypesFromMetadata()
 	if (defTableExtensions.Members.Count > 0)
 	{
 		Model.Usings.Add("System.Linq");
+		Model.Usings.Add("System.Threading.Tasks");
 		Model.Types.Add(new Class("TableExtensions", defTableExtensions) { IsStatic = true });
 	}
 
@@ -697,6 +712,7 @@ void GenerateTypesFromMetadata()
 		if (schema.TableExtensions.Members.Count > 0)
 		{
 			Model.Usings.Add("System.Linq");
+			Model.Usings.Add("System.Threading.Tasks");
 			schema.Type.Members.Add(schema.TableExtensions);
 		}
 	}

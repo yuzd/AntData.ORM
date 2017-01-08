@@ -77,9 +77,9 @@
       <Project>{8156e731-ed0a-404e-9a72-fca6988270da}</Project>
       <Name>AntData.ORM</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DbModels\DbModels.csproj">
+    <ProjectReference Include="..\AntData.DbModels\AntData.DbModels.csproj">
       <Project>{856daaff-d0c6-4c37-8112-e110d8c588b1}</Project>
-      <Name>DbModels</Name>
+      <Name>AntData.DbModels</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
