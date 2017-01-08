@@ -23,6 +23,7 @@ namespace AntDataUnitTest
         public static void MyClassInitialize(TestContext testContext)
         {
             DB = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
+            AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
             DB.IsNoLock = true;
