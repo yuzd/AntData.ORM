@@ -41,9 +41,5 @@ namespace AntData.ORM
         /// <returns></returns>
         string              GetSqlText         (object query);
 
-        /// <summary>
-        /// 关闭事件
-        /// </summary>
-		event EventHandler  OnClosing;
 	}
 }

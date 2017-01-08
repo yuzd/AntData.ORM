@@ -23,7 +23,8 @@ namespace AntDataUnitTest
         public static void MyClassInitialize(TestContext testContext)
         {
             DB = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
-            DB.OnCustomerTraceConnection = OnCustomerTraceConnection;
+            DB.IsEnableLogTrace = true;
+            DB.OnLogTrace = OnCustomerTraceConnection;
             DB.IsNoLock = true;
         }
 
@@ -503,6 +504,15 @@ namespace AntDataUnitTest
 
             var bb = DB.Tables.People.GroupBy(r => r.Age).Select(r => new { Key = r.Key, Value = r.ToList() }).ToList();
 
+        }
+
+        [TestMethod]
+        public void TestMethod5_08()
+        {
+            var name = "yuzd";
+            var list = DB.Query<Person>("select * from person where name=@name", new { name = name }).ToList();
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Count > 0, true);
         }
     }
 

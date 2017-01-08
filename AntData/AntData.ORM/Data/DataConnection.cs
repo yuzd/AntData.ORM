@@ -122,7 +122,6 @@ namespace AntData.ORM.Data
 			set { _isMarsEnabled = value; }
 		}
 
-        public event EventHandler OnClosing;
 
         /// <summary>
         /// 针对sqlserver
@@ -133,15 +132,14 @@ namespace AntData.ORM.Data
 
         #region 执行sql后显示Trace
 
-        private Action<CustomerTraceInfo> _onCustomerTraceConnection;
-        [JetBrains.Annotations.CanBeNull]
-        public Action<CustomerTraceInfo> OnCustomerTraceConnection
-        {
-            get { return _onCustomerTraceConnection; }
-            set { _onCustomerTraceConnection = value; }
-        }
+        //是否开启打sql日志
+	    public bool IsEnableLogTrace { get; set; }
 
-        public static Action<string, string> WriteTraceLine = (message, displayName) => Debug.WriteLine(message, displayName);
+        /// <summary>
+        /// 打日志方法
+        /// </summary>
+        public virtual Action<CustomerTraceInfo> OnLogTrace { get; set; }
+
 
         #endregion
 
@@ -281,15 +279,15 @@ namespace AntData.ORM.Data
 		    {
                 dic.Add("TIMEOUT", this.CommandTimeout);
 		    }
-            var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
-            if (OnCustomerTraceConnection!=null)
-		    {
-		        OnCustomerTraceConnection(new CustomerTraceInfo
-		        {
+            if (OnLogTrace != null && IsEnableLogTrace)
+            {
+                OnLogTrace(new CustomerTraceInfo
+                {
                     CustomerParams = Params,
                     SqlText = sqlString
-		        });
-		    }
+                });
+            }
+            var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
             this.Dispose();
             return result;
 		}
@@ -308,15 +306,15 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
-            if (OnCustomerTraceConnection != null)
+            if (OnLogTrace != null && IsEnableLogTrace)
             {
-                OnCustomerTraceConnection(new CustomerTraceInfo
+                OnLogTrace(new CustomerTraceInfo
                 {
                     CustomerParams = Params,
                     SqlText = sqlString
                 });
             }
+            var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
             this.Dispose();
             return result;
 		}
@@ -335,15 +333,16 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic, IsInTransaction || isWrite);
-            if (OnCustomerTraceConnection != null)
+
+            if (OnLogTrace != null && IsEnableLogTrace)
             {
-                OnCustomerTraceConnection(new CustomerTraceInfo
+                OnLogTrace(new CustomerTraceInfo
                 {
                     CustomerParams = Params,
                     SqlText = sqlString
                 });
             }
+            var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic, IsInTransaction || isWrite);
             this.Dispose();
 		    return result;
 		}
@@ -363,15 +362,19 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
-            if (OnCustomerTraceConnection != null)
+
+            if (OnLogTrace != null && IsEnableLogTrace)
             {
-                OnCustomerTraceConnection(new CustomerTraceInfo
+                OnLogTrace(new CustomerTraceInfo
                 {
                     CustomerParams = Params,
                     SqlText = sqlString
                 });
+                
             }
+
+            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic, IsInTransaction || isWrite);
+            
             this.Dispose();
             return result;
         }

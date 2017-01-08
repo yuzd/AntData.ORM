@@ -220,14 +220,11 @@ namespace AntData.ORM
 		}
 
 	
-		public event EventHandler OnClosing;
 
 		void IDisposable.Dispose()
 		{
 			if (_dataConnection != null)
 			{
-				if (OnClosing != null)
-					OnClosing(this, EventArgs.Empty);
 
 				if (_dataConnection.QueryHints.    Count > 0) QueryHints.    AddRange(_queryHints);
 				if (_dataConnection.NextQueryHints.Count > 0) NextQueryHints.AddRange(_nextQueryHints);
