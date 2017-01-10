@@ -194,5 +194,6 @@ namespace AntData.ORM.Mapping
 		public bool HasScale() { return _scale.HasValue; }
 
 		public string CreateFormat { get; set; }
+		public string Comment { get; set; }
 	}
 }

@@ -18,7 +18,13 @@ namespace DbModels.SqlServer
 	/// </summary>
 	public partial class Entitys : IEntity
 	{
+		/// <summary>
+		/// 人员
+		/// </summary>
 		public ITable<Person> People  { get { return this.Get<Person>(); } }
+		/// <summary>
+		/// 学校
+		/// </summary>
 		public ITable<School> Schools { get { return this.Get<School>(); } }
 
 		private readonly IDataContext con;
@@ -35,7 +41,10 @@ namespace DbModels.SqlServer
 		}
 	}
 
-	[Table(Schema="dbo", Name="person")]
+	/// <summary>
+	/// 人员
+	/// </summary>
+	[Table(Schema="dbo", Comment="人员", Name="person")]
 	public partial class Person : BaseEntity
 	{
 		#region Column
@@ -78,7 +87,10 @@ namespace DbModels.SqlServer
 		#endregion
 	}
 
-	[Table(Schema="dbo", Name="school")]
+	/// <summary>
+	/// 学校
+	/// </summary>
+	[Table(Schema="dbo", Comment="学校", Name="school")]
 	public partial class School : BaseEntity
 	{
 		#region Column
@@ -86,25 +98,25 @@ namespace DbModels.SqlServer
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("Id",                  DataType=DataType.Int64)   , PrimaryKey, Identity]
+		[Column("Id",                  DataType=DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
 		public long Id { get; set; } // bigint
 
 		/// <summary>
 		/// 学校名称
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50),    Nullable]
+		[Column("Name",                DataType=DataType.VarChar,  Length=50, Comment="学校名称"),    Nullable]
 		public string Name { get; set; } // varchar(50)
 
 		/// <summary>
 		/// 学校地址
 		/// </summary>
-		[Column("Address",             DataType=DataType.VarChar,  Length=100),    Nullable]
+		[Column("Address",             DataType=DataType.VarChar,  Length=100, Comment="学校地址"),    Nullable]
 		public string Address { get; set; } // varchar(100)
 
 		/// <summary>
 		/// 最后更新时间
 		/// </summary>
-		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		[Column("DataChange_LastTime", DataType=DataType.DateTime, Comment="最后更新时间"), NotNull]
 		public DateTime DataChangeLastTime // datetime
 		{
 			get { return _DataChangeLastTime; }

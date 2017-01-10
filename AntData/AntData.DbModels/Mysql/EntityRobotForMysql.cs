@@ -16,7 +16,13 @@ namespace DbModels.Mysql
 	/// </summary>
 	public partial class Entitys : IEntity
 	{
+		/// <summary>
+		/// 人员
+		/// </summary>
 		public ITable<Person> People  { get { return this.Get<Person>(); } }
+		/// <summary>
+		/// 学校
+		/// </summary>
 		public ITable<School> Schools { get { return this.Get<School>(); } }
 
 		private readonly IDataContext con;
@@ -33,7 +39,10 @@ namespace DbModels.Mysql
 		}
 	}
 
-	[Table("person")]
+	/// <summary>
+	/// 人员
+	/// </summary>
+	[Table(Comment="人员", Name="person")]
 	public partial class Person : BaseEntity
 	{
 		#region Column
@@ -41,13 +50,13 @@ namespace DbModels.Mysql
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("Id",                  DataType=DataType.Int64)   , PrimaryKey, Identity]
+		[Column("Id",                  DataType=DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
 		public long Id { get; set; } // bigint(20)
 
 		/// <summary>
 		/// 最后更新时间
 		/// </summary>
-		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		[Column("DataChange_LastTime", DataType=DataType.DateTime, Comment="最后更新时间"), NotNull]
 		public DateTime DataChangeLastTime // datetime
 		{
 			get { return _DataChangeLastTime; }
@@ -57,19 +66,19 @@ namespace DbModels.Mysql
 		/// <summary>
 		/// 姓名
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50), NotNull]
+		[Column("Name",                DataType=DataType.VarChar,  Length=50, Comment="姓名"), NotNull]
 		public string Name { get; set; } // varchar(50)
 
 		/// <summary>
 		/// 年纪
 		/// </summary>
-		[Column("Age",                 DataType=DataType.Int32)   ,    Nullable]
+		[Column("Age",                 DataType=DataType.Int32,    Comment="年纪"),    Nullable]
 		public int? Age { get; set; } // int(11)
 
 		/// <summary>
 		/// 学校主键
 		/// </summary>
-		[Column("SchoolId",            DataType=DataType.Int64)   ,    Nullable]
+		[Column("SchoolId",            DataType=DataType.Int64,    Comment="学校主键"),    Nullable]
 		public long? SchoolId { get; set; } // bigint(20)
 
 		#endregion
@@ -91,7 +100,10 @@ namespace DbModels.Mysql
 		#endregion
 	}
 
-	[Table("school")]
+	/// <summary>
+	/// 学校
+	/// </summary>
+	[Table(Comment="学校", Name="school")]
 	public partial class School : BaseEntity
 	{
 		#region Column
@@ -99,25 +111,25 @@ namespace DbModels.Mysql
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("Id",                  DataType=DataType.Int64)   , PrimaryKey, Identity]
+		[Column("Id",                  DataType=DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
 		public long Id { get; set; } // bigint(20)
 
 		/// <summary>
 		/// 学校名称
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50),    Nullable]
+		[Column("Name",                DataType=DataType.VarChar,  Length=50, Comment="学校名称"),    Nullable]
 		public string Name { get; set; } // varchar(50)
 
 		/// <summary>
 		/// 学校地址
 		/// </summary>
-		[Column("Address",             DataType=DataType.VarChar,  Length=100),    Nullable]
+		[Column("Address",             DataType=DataType.VarChar,  Length=100, Comment="学校地址"),    Nullable]
 		public string Address { get; set; } // varchar(100)
 
 		/// <summary>
 		/// 最后更新时间
 		/// </summary>
-		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		[Column("DataChange_LastTime", DataType=DataType.DateTime, Comment="最后更新时间"), NotNull]
 		public DateTime DataChangeLastTime // datetime
 		{
 			get { return _DataChangeLastTime; }

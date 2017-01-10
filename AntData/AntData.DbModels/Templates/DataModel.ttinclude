@@ -50,7 +50,7 @@ Func<TableSchema,Table> LoadProviderSpecificTable = tableSchema => null;
 
 void LoadServerMetadata(DataConnection dataConnection)
 {
-	SqlBuilder = dataConnection.DataProvider.CreateSqlBuilder();
+	 SqlBuilder = dataConnection.DataProvider.CreateSqlBuilder();
 
 	var sp = dataConnection.DataProvider.GetSchemaProvider();
 	var db = sp.GetSchema(dataConnection, GetSchemaOptions);

@@ -169,6 +169,7 @@ void GenerateTypesFromMetadata()
 
 		if (DatabaseName != null) tableAttrs.Add("Database=" + '"' + DatabaseName + '"');
 		if (t.Schema     != null) tableAttrs.Add("Schema="   + '"' + t.Schema     + '"');
+		if (!string.IsNullOrEmpty(t.Description )) tableAttrs.Add("Comment="   + '"' + t.Description  + '"');
 
 		tableAttrs.Add((tableAttrs.Count == 0 ? "" : "Name=") + '"' + t.TableName + '"');
 
@@ -263,7 +264,10 @@ void GenerateTypesFromMetadata()
 				ca.Parameters.Add("SkipOnUpdate=true");
 				canBeReplaced = false;
 			}
-
+			if (!string.IsNullOrEmpty(c.Description))
+			{
+				ca.Parameters.Add("Comment=\"" + c.Description + '"');
+			}
 			c.Attributes.Add(ca);
 
 			// Ö÷¼üPK.
