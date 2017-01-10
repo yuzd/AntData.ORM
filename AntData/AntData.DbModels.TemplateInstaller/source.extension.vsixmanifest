@@ -5,7 +5,7 @@
     <DisplayName>AntData.DbModels.TemplateInstaller</DisplayName>
     <Description xml:space="preserve">AntData.DbModels.TemplateInstaller</Description>
     <MoreInfo>https://github.com/yuzd/AntData.ORM</MoreInfo>
-    <ReleaseNotes>1.1</ReleaseNotes>
+    <ReleaseNotes>1.2</ReleaseNotes>
     <Tags>CodeGen</Tags>
   </Metadata>
   <Installation>
