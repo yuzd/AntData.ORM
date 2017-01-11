@@ -13,5 +13,7 @@ namespace AntData.ORM.Linq
 		List<string>   QueryHints  { get; }
         Dictionary<string, CustomerParam> Params { get; }
 		SqlParameter[] GetParameters();
-	}
+
+        List<ParameterAccessor> Parameters { get; set; }
+    }
 }

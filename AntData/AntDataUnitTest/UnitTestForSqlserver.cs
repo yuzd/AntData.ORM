@@ -24,6 +24,8 @@ namespace AntDataUnitTest
         {
             DB = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
+            //Insert的时候 忽略Null的字段
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
             DB.IsNoLock = true;

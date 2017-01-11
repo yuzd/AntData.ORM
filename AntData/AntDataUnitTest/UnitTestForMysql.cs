@@ -23,6 +23,7 @@ namespace AntDataUnitTest
         {
             DB = new DbContext<Entitys>("testorm", new MySqlDataProvider());
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
         }

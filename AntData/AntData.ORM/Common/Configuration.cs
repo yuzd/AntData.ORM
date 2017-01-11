@@ -6,6 +6,7 @@ namespace AntData.ORM.Common
 	{
 		public static bool IsStructIsScalarType = true;
 		public static bool AvoidSpecificDataProviderAPI;
+		
 
 		public static class Linq
 		{
@@ -13,7 +14,8 @@ namespace AntData.ORM.Common
 			public static bool IgnoreEmptyUpdate;
 			public static bool AllowMultipleQuery;
 			public static bool GenerateExpressionTest;
-		}
+            public static bool IgnoreNullInsert;
+        }
 
 		public static class LinqService
 		{

@@ -410,6 +410,8 @@ namespace AntData.ORM.Linq
 						dataContext.NextQueryHints.Clear();
 				}
 
+			   
+                //检查是否要去掉NULL
 				return dataContext.SetQuery(query);
 			}
 		}
@@ -507,12 +509,14 @@ namespace AntData.ORM.Linq
 			public QueryInfo()
 			{
 				SelectQuery = new SelectQuery();
-			}
+                Parameters = new List<ParameterAccessor>();
+            }
 
 			public SelectQuery  SelectQuery { get; set; }
 			public object       Context     { get; set; }
 			public List<string> QueryHints  { get; set; }
             public Dictionary<string, CustomerParam> Params { get; set; }
+            public List<ParameterAccessor> Parameters { get; set; }
 
             public SqlParameter[] GetParameters()
 			{
@@ -524,7 +528,6 @@ namespace AntData.ORM.Linq
 				return ps;
 			}
 
-			public List<ParameterAccessor> Parameters = new List<ParameterAccessor>();
 		}
 
 		#endregion

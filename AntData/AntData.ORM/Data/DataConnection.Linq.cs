@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -61,7 +62,27 @@ namespace AntData.ORM.Data
                     Params = query.Params
                 };
 			}
-
+		    if (query.SelectQuery.IsInsert || query.SelectQuery.IsInsertOrUpdate)
+		    {
+		        if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert && query.Parameters!=null && query.Parameters.Count>0)
+		        {
+                    var ignoreList = new List<string>();
+                    //如果指定了忽略NULL字段的插入
+		            foreach (var v in query.Parameters)
+		            {
+		                if (v.SqlParameter != null && v.SqlParameter.Value == null)
+		                {
+                            ignoreList.Add(v.SqlParameter.Name);
+		                }
+		            }
+		            if (ignoreList.Count > 0)
+		            {
+                        query.Parameters.RemoveAll(r => r.SqlParameter != null && r.SqlParameter.Value == null);
+                        query.SelectQuery.Insert.Items.RemoveAll(r => ignoreList.Contains(((AntData.ORM.SqlQuery.SqlField)r.Column).Name));
+                    }
+                    
+		        }
+		    }
 			var sql    = query.SelectQuery.ProcessParameters();
 			var newSql = ProcessQuery(sql);
 
@@ -331,11 +352,10 @@ namespace AntData.ORM.Data
 			var query = GetCommand(queryContext);
             query.Params = new Dictionary<string, CustomerParam>();
             GetParameters(queryContext, query);
-
-//			if (TraceSwitch.TraceInfo)
-//				WriteTraceLine(((IDataContext)this).GetSqlText(query).Replace("\r", ""), TraceSwitch.DisplayName);
-
-			return query;
+#if DEBUG
+           // Debug.WriteLine(((IDataContext)this).GetSqlText(query).Replace("\r", ""));
+#endif
+            return query;
 		}
 
 

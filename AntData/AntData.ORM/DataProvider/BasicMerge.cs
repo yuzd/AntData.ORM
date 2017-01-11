@@ -271,6 +271,8 @@ namespace AntData.ORM.DataProvider
 			{
 				return SqlParameters;
 			}
+
+		    public List<ParameterAccessor> Parameters { get; set; }
 		}
 
 		protected virtual bool BuildUsing<T>(DataConnection dataConnection, IEnumerable<T> source)
