@@ -517,6 +517,20 @@ namespace AntDataUnitTest
             Assert.IsNotNull(list);
             Assert.AreEqual(list.Count > 0, true);
         }
+
+        [TestMethod]
+        public void TestMethod5_09()
+        {
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
+            Person p = new Person
+            {
+                Name = null,
+                Age = 11
+            };
+            DB.Insert(p);
+            DB.InsertWithIdentity(p);
+
+        }
     }
 
 
