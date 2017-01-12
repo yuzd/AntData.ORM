@@ -531,6 +531,19 @@ namespace AntDataUnitTest
             DB.InsertWithIdentity(p);
 
         }
+
+        [TestMethod]
+        public void TestMethod6_01()
+        {
+            //批量更新
+            var allPerson = DB.Tables.People.ToList();
+            allPerson.ForEach(r =>
+            {
+                r.DataChangeLastTime = DateTime.Now;
+            });
+
+            DB.Tables.People.Merge(allPerson);
+        }
     }
 
 
