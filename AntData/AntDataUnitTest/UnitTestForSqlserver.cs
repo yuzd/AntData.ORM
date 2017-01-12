@@ -525,7 +525,8 @@ namespace AntDataUnitTest
             Person p = new Person
             {
                 Name = null,
-                Age = 11
+                Age = 11,
+                SchoolId = null
             };
             DB.Insert(p);
             DB.InsertWithIdentity(p);

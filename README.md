@@ -257,6 +257,15 @@ DB.InsertWithIdentity(p);【 now p.Id is the Identity result 】
 //if identity is guid
 var guidIdentity = DB.InsertWithIdentity<Person,string>(p);
 
+//insert ignore null field
+Person p = new Person
+{
+    Name = null,
+    Age = 11,
+    SchoolId = null // will be ignored
+};
+DB.Insert(p);
+
 ````
 
 # 3.Update 
@@ -271,6 +280,14 @@ var entity = DB.Tables.People.FirstOrDefault();
 entity.DataChangeLastTime = DateTime.Now;
 DB.Update(entity);
 
+//bulkupdate 【sqlserver only】
+var allPerson = DB.Tables.People.ToList();
+allPerson.ForEach(r =>
+{
+    r.DataChangeLastTime = DateTime.Now;
+});
+
+DB.Tables.People.Merge(allPerson);
 
 ```
 
