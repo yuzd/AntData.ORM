@@ -26,6 +26,7 @@ namespace DbModels.SqlServer
 		/// 学校
 		/// </summary>
 		public ITable<School> Schools { get { return this.Get<School>(); } }
+		public ITable<Test>   Tests   { get { return this.Get<Test>(); } }
 
 		private readonly IDataContext con;
 
@@ -142,6 +143,50 @@ namespace DbModels.SqlServer
 		#endregion
 	}
 
+	[Table(Schema="dbo", Name="Test")]
+	public partial class Test : BaseEntity
+	{
+		#region Column
+
+		[Column("Id",         DataType=DataType.Int32)   , PrimaryKey, Identity]
+		public int Id { get; set; } // int
+
+		[Column("F_Byte",     DataType=DataType.Byte)    , Nullable]
+		public byte? FByte { get; set; } // tinyint
+
+		[Column("F_Int16",    DataType=DataType.Int16)   , Nullable]
+		public short? FInt16 { get; set; } // smallint
+
+		[Column("F_Int32",    DataType=DataType.Int32)   , Nullable]
+		public int? FInt32 { get; set; } // int
+
+		[Column("F_Int64",    DataType=DataType.Int64)   , Nullable]
+		public long? FInt64 { get; set; } // bigint
+
+		[Column("F_Double",   DataType=DataType.Double)  , Nullable]
+		public double? FDouble { get; set; } // float
+
+		[Column("F_Float",    DataType=DataType.Single)  , Nullable]
+		public float? FFloat { get; set; } // real
+
+		[Column("F_Decimal",  DataType=DataType.Decimal,  Precision=18, Scale=0), Nullable]
+		public decimal? FDecimal { get; set; } // decimal(18, 0)
+
+		[Column("F_Bool",     DataType=DataType.Boolean) , Nullable]
+		public bool? FBool { get; set; } // bit
+
+		[Column("F_DateTime", DataType=DataType.DateTime), Nullable]
+		public DateTime? FDateTime { get; set; } // datetime
+
+		[Column("F_Guid",     DataType=DataType.Guid)    , Nullable]
+		public Guid? FGuid { get; set; } // uniqueidentifier
+
+		[Column("F_String",   DataType=DataType.NVarChar, Length=100), Nullable]
+		public string FString { get; set; } // nvarchar(100)
+
+		#endregion
+	}
+
 	public static partial class TableExtensions
 	{
 		public static Person FindByBk(this ITable<Person> table, long Id)
@@ -163,6 +208,18 @@ namespace DbModels.SqlServer
 		}
 
 		public static async Task<School> FindByBkAsync(this ITable<School> table, long Id)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Id == Id);
+		}
+
+		public static Test FindByBk(this ITable<Test> table, int Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static async Task<Test> FindByBkAsync(this ITable<Test> table, int Id)
 		{
 			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);
