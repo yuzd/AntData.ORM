@@ -10,6 +10,7 @@
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
-	LoadSqlServerMetadata(@"server=YUZD\SERVERQ;database=Test;uid=sa;pwd=p@ssw0rd;");
+	LoadSqlServerMetadata(@"server=.\SERVERQ;database=Test;uid=sa;pwd=p@ssw0rd;");
+	//LoadSqlServerMetadata(@" please type your sqlserver connection string into this place");
 	GenerateModel();
 #>

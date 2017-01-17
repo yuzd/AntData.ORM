@@ -12,5 +12,6 @@
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
 	LoadMySqlMetadata("localhost","28747", "testorm", "root", "123456");
+	//LoadMySqlMetadata("localhost","3306", "DBName", "DbUserName", "DbPassword");
 	GenerateModel();
 #>

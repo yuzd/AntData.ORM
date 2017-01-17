@@ -13,7 +13,7 @@ namespace DbModels.SqlServer
 {
 	/// <summary>
 	/// Database       : Test
-	/// Data Source    : YUZD\SERVERQ
+	/// Data Source    : .\SERVERQ
 	/// Server Version : 11.00.3156
 	/// </summary>
 	public partial class Entitys : IEntity
