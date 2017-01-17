@@ -57,6 +57,15 @@
     <Compile Include="Common\Option.cs" />
     <Compile Include="Common\Tools.cs" />
     <Compile Include="CompiledQuery.cs" />
+    <Compile Include="DataProvider\Oracle\OracleBulkCopy.cs" />
+    <Compile Include="DataProvider\Oracle\OracleDataProvider.cs" />
+    <Compile Include="DataProvider\Oracle\OracleFactory.cs" />
+    <Compile Include="DataProvider\Oracle\OracleMappingSchema.cs" />
+    <Compile Include="DataProvider\Oracle\OracleMerge.cs" />
+    <Compile Include="DataProvider\Oracle\OracleSqlBuilder.cs" />
+    <Compile Include="DataProvider\Oracle\OracleSqlOptimizer.cs" />
+    <Compile Include="DataProvider\Oracle\OracleTools.cs" />
+    <Compile Include="DataProvider\Oracle\OracleXmlTable.cs" />
     <Compile Include="DataProvider\SqlServer\SqlServer2000SqlBuilder.cs" />
     <Compile Include="DataProvider\SqlServer\SqlServer2000SqlOptimizer.cs" />
     <Compile Include="DataProvider\SqlServer\SqlServer2005SqlBuilder.cs" />
@@ -83,6 +92,7 @@
     <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
     <Compile Include="DbEngine\Dao\DalBridge.cs" />
     <Compile Include="DbEngine\Dao\DalException.cs" />
+    <Compile Include="DbEngine\HA\OracleHA.cs" />
     <Compile Include="Expressions\Dynamic.cs" />
     <Compile Include="Mapping\SQL.cs" />
     <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />
