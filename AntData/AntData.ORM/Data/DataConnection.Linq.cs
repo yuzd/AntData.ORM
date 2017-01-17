@@ -51,9 +51,33 @@ namespace AntData.ORM.Data
 
 		internal PreparedQuery GetCommand(IQueryContext query)
 		{
-			if (query.Context != null)
+		    var needRefresh = false;
+            if (query.SelectQuery.IsInsert || query.SelectQuery.IsInsertOrUpdate)
+            {
+                if (Configuration.Linq.IgnoreNullInsert && query.Parameters != null && query.Parameters.Count > 0)
+                {
+                    var ignoreList = new List<string>();
+                    //如果指定了忽略NULL字段的插入
+                    foreach (var v in query.Parameters)
+                    {
+                        if (v.SqlParameter != null && v.SqlParameter.Value == null)
+                        {
+                            ignoreList.Add(v.SqlParameter.Name);
+                        }
+                    }
+                    if (ignoreList.Count > 0)
+                    {
+                        needRefresh = true;
+                        query.Parameters.RemoveAll(r => r.SqlParameter != null && r.SqlParameter.Value == null);
+                        query.SelectQuery.Insert.Items.RemoveAll(r => ignoreList.Contains(((AntData.ORM.SqlQuery.SqlField)r.Column).Name));
+                    }
+
+                }
+            }
+
+            if (query.Context != null && !needRefresh)
 			{
-				return new PreparedQuery
+                return new PreparedQuery
 				{
 					Commands      = (string[])query.Context,
 					SqlParameters = query.SelectQuery.Parameters,
@@ -62,28 +86,10 @@ namespace AntData.ORM.Data
                     Params = query.Params
                 };
 			}
-		    if (query.SelectQuery.IsInsert || query.SelectQuery.IsInsertOrUpdate)
-		    {
-		        if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert && query.Parameters!=null && query.Parameters.Count>0)
-		        {
-                    var ignoreList = new List<string>();
-                    //如果指定了忽略NULL字段的插入
-		            foreach (var v in query.Parameters)
-		            {
-		                if (v.SqlParameter != null && v.SqlParameter.Value == null)
-		                {
-                            ignoreList.Add(v.SqlParameter.Name);
-		                }
-		            }
-		            if (ignoreList.Count > 0)
-		            {
-                        query.Parameters.RemoveAll(r => r.SqlParameter != null && r.SqlParameter.Value == null);
-                        query.SelectQuery.Insert.Items.RemoveAll(r => ignoreList.Contains(((AntData.ORM.SqlQuery.SqlField)r.Column).Name));
-                    }
-                    
-		        }
-		    }
-			var sql    = query.SelectQuery.ProcessParameters();
+
+            
+
+            var sql    = query.SelectQuery.ProcessParameters();
 			var newSql = ProcessQuery(sql);
 
 			if (!object.ReferenceEquals(sql, newSql))
@@ -106,11 +112,11 @@ namespace AntData.ORM.Data
 				sqlProvider.BuildSql(i, sql, sb);
 				commands[i] = sb.ToString();
 			}
-
+            
 			if (!query.SelectQuery.IsParameterDependent)
 				query.Context = commands;
 
-			return new PreparedQuery
+		    return new PreparedQuery
 			{
 				Commands      = commands,
 				SqlParameters = sql.Parameters,

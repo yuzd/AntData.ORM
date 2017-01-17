@@ -44,6 +44,25 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod1_00()
         {
+            if (!DB.Tables.Schools.Any())
+            {
+                List<School> sList = new List<School>
+                {
+                    new School
+                    {
+                        Name = "上海大学",
+                        Address = "上海"
+                    },
+                    new School
+                    {
+                        Name = "北京大学",
+                        Address = "北京"
+                    }
+                };
+
+                DB.BulkCopy(sList);
+            }
+
             List<Person> pList = new List<Person>
             {
                 new Person
@@ -356,6 +375,7 @@ namespace AntDataUnitTest
         [ExpectedException(typeof(MySqlException))]
         public void TestMethod4_01()
         {
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = false;
             Person p = new Person
             {
                 Age = 27
@@ -508,6 +528,17 @@ namespace AntDataUnitTest
         {
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             Person p = new Person
+            {
+                Name = "yuzd",
+                Age = 27,
+                SchoolId = 1
+            };
+
+            var insertResult = DB.InsertWithIdentity<Person, long>(p);
+            Assert.AreEqual(insertResult > 0, true);
+            Assert.AreEqual(p.Id, insertResult);
+
+             p = new Person
             {
                 Name = null,
                 Age = 11

@@ -49,6 +49,25 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod1_00()
         {
+            if (!DB.Tables.Schools.Any())
+            {
+                List<School> sList = new List<School>
+                {
+                    new School
+                    {
+                        Name = "上海大学",
+                        Address = "上海"
+                    },
+                    new School
+                    {
+                        Name = "北京大学",
+                        Address = "北京"
+                    }
+                };
+
+                DB.BulkCopy(sList);
+            }
+
             List<Person> pList = new List<Person>
             {
                 new Person
@@ -355,6 +374,7 @@ namespace AntDataUnitTest
         [ExpectedException(typeof(SqlException))]
         public void TestMethod4_01()
         {
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = false;
             Person p = new Person
             {
                 Age = 27
