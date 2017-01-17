@@ -117,6 +117,7 @@ void GenerateTypesFromMetadata()
 
 	foreach (var t in Tables.Values.OrderBy(tbl => tbl.IsProviderSpecific).ThenBy(tbl=> tbl.TypeName))
 	{
+		if(t.Columns.Values.Count == 0) continue;
 	    t.TypeName = ToPascalCase(t.TypeName);
 		Action<Class> addType = tp => Model.Types.Add(tp);
 		var props             = defProps;

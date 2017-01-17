@@ -11,7 +11,7 @@ namespace DbModels.Mysql
 {
 	/// <summary>
 	/// Database       : testorm
-	/// Data Source    : 127.0.0.1
+	/// Data Source    : localhost
 	/// Server Version : 5.6.26-log
 	/// </summary>
 	public partial class Entitys : IEntity

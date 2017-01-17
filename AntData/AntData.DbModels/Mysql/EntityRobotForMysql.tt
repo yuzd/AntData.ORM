@@ -11,6 +11,6 @@
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
-	LoadMySqlMetadata("127.0.0.1","28747", "testorm", "root", "123456");
+	LoadMySqlMetadata("localhost","28747", "testorm", "root", "123456");
 	GenerateModel();
 #>
