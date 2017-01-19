@@ -20,6 +20,8 @@ namespace AntData.ORM.DbEngine.HA
                     return new SqlServerHA();
                 case DatabaseProviderType.MySql:
                     return new MySqlHA();
+                case DatabaseProviderType.Oracle:
+                    return new OracleHA();
                 default:
                     throw new NotImplementedException("Not supported.");
             }

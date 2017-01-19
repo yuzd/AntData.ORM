@@ -8,7 +8,8 @@ namespace AntData.ORM.Enums
     public enum DatabaseProviderType
     {
         MySql,
-        SqlServer
+        SqlServer,
+        Oracle
     }
 
     public class DatabaseProviderTypeFactory
@@ -26,6 +27,8 @@ namespace AntData.ORM.Enums
                     return DatabaseProviderType.MySql;
                 case "SQLSERVER2008":
                     return DatabaseProviderType.SqlServer;
+                case "Oracle":
+                    return DatabaseProviderType.Oracle;
                 default:
                     throw new NotSupportedException();
             }
