@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AntData.ORM.DbEngine.Providers;
-using Oracle.DataAccess.Client;
+using Oracle.ManagedDataAccess.Client;
 
-namespace AntData.Oracle
+namespace AntData.ORM.Oracle
 {
     public class OracleDatabaseProvider : IDatabaseProvider
     {

@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.DbModels.TemplateIn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PkDapper", "PkDapper\PkDapper.csproj", "{C3B6101B-0B5A-492E-946B-ECC05483137F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.Oracle.x64", "AntData.Oracle\AntData.Oracle.x64.csproj", "{6340E498-25E5-4D6E-914F-ACE51CE0D7E3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.ORM.Oracle", "AntData.ORM.Oracle\AntData.ORM.Oracle.csproj", "{6340E498-25E5-4D6E-914F-ACE51CE0D7E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

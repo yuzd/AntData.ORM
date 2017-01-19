@@ -1,0 +1,16 @@
+<#@ template language="C#" debug="True" hostSpecific="True"                            #>
+<#@ output extension=".generated.cs"                                                   #>
+<#@ include file="..\Templates\LinqToDB.Oracle.Tools.ttinclude" #>
+<#@ include file="..\Templates\PluralizationService.ttinclude" #>
+<#
+	
+	NamespaceName = "DbModels.Oracle";
+	GenerateConstructors     = true;
+    GenerateFindExtensions = true;
+	GenerateDataTypes = true;
+    IsCompactColumns = false;
+    BaseDataContextClass = "IEntity";
+    BaseEntityClass = "BaseEntity";
+	LoadOracleMetadata("192.168.1.6", "1521", "orcl", "test", "test");
+	GenerateModel();
+#>

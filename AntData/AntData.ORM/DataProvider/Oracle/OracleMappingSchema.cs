@@ -8,7 +8,7 @@ using AntData.ORM.Expressions;
 using AntData.ORM.Mapping;
 using AntData.ORM.SqlQuery;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 	
 

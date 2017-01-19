@@ -27,6 +27,7 @@ namespace AntData.ORM.Data
             _configurationIDs = new ConcurrentDictionary<string, int>();
             AntData.ORM.DataProvider.SqlServer.SqlServerTools.GetDataProvider();
             AntData.ORM.DataProvider.MySql.MySqlTools.GetDataProvider();
+            AntData.ORM.DataProvider.Oracle.OracleTools.GetDataProvider();
         }
 
 

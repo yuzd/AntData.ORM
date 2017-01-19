@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using AntData.ORM.DataProvider;
 using JetBrains.Annotations;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 	[UsedImplicitly]
 	class OracleFactory : IDataProviderFactory

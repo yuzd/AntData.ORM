@@ -6,7 +6,7 @@ using System.Reflection;
 using AntData.ORM.Data;
 using AntData.ORM.DataProvider;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 
 	public static partial class OracleTools

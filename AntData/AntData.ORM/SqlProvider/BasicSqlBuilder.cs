@@ -34,6 +34,7 @@ namespace AntData.ORM.SqlProvider
 		protected ValueToSqlConverter ValueToSqlConverter;
 		protected StringBuilder       StringBuilder;
 		protected bool                SkipAlias;
+		protected bool                needAddQuotation;//表名称是否需要加引号
 
 		#endregion
 
@@ -231,11 +232,12 @@ namespace AntData.ORM.SqlProvider
 			if (database != null)
 			{
 				if (owner == null)  sb.Append(database).Append("..");
-				else                sb.Append(database).Append(".").Append(owner).Append(".");
+                else                sb.Append(database).Append(".").Append(owner).Append(".");
 			}
-			else if (owner != null) sb.Append(owner).Append(".");
+            else if (needAddQuotation) sb.Append(owner).Append(".\"");
+            else if (owner != null) sb.Append(owner).Append(".");
 
-			return sb.Append(table);
+			return needAddQuotation? sb.Append(table).Append("\""):sb.Append(table);
 		}
 
 		public virtual object Convert(object value, ConvertType convertType)

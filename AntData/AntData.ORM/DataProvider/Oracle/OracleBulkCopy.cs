@@ -7,7 +7,7 @@ using AntData.ORM.Data;
 using AntData.ORM.DataProvider;
 using AntData.ORM.SqlProvider;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 	
 

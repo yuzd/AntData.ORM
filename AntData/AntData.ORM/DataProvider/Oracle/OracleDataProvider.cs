@@ -12,7 +12,7 @@ using AntData.ORM.Extensions;
 using AntData.ORM.Mapping;
 using AntData.ORM.SqlProvider;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 
 	public class OracleDataProvider : DynamicDataProviderBase

@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +38,10 @@
   <ItemGroup>
     <Reference Include="MySql.Data, Version=6.7.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\packages\MySql.Data.6.7.4\lib\net40\MySql.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.12.1.24160719\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -74,6 +79,10 @@
     <ProjectReference Include="..\AntData.ORM.Mysql\AntData.ORM.Mysql.csproj">
       <Project>{793dcff9-618b-4106-9f2e-7280d8da8ccc}</Project>
       <Name>AntData.ORM.Mysql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AntData.ORM.Oracle\AntData.ORM.Oracle.csproj">
+      <Project>{6340e498-25e5-4d6e-914f-ace51ce0d7e3}</Project>
+      <Name>AntData.ORM.Oracle</Name>
     </ProjectReference>
     <ProjectReference Include="..\AntData.ORM\AntData.ORM.csproj">
       <Project>{8156e731-ed0a-404e-9a72-fca6988270da}</Project>

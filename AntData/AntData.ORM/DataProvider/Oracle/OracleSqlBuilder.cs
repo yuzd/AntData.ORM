@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using System.Text;
 using AntData.ORM;
 using AntData.ORM.Common;
 using AntData.ORM.SqlProvider;
 using AntData.ORM.SqlQuery;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 
 
@@ -140,7 +141,16 @@ namespace LinqToDB.DataProvider.Oracle
 			}
 		}
 
-		protected override void BuildWhereSearchCondition(SelectQuery.SearchCondition condition)
+	    public override StringBuilder BuildTableName(StringBuilder sb, string database, string owner, string table)
+	    {
+	        if(!string.IsNullOrEmpty(owner)) needAddQuotation = true;
+	        return base.BuildTableName(sb, database, owner, table);
+	    }
+        protected override void BuildSelectQuery()
+        {
+            base.BuildSelectQuery();
+        }
+        protected override void BuildWhereSearchCondition(SelectQuery.SearchCondition condition)
 		{
 			if (NeedTake && !NeedSkip && SelectQuery.OrderBy.IsEmpty && SelectQuery.Having.IsEmpty)
 			{

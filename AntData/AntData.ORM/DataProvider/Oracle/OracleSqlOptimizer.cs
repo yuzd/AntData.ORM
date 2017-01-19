@@ -3,7 +3,7 @@ using AntData.ORM.Extensions;
 using AntData.ORM.SqlProvider;
 using AntData.ORM.SqlQuery;
 
-namespace LinqToDB.DataProvider.Oracle
+namespace AntData.ORM.DataProvider.Oracle
 {
 
 	public class OracleSqlOptimizer : BasicSqlOptimizer
