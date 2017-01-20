@@ -69,13 +69,13 @@ namespace AntDataUnitTest
                 {
                     Name = "yuzd",
                     Age = 27,
-                    SchoolId = 1
+                    Schoolid = 1
                 },
                 new Person
                 {
                     Name = "nainaigu",
                     Age = 18,
-                    SchoolId = 2
+                    Schoolid = 2
                 }
             };
 
@@ -129,7 +129,7 @@ namespace AntDataUnitTest
             {
                 Name = "yuzd",
                 Age = 27,
-                SchoolId = 1
+                Schoolid = 1
             };
 
             var insertResult = DB.InsertWithIdentity(p);
@@ -185,7 +185,7 @@ namespace AntDataUnitTest
         public void TestMethod2_02()
         {
             var list = (from p in DB.Tables.People
-                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                        join s in DB.Tables.Schools on p.Schoolid equals s.Id
                         select p).ToList();
 
             Assert.IsTrue(list.Count > 0);
@@ -195,7 +195,7 @@ namespace AntDataUnitTest
         public void TestMethod2_03()
         {
             var list = (from p in DB.Tables.People
-                        from s in DB.Tables.Schools.Where(r => r.Id.Equals(p.SchoolId)).DefaultIfEmpty()
+                        from s in DB.Tables.Schools.Where(r => r.Id.Equals(p.Schoolid)).DefaultIfEmpty()
                         select p).ToList();
 
             Assert.IsTrue(list.Count > 0);
@@ -214,11 +214,11 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_05()
         {
-            var p = DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefault(r => r.Name.Equals("北京大学"));
+            var p = DB.Tables.Schools.LoadWith(r => r.Personsschools).FirstOrDefault(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Persons);
-            Assert.IsTrue(p.Persons.Any());
+            Assert.IsNotNull(p.Personsschools);
+            Assert.IsTrue(p.Personsschools.Any());
         }
 
         [TestMethod]
@@ -257,7 +257,7 @@ namespace AntDataUnitTest
         {
             var name = "yuzd";
             var list = await (from p in DB.Tables.People
-                              join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                              join s in DB.Tables.Schools on p.Schoolid equals s.Id
                               select p).ToListAsync();
             Assert.AreEqual(list.Count > 0, true);
 
@@ -419,7 +419,7 @@ namespace AntDataUnitTest
             var bbb = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).ToList(); ;
             var bbbd = DB.Tables.People.Where("age > @age", new { age = age }).Where("name = @name", new { name = "nainaigu" }).ToList();
             var bbbc = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).Where(r => r.Name.Equals("aaa")).ToList();
-            var bbbcc = DB.Tables.People.Where(r => r.SchoolId.Equals(2)).Where("age > @age", new { age = age }).Where(r => r.Name.Equals("nainaigu")).ToList();
+            var bbbcc = DB.Tables.People.Where(r => r.Schoolid.Equals(2)).Where("age > @age", new { age = age }).Where(r => r.Name.Equals("nainaigu")).ToList();
         }
 
         [TestMethod]
@@ -436,7 +436,7 @@ namespace AntDataUnitTest
             var age = 10;
 
             var list = (from p in DB.Tables.People
-                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                        join s in DB.Tables.Schools on p.Schoolid equals s.Id
                         select new { Name = p.Name, SchoolName = s.Name, Age = p.Age }).Where(r => r.Age > age).Where("school.name = @name", new { name = "nainaigu" }).Where("person.name = @name", new { name = "nainaigu" }).ToList();
         }
 
@@ -480,7 +480,7 @@ namespace AntDataUnitTest
             {
                 Name = "yuzd",
                 Age = 27,
-                SchoolId = 1
+                Schoolid = 1
             };
 
             var insertResult = DB.InsertWithIdentity<Person, long>(p);
@@ -531,7 +531,7 @@ namespace AntDataUnitTest
             {
                 Name = "yuzd",
                 Age = 27,
-                SchoolId = 1
+                Schoolid = 1
             };
 
             var insertResult = DB.InsertWithIdentity<Person, long>(p);

@@ -9,6 +9,7 @@
     GenerateFindExtensions = true;
 	GenerateDataTypes = true;
     IsCompactColumns = false;
+	IsOracle = true;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
 	LoadOracleMetadata("192.168.1.6", "1521", "orcl", "test", "test");

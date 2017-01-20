@@ -42,7 +42,7 @@ namespace DbModels.Oracle
 	/// <summary>
 	/// 用户表
 	/// </summary>
-	[Table(Schema="TEST", Comment="用户表", Name="person")]
+	[Table(Schema="TEST", Comment="用户表", Name="PERSON")]
 	public partial class Person : BaseEntity
 	{
 		#region Column
@@ -50,32 +50,42 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("Id",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, NotNull]
+		[Column("ID",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, NotNull]
 		public long Id { get; set; } // NUMBER (15,0)
 
 		/// <summary>
 		/// 姓名
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50, Comment="姓名"),    Nullable]
+		[Column("NAME",                DataType=DataType.VarChar,  Length=50, Comment="姓名"),    Nullable]
 		public string Name { get; set; } // VARCHAR2(50)
 
 		/// <summary>
 		/// 年纪
 		/// </summary>
-		[Column("Age",                 DataType=DataType.Decimal,  Length=22, Precision=5, Scale=0, Comment="年纪"),    Nullable]
+		[Column("AGE",                 DataType=DataType.Decimal,  Length=22, Precision=5, Scale=0, Comment="年纪"),    Nullable]
 		public int? Age { get; set; } // NUMBER (5,0)
 
 		/// <summary>
 		/// School外键
 		/// </summary>
-		[Column("SchoolId",            DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="School外键"),    Nullable]
-		public long? SchoolId { get; set; } // NUMBER (15,0)
+		[Column("SCHOOLID",            DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="School外键"),    Nullable]
+		public long? Schoolid { get; set; } // NUMBER (15,0)
 
 		/// <summary>
 		/// 最后更新时间
 		/// </summary>
-		[Column("DataChange_LastTime", DataType=DataType.DateTime, Length=7, Comment="最后更新时间"),    Nullable]
-		public DateTime? DataChangeLastTime { get; set; } // DATE
+		[Column("DATACHANGE_LASTTIME", DataType=DataType.DateTime, Length=7, Comment="最后更新时间"), NotNull]
+		public DateTime DatachangeLasttime // DATE
+		{
+			get { return _DatachangeLasttime; }
+			set { _DatachangeLasttime = value; }
+		}
+
+		#endregion
+
+		#region Field
+
+		private DateTime _DatachangeLasttime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
 
 		#endregion
 
@@ -84,7 +94,7 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// persons_school
 		/// </summary>
-		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, KeyName="persons_school", BackReferenceName="persons")]
+		[Association(ThisKey="Schoolid", OtherKey="ID", CanBeNull=true, KeyName="persons_school", BackReferenceName="personsschools")]
 		public School Personsschool { get; set; }
 
 		#endregion
@@ -93,31 +103,44 @@ namespace DbModels.Oracle
 	/// <summary>
 	/// 学校表
 	/// </summary>
-	[Table(Schema="TEST", Comment="学校表", Name="school")]
+	[Table(Schema="TEST", Comment="学校表", Name="SCHOOL")]
 	public partial class School : BaseEntity
 	{
 		#region Column
 
-		[Column("Id",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0), PrimaryKey, NotNull]
+		/// <summary>
+		/// 主键
+		/// </summary>
+		[Column("ID",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, NotNull]
 		public long Id { get; set; } // NUMBER (15,0)
 
 		/// <summary>
 		/// 学校名称
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50, Comment="学校名称"),    Nullable]
+		[Column("NAME",                DataType=DataType.VarChar,  Length=50, Comment="学校名称"),    Nullable]
 		public string Name { get; set; } // VARCHAR2(50)
 
 		/// <summary>
 		/// 学校地址
 		/// </summary>
-		[Column("Address",             DataType=DataType.VarChar,  Length=100, Comment="学校地址"),    Nullable]
+		[Column("ADDRESS",             DataType=DataType.VarChar,  Length=100, Comment="学校地址"),    Nullable]
 		public string Address { get; set; } // VARCHAR2(100)
 
 		/// <summary>
 		/// 最后更新时间
 		/// </summary>
-		[Column("DataChange_LastTime", DataType=DataType.DateTime, Length=7, Comment="最后更新时间"),    Nullable]
-		public DateTime? DataChangeLastTime { get; set; } // DATE
+		[Column("DATACHANGE_LASTTIME", DataType=DataType.DateTime, Length=7, Comment="最后更新时间"), NotNull]
+		public DateTime DatachangeLasttime // DATE
+		{
+			get { return _DatachangeLasttime; }
+			set { _DatachangeLasttime = value; }
+		}
+
+		#endregion
+
+		#region Field
+
+		private DateTime _DatachangeLasttime = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
 
 		#endregion
 
@@ -126,8 +149,8 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// persons_school_BackReference
 		/// </summary>
-		[Association(ThisKey="Id", OtherKey="SchoolId", CanBeNull=true, IsBackReference=true)]
-		public IEnumerable<Person> Persons { get; set; }
+		[Association(ThisKey="Id", OtherKey="Schoolid", CanBeNull=true, IsBackReference=true)]
+		public IEnumerable<Person> Personsschools { get; set; }
 
 		#endregion
 	}

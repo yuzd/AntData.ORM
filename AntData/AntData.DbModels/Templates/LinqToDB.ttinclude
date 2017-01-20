@@ -19,6 +19,7 @@ bool IsCompactColumnAliases = true;
 bool GenerateDataTypes      = false;
 bool GenerateDbTypes        = false;
 bool GenerateSchemaAsType   = false;
+bool IsOracle   = false;
 
 string SchemaNameSuffix          = "Schema";
 string SchemaDataContextTypeName = "DataContext";
@@ -41,7 +42,7 @@ string ToPascalCase(string the_string)
     {
         result +=
             word.Substring(0, 1).ToUpper() +
-            word.Substring(1);
+            (IsOracle?word.Substring(1).ToLower():word.Substring(1));
     }
 
     return result;
