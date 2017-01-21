@@ -183,6 +183,10 @@ namespace DbModels.Oracle
 	}
 }
 
+//下面的sql是创建SEQUENCE
+//CREATE SEQUENCE PERSONSEQ;
+//CREATE SEQUENCE SCHOOLSEQ; 
+
 //下面的sql是创建一个获取指定的Seq的结果的function，其中PERSONSEQ是我创建的seq
 //CREATE
 //OR REPLACE FUNCTION GET_PERSONSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
