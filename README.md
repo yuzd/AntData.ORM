@@ -17,6 +17,12 @@ Please see:
 
 http://note.youdao.com/noteshare?id=f4958dbc7b42971f64f44675fd116413&sub=8EF852DD85064E02AB187ACA9823D576
 
+# DEMO
+AntData.ORM For Oracle Demo：
+
+http://note.youdao.com/share/?id=998f6da78d9d7dfcc5293ca41a6d7c3a&type=note#/
+
+
 # Instance  DbContext
 
 ```csharp
