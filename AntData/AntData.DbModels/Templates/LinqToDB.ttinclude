@@ -406,8 +406,8 @@ void GenerateTypesFromMetadata()
 
 					var aa = new Attribute("Association");
 
-					aa.Parameters.Add("ThisKey=\""   + string.Join(", ", (from c in key.ThisColumns  select c.MemberName).ToArray()) + "\"");
-					aa.Parameters.Add("OtherKey=\""  + string.Join(", ", (from c in key.OtherColumns select c.MemberName).ToArray()) + "\"");
+					aa.Parameters.Add("ThisKey=\""   + string.Join(", ", (from c in key.ThisColumns  select ToPascalCase(c.MemberName)).ToArray()) + "\"");
+					aa.Parameters.Add("OtherKey=\""  + string.Join(", ", (from c in key.OtherColumns select ToPascalCase(c.MemberName)).ToArray()) + "\"");
 					aa.Parameters.Add("CanBeNull=" + (key.CanBeNull ? "true" : "false"));
 
 					if (key.BackReference != null)

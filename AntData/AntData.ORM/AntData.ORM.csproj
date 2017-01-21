@@ -62,6 +62,7 @@
     <Compile Include="DataProvider\Oracle\OracleFactory.cs" />
     <Compile Include="DataProvider\Oracle\OracleMappingSchema.cs" />
     <Compile Include="DataProvider\Oracle\OracleMerge.cs" />
+    <Compile Include="DataProvider\Oracle\OracleMultipleRowsHelper.cs" />
     <Compile Include="DataProvider\Oracle\OracleSqlBuilder.cs" />
     <Compile Include="DataProvider\Oracle\OracleSqlOptimizer.cs" />
     <Compile Include="DataProvider\Oracle\OracleTools.cs" />

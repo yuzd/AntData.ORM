@@ -81,7 +81,16 @@ namespace AntData.ORM.DataProvider.SqlServer
 
 		#region Public Properties
 
-		public override string ConnectionNamespace { get { return typeof(SqlConnection).Namespace; } }
+	    public override string ParameterSymbol
+	    {
+	        get { return "@"; }
+	    }
+
+	    public override bool InsertWinthIdentityWithNoCache {
+	        get { return false; }
+	    }
+
+	    public override string ConnectionNamespace { get { return typeof(SqlConnection).Namespace; } }
 		public override Type   DataReaderType      { get { return typeof(SqlDataReader);           } }
 
 		public SqlServerVersion Version { get; private set; }
@@ -114,10 +123,6 @@ namespace AntData.ORM.DataProvider.SqlServer
 			}
 		}
 
-		protected override IDbConnection CreateConnectionInternal(string connectionString)
-		{
-			return new SqlConnection(connectionString);
-		}
 
 		public override ISqlBuilder CreateSqlBuilder()
 		{

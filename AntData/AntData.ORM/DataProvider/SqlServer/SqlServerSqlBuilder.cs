@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AntData.ORM;
+using AntData.ORM.Common;
 using AntData.ORM.SqlProvider;
 using AntData.ORM.SqlQuery;
 
@@ -43,9 +44,9 @@ namespace AntData.ORM.DataProvider.SqlServer
             return selectQuery.IsInsert && selectQuery.Insert.WithIdentity ? 2 : 1;
         }
 
-        protected override void BuildCommand(int commandNumber)
+        protected override void BuildCommand(int commandNumber, List<CustomerParam> extend)
         {
-            StringBuilder.AppendLine("SELECT SCOPE_IDENTITY()");
+            StringBuilder.AppendLine(";SELECT SCOPE_IDENTITY()");
         }
 
         protected override void BuildOrderByClause()

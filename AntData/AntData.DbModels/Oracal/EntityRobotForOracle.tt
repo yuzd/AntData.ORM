@@ -13,5 +13,30 @@
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
 	LoadOracleMetadata("192.168.1.6", "1521", "orcl", "test", "test");
+
+	//set Identity field of table (ps:oracle表的自增类型是通过trigger seq来实现的，如果表有自增类型的字段要在这里手动设置一下)
+	SetIdentity("PERSON","ID","PERSONSEQ","GET_PERSONSEQ_IDENTITY_ID");
+	SetIdentity("SCHOOL","ID","SCHOOLSEQ","GET_SCHOOLSEQ_IDENTITY_ID");
+
+	//create entities
 	GenerateModel();
 #>
+
+//下面的sql是创建一个获取指定的Seq的结果的function，其中PERSONSEQ是我创建的seq
+//CREATE
+//OR REPLACE FUNCTION GET_PERSONSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
+//BEGIN
+//	SELECT
+//		PERSONSEQ.nextval INTO num
+//	FROM
+//		dual ; RETURN num ;
+//	END GET_PERSONSEQ_IDENTITY_ID ;
+
+//CREATE
+//OR REPLACE FUNCTION GET_SCHOOLSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
+//BEGIN
+//	SELECT
+//		PERSONSEQ.nextval INTO num
+//	FROM
+//		dual ; RETURN num ;
+//	END GET_SCHOOLSEQ_IDENTITY_ID ;

@@ -29,7 +29,9 @@ namespace AntData.ORM.Oracle
         /// <returns>数据库指令</returns>
         public DbCommand CreateCommand()
         {
-            return new OracleCommand();
+            var cmd = new OracleCommand();
+            cmd.BindByName = true;
+            return cmd;
         }
 
         /// <summary>

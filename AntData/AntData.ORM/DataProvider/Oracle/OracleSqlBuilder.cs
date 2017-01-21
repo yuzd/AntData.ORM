@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -32,18 +33,29 @@ namespace AntData.ORM.DataProvider.Oracle
 
 		protected override void BuildGetIdentity()
 		{
-			var identityField = SelectQuery.Insert.Into.GetIdentityField();
+            var identityField = SelectQuery.Insert.Into.GetIdentityField();
 
-			if (identityField == null)
-				throw new SqlException("Identity field must be defined for '{0}'.", SelectQuery.Insert.Into.Name);
+            if (identityField == null)
+            	throw new SqlException("Identity field must be defined for '{0}'.", SelectQuery.Insert.Into.Name);
 
-			AppendIndent().AppendLine("RETURNING ");
-			AppendIndent().Append("\t");
-			BuildExpression(identityField, false, true);
-			StringBuilder.AppendLine(" INTO :IDENTITY_PARAMETER");
-		}
+            //var table = identityField.Table as SqlTable;
+            //      if (table ==null)
+            //      {
+            //          throw new SqlException("Identity field must have table attributer for '{0}'.", SelectQuery.Insert.Into.Name);
+            //      }
+            //      var attr = GetSequenceNameAttribute(table, false);
+            //if (attr == null)
+            //{
+            //          throw new SqlException("Identity field must have Sequence attributer for '{0}'.", SelectQuery.Insert.Into.Name);
+            //      }
+            //      StringBuilder.AppendLine(" SELECT {0}.CURRVAL  from dual ".Args(attr.SequenceName));
+            AppendIndent().AppendLine(" RETURNING ");
+            AppendIndent().Append("\t");
+            BuildExpression(identityField, false, true);
+            StringBuilder.AppendLine(" INTO :IDENTITY_PARAMETER");
+        }
 
-		public override ISqlExpression GetIdentityExpression(SqlTable table)
+        public override ISqlExpression GetIdentityExpression(SqlTable table)
 		{
 			if (!table.SequenceAttributes.IsNullOrEmpty())
 			{
@@ -254,15 +266,16 @@ namespace AntData.ORM.DataProvider.Oracle
 
 		public override int CommandCount(SelectQuery selectQuery)
 		{
-			if (selectQuery.IsCreateTable)
-			{
-				_identityField = selectQuery.CreateTable.Table.Fields.Values.FirstOrDefault(f => f.IsIdentity);
+            return selectQuery.IsInsert && selectQuery.Insert.WithIdentity ? 2 : 1;
+   //         if (selectQuery.IsCreateTable)
+			//{
+			//	_identityField = selectQuery.CreateTable.Table.Fields.Values.FirstOrDefault(f => f.IsIdentity);
 
-				if (_identityField != null)
-					return 3;
-			}
+			//	if (_identityField != null)
+			//		return 3;
+			//}
 
-			return base.CommandCount(selectQuery);
+			//return base.CommandCount(selectQuery);
 		}
 
 		protected override void BuildDropTableStatement()
@@ -280,43 +293,72 @@ namespace AntData.ORM.DataProvider.Oracle
 			}
 		}
 
-		protected override void BuildCommand(int commandNumber)
+		protected override void BuildCommand(int commandNumber, List<CustomerParam> extend)
 		{
-			if (SelectQuery.CreateTable.IsDrop)
-			{
-				if (commandNumber == 1)
-				{
-					StringBuilder
-						.Append("DROP SEQUENCE SIDENTITY_")
-						.Append(SelectQuery.CreateTable.Table.PhysicalName)
-						.AppendLine();
-				}
-				else
-					base.BuildDropTableStatement();
-			}
-			else
-			{
-				if (commandNumber == 1)
-				{
-					StringBuilder
-						.Append("CREATE SEQUENCE SIDENTITY_")
-						.Append(SelectQuery.CreateTable.Table.PhysicalName)
-						.AppendLine();
-				}
-				else
-				{
-					StringBuilder
-						.AppendFormat("CREATE OR REPLACE TRIGGER  TIDENTITY_{0}", SelectQuery.CreateTable.Table.PhysicalName)
-						.AppendLine  ()
-						.AppendFormat("BEFORE INSERT ON {0} FOR EACH ROW", SelectQuery.CreateTable.Table.PhysicalName)
-						.AppendLine  ()
-						.AppendLine  ("BEGIN")
-						.AppendFormat("\tSELECT SIDENTITY_{1}.NEXTVAL INTO :NEW.{0} FROM dual;", _identityField.PhysicalName, SelectQuery.CreateTable.Table.PhysicalName)
-						.AppendLine  ()
-						.AppendLine  ("END;");
-				}
-			}
-		}
+            if(extend==null) extend = new List<CustomerParam>();
+            var identityField = SelectQuery.Insert.Into.GetIdentityField();
+
+            if (identityField == null)
+                throw new SqlException("Identity field must be defined for '{0}'.", SelectQuery.Insert.Into.Name);
+
+            //var table = identityField.Table as SqlTable;
+            //      if (table ==null)
+            //      {
+            //          throw new SqlException("Identity field must have table attributer for '{0}'.", SelectQuery.Insert.Into.Name);
+            //      }
+            //      var attr = GetSequenceNameAttribute(table, false);
+            //if (attr == null)
+            //{
+            //          throw new SqlException("Identity field must have Sequence attributer for '{0}'.", SelectQuery.Insert.Into.Name);
+            //      }
+            //      StringBuilder.AppendLine(" SELECT {0}.CURRVAL  from dual ".Args(attr.SequenceName));
+            AppendIndent().AppendLine(" RETURNING ");
+            AppendIndent().Append("\t");
+            BuildExpression(identityField, false, true);
+            StringBuilder.AppendLine(" INTO :IDENTITY_PARAMETER");
+            extend.Add(new CustomerParam
+            {
+                ParameterName = "IDENTITY_PARAMETER",
+                DbType = DataTypeConvert.Convert(identityField.DataType),
+                Value = identityField.Name,
+                ParameterDirection = ParameterDirection.Output
+            });
+
+            //         if (SelectQuery.CreateTable.IsDrop)
+            //{
+            //	if (commandNumber == 1)
+            //	{
+            //		StringBuilder
+            //			.Append("DROP SEQUENCE SIDENTITY_")
+            //			.Append(SelectQuery.CreateTable.Table.PhysicalName)
+            //			.AppendLine();
+            //	}
+            //	else
+            //		base.BuildDropTableStatement();
+            //}
+            //else
+            //{
+            //	if (commandNumber == 1)
+            //	{
+            //		StringBuilder
+            //			.Append("CREATE SEQUENCE SIDENTITY_")
+            //			.Append(SelectQuery.CreateTable.Table.PhysicalName)
+            //			.AppendLine();
+            //	}
+            //	else
+            //	{
+            //		StringBuilder
+            //			.AppendFormat("CREATE OR REPLACE TRIGGER  TIDENTITY_{0}", SelectQuery.CreateTable.Table.PhysicalName)
+            //			.AppendLine  ()
+            //			.AppendFormat("BEFORE INSERT ON {0} FOR EACH ROW", SelectQuery.CreateTable.Table.PhysicalName)
+            //			.AppendLine  ()
+            //			.AppendLine  ("BEGIN")
+            //			.AppendFormat("\tSELECT SIDENTITY_{1}.NEXTVAL INTO :NEW.{0} FROM dual;", _identityField.PhysicalName, SelectQuery.CreateTable.Table.PhysicalName)
+            //			.AppendLine  ()
+            //			.AppendLine  ("END;");
+            //	}
+            //}
+        }
 
 
 

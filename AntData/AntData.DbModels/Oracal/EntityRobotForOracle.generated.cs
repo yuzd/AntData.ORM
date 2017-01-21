@@ -50,13 +50,13 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("ID",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, NotNull]
+		[SequenceName("Oracle", "PERSONSEQ", SequenceFunction = "GET_PERSONSEQ_IDENTITY_ID"), Column("ID",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, Identity]
 		public long Id { get; set; } // NUMBER (15,0)
 
 		/// <summary>
 		/// 姓名
 		/// </summary>
-		[Column("NAME",                DataType=DataType.VarChar,  Length=50, Comment="姓名"),    Nullable]
+		[Column("NAME",                DataType=DataType.VarChar,  Length=50, Comment="姓名"), NotNull]
 		public string Name { get; set; } // VARCHAR2(50)
 
 		/// <summary>
@@ -94,7 +94,7 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// persons_school
 		/// </summary>
-		[Association(ThisKey="Schoolid", OtherKey="ID", CanBeNull=true, KeyName="persons_school", BackReferenceName="personsschools")]
+		[Association(ThisKey="Schoolid", OtherKey="Id", CanBeNull=true, KeyName="persons_school", BackReferenceName="personsschools")]
 		public School Personsschool { get; set; }
 
 		#endregion
@@ -111,7 +111,7 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("ID",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, NotNull]
+		[SequenceName("Oracle", "SCHOOLSEQ", SequenceFunction = "GET_SCHOOLSEQ_IDENTITY_ID"), Column("ID",                  DataType=DataType.Decimal,  Length=22, Precision=15, Scale=0, Comment="主键"), PrimaryKey, Identity]
 		public long Id { get; set; } // NUMBER (15,0)
 
 		/// <summary>
@@ -182,3 +182,22 @@ namespace DbModels.Oracle
 		}
 	}
 }
+
+//下面的sql是创建一个获取指定的Seq的结果的function，其中PERSONSEQ是我创建的seq
+//CREATE
+//OR REPLACE FUNCTION GET_PERSONSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
+//BEGIN
+//	SELECT
+//		PERSONSEQ.nextval INTO num
+//	FROM
+//		dual ; RETURN num ;
+//	END GET_PERSONSEQ_IDENTITY_ID ;
+
+//CREATE
+//OR REPLACE FUNCTION GET_SCHOOLSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
+//BEGIN
+//	SELECT
+//		PERSONSEQ.nextval INTO num
+//	FROM
+//		dual ; RETURN num ;
+//	END GET_SCHOOLSEQ_IDENTITY_ID ;

@@ -10,7 +10,7 @@ namespace AntData.ORM.DataProvider
 	using SqlProvider;
 	using SqlQuery;
 
-	class MultipleRowsHelper<T>
+    public class MultipleRowsHelper<T>
 	{
 		public MultipleRowsHelper(DataConnection dataConnection, BulkCopyOptions options, bool enforceKeepIdentity)
 		{
@@ -52,12 +52,13 @@ namespace AntData.ORM.DataProvider
 			HeaderSize = StringBuilder.Length;
 		}
 
-		public void BuildColumns(object item)
+        
+		public virtual void BuildColumns(object item)
 		{
 			for (var i = 0; i < Columns.Length; i++)
 			{
 				var column = Columns[i];
-				var value  = column.GetValue(item);
+                var value  = column.GetValue(item);
 
 				if (!ValueConverter.TryConvert(StringBuilder, ColumnTypes[i], value))
 				{

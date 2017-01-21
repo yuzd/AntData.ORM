@@ -54,6 +54,11 @@ namespace AntData.ORM.Data
 		    var needRefresh = false;
             if (query.SelectQuery.IsInsert || query.SelectQuery.IsInsertOrUpdate)
             {
+                if (query.SelectQuery.Insert.WithIdentity && DataProvider.InsertWinthIdentityWithNoCache)
+                {
+                    needRefresh = true;
+                }
+
                 if (Configuration.Linq.IgnoreNullInsert && query.Parameters != null && query.Parameters.Count > 0)
                 {
                     var ignoreList = new List<string>();
@@ -71,11 +76,10 @@ namespace AntData.ORM.Data
                         query.Parameters.RemoveAll(r => r.SqlParameter != null && r.SqlParameter.Value == null);
                         query.SelectQuery.Insert.Items.RemoveAll(r => ignoreList.Contains(((AntData.ORM.SqlQuery.SqlField)r.Column).Name));
                     }
-
                 }
             }
 
-            if (query.Context != null && !needRefresh)
+            if (query.Context != null && !needRefresh )
 			{
                 return new PreparedQuery
 				{
@@ -102,28 +106,27 @@ namespace AntData.ORM.Data
 		    sqlProvider.IsNoLock = this.IsNoLock;
             var cc = sqlProvider.CommandCount(sql);//获取自增的时候 才会是2
 			var sb = new StringBuilder();
-
-			var commands = new string[cc];
-
+            var commands = new string[cc];
+		    var extendHit = new List<CustomerParam>();
 			for (var i = 0; i < cc; i++)
 			{
 				sb.Length = 0;
 
-				sqlProvider.BuildSql(i, sql, sb);
+				sqlProvider.BuildSql(i, sql, sb, extendHit);
 				commands[i] = sb.ToString();
 			}
-            
-			if (!query.SelectQuery.IsParameterDependent)
+           
+            if (!query.SelectQuery.IsParameterDependent)
 				query.Context = commands;
 
-		    return new PreparedQuery
+		    return  new PreparedQuery
 			{
 				Commands      = commands,
 				SqlParameters = sql.Parameters,
 				SelectQuery   = sql,
 				SqlProvider   = sqlProvider,
 				QueryHints    = query.QueryHints,
-                Params = query.Params
+                Params = extendHit.Count > 0? extendHit.ToDictionary(r=>r.ParameterName,r=>r) :query.Params
             };
 		}
 
@@ -153,7 +156,7 @@ namespace AntData.ORM.Data
 					if (sqlp.IsQueryParameter)
 					{
 						var parm = parameters.Length > i && object.ReferenceEquals(parameters[i], sqlp) ? parameters[i] : parameters.First(p => object.ReferenceEquals(p, sqlp));
-                        pq.Params.Add("@" + parm.Name,AddParameter(parms, parm.Name, parm));
+                        pq.Params.Add(DataProvider.ParameterSymbol + parm.Name,AddParameter(parms, parm.Name, parm));
 					}
 				}
 			}
@@ -163,7 +166,7 @@ namespace AntData.ORM.Data
 				{
 				    if (parm.IsQueryParameter) // && pq.SqlParameters.Contains(parm)
                     {
-                        pq.Params.Add("@" + parm.Name, AddParameter(parms, parm.Name, parm));
+                        pq.Params.Add(DataProvider.ParameterSymbol + parm.Name, AddParameter(parms, parm.Name, parm));
                     }
 						
 				}
@@ -233,13 +236,15 @@ namespace AntData.ORM.Data
         object IDataContext.ExecuteScalar(object query, bool Identity)
         {
             var pq = (PreparedQuery)query;
-
-            InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
+            
             if (Identity)
             {
-                InitCommand(CommandType.Text,pq.Commands[0] + ";" + pq.Commands[1], null, null);
-                return ExecuteScalar(pq.Commands[0] + ";" + pq.Commands[1],pq.Params,true);//执行Insert
+                InitCommand(CommandType.Text,pq.Commands[0] + pq.Commands[1], null, null);
+                return ExecuteScalar(pq.Commands[0]  + pq.Commands[1],pq.Params,true);//执行Insert
             }
+
+            InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
+
             if (pq.Commands.Length == 1)
             {
                 return ExecuteScalar(pq.Commands[0], pq.Params);
@@ -255,9 +260,9 @@ namespace AntData.ORM.Data
 		{
 			var pq = (PreparedQuery)query;
 
-			InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
+            InitCommand(CommandType.Text, pq.Commands[0], null, pq.QueryHints);
 
-			if (pq.Commands.Length == 1)
+            if (pq.Commands.Length == 1)
 			{
 				return ExecuteScalar(pq.Commands[0],pq.Params);
 			}
@@ -355,12 +360,27 @@ namespace AntData.ORM.Data
 
 		object IDataContext.SetQuery(IQueryContext queryContext)
 		{
+            var reverseCount = 0;
 			var query = GetCommand(queryContext);
-            query.Params = new Dictionary<string, CustomerParam>();
+		    if (query.Params == null)
+		    {
+		        query.Params = new Dictionary<string, CustomerParam>();
+		    }
+		    else
+		    {
+                reverseCount = query.Params.Count;
+
+		    }
             GetParameters(queryContext, query);
 #if DEBUG
            // Debug.WriteLine(((IDataContext)this).GetSqlText(query).Replace("\r", ""));
 #endif
+		    if (reverseCount > 0)
+		    {
+		        var q = query.Params.Skip(reverseCount).Take(query.Params.Count - reverseCount).ToList();
+                q.AddRange(query.Params.Take(reverseCount));
+                query.Params = q.ToDictionary(r=>r.Key,r=>r.Value);
+		    }
             return query;
 		}
 

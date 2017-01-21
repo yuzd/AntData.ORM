@@ -56,12 +56,12 @@ namespace AntData.ORM.SqlProvider
 
 		#region BuildSql
 
-		public void BuildSql(int commandNumber, SelectQuery selectQuery, StringBuilder sb)
+		public void BuildSql(int commandNumber, SelectQuery selectQuery, StringBuilder sb, List<CustomerParam> extend = null)
 		{
-			BuildSql(commandNumber, selectQuery, sb, 0, false);
+			BuildSql(commandNumber, selectQuery, sb, 0, false, extend);
 		}
 
-		protected virtual void BuildSql(int commandNumber, SelectQuery selectQuery, StringBuilder sb, int indent, bool skipAlias)
+		protected virtual void BuildSql(int commandNumber, SelectQuery selectQuery, StringBuilder sb, int indent, bool skipAlias, List<CustomerParam> extend = null)
 		{
 			SelectQuery   = selectQuery;
 			StringBuilder = sb;
@@ -81,17 +81,17 @@ namespace AntData.ORM.SqlProvider
 						if (union.IsAll) sb.Append(" ALL");
 						sb.AppendLine();
 
-						((BasicSqlBuilder)CreateSqlBuilder()).BuildSql(commandNumber, union.SelectQuery, sb, indent, skipAlias);
+						((BasicSqlBuilder)CreateSqlBuilder()).BuildSql(commandNumber, union.SelectQuery, sb, indent, skipAlias, extend);
 					}
 				}
 			}
 			else
 			{
-				BuildCommand(commandNumber);
+				BuildCommand(commandNumber, extend);
 			}
 		}
 
-		protected virtual void BuildCommand(int commandNumber)
+		protected virtual void BuildCommand(int commandNumber, List<CustomerParam> extend)
 		{
 		}
 

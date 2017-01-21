@@ -64,24 +64,16 @@ namespace AntData.ORM.DataProvider
 		#region Public Members
 
 		public          string           Name                { get; private set; }
-		public abstract string           ConnectionNamespace { get; }
+	    public abstract string ParameterSymbol { get; }
+	    public abstract bool InsertWinthIdentityWithNoCache { get; }
+	    public abstract string           ConnectionNamespace { get; }
 		public abstract Type             DataReaderType      { get; }
 		public virtual  MappingSchema    MappingSchema       { get; private set; }
 		public          SqlProviderFlags SqlProviderFlags    { get; private set; }
 
-		public static Func<IDataProvider,IDbConnection,IDbConnection> OnConnectionCreated { get; set; }
 
-		public IDbConnection CreateConnection(string connectionString)
-		{
-			var connection = CreateConnectionInternal(connectionString);
+		
 
-			if (OnConnectionCreated != null)
-				connection = OnConnectionCreated(this, connection);
-
-			return connection;
-		}
-
-		protected abstract IDbConnection CreateConnectionInternal (string connectionString);
 		public    abstract ISqlBuilder   CreateSqlBuilder();
 		public    abstract ISqlOptimizer GetSqlOptimizer ();
 

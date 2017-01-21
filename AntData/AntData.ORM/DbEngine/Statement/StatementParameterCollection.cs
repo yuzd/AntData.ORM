@@ -77,6 +77,16 @@ namespace AntData.ORM.DbEngine
             });
         }
 
+        public void AddReturnParameter(String name, DbType dbType, Boolean sensitive = false)
+        {
+            Add(new StatementParameter()
+            {
+                Name = name,
+                DbType = dbType,
+                Direction = ParameterDirection.ReturnValue,
+                IsSensitive = sensitive,
+            });
+        }
         public void AddOutParameter(String name, DbType dbType, Int32 size, Boolean sensitive = false)
         {
             Add(new StatementParameter()
@@ -89,6 +99,17 @@ namespace AntData.ORM.DbEngine
             });
         }
 
+        public void AddReturnParameter(String name, DbType dbType, Int32 size, Boolean sensitive = false)
+        {
+            Add(new StatementParameter()
+            {
+                Name = name,
+                DbType = dbType,
+                Direction = ParameterDirection.ReturnValue,
+                Size = size,
+                IsSensitive = sensitive,
+            });
+        }
         public void AddParameter(String name, DbType dbType, Object value, Int32 size, ParameterDirection dir, Boolean sensitive = false)
         {
             Add(new StatementParameter()

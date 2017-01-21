@@ -1,0 +1,75 @@
+﻿//-----------------------------------------------------------------------
+// <copyright file="OracleMultipleRowsHelper.cs" company="Company">
+// Copyright (C) Company. All Rights Reserved.
+// </copyright>
+// <author>nainaigu</author>
+// <summary></summary>
+//-----------------------------------------------------------------------
+
+using AntData.ORM.Data;
+using AntData.ORM.Mapping;
+
+namespace AntData.ORM.DataProvider.Oracle
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class OracleMultipleRowsHelper<T>: MultipleRowsHelper<T>
+    {
+        public string WithSeqName;
+        public OracleMultipleRowsHelper(DataConnection dataConnection, BulkCopyOptions options, bool enforceKeepIdentity) : base(dataConnection, options, enforceKeepIdentity)
+        {
+            var id = base.Columns.FirstOrDefault(r => r.IsIdentity);
+            if (id != null)
+            {
+                var seq = id.MemberInfo.GetCustomAttributes(typeof(SequenceNameAttribute), true).FirstOrDefault();
+                var seqName = seq as SequenceNameAttribute;
+                if (seqName != null)
+                {
+                    WithSeqName = seqName.SequenceFunction + "()";
+                }
+            }
+        }
+
+        public override void BuildColumns(object item)
+        {
+            for (var i = 0; i < Columns.Length; i++)
+            {
+                var column = Columns[i];
+                if (column.IsIdentity && !string.IsNullOrEmpty(WithSeqName))
+                {
+                    StringBuilder.Append(WithSeqName);
+                    StringBuilder.Append(" ,");
+                    continue;
+                }
+                var value = column.GetValue(item);
+
+                if (!ValueConverter.TryConvert(StringBuilder, ColumnTypes[i], value))
+                {
+                    var name = ParameterName == "?" ? ParameterName : ParameterName + ++ParameterIndex;
+
+                    StringBuilder.Append(name);
+
+                    if (value is DataParameter)
+                    {
+                        value = ((DataParameter)value).Value;
+                    }
+
+                    Parameters.Add(new DataParameter(ParameterName == "?" ? ParameterName : "p" + ParameterIndex, value,
+                        column.DataType));
+                }
+
+                StringBuilder.Append(",");
+            }
+
+            StringBuilder.Length--;
+        }
+    }
+}

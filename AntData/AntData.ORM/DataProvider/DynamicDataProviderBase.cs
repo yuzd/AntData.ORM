@@ -56,18 +56,6 @@ namespace AntData.ORM.DataProvider
 			get { return _dataReaderType ?? (_dataReaderType = Type.GetType(DataReaderTypeName, true)); }
 		}
 
-		Func<string,IDbConnection> _createConnection;
-
-		protected override IDbConnection CreateConnectionInternal(string connectionString)
-		{
-			if (_createConnection == null)
-			{
-				var l = CreateConnectionExpression(GetConnectionType());
-				_createConnection = l.Compile();
-			}
-
-			return _createConnection(connectionString);
-		}
 
 		internal static Expression<Func<string,IDbConnection>> CreateConnectionExpression(Type connectionType)
 		{

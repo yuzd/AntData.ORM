@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using AntData.ORM.Common;
 
 namespace AntData.ORM.DataProvider.MySql
 {
@@ -26,9 +27,9 @@ namespace AntData.ORM.DataProvider.MySql
 			return selectQuery.IsInsert && selectQuery.Insert.WithIdentity ? 2 : 1;
 		}
 
-		protected override void BuildCommand(int commandNumber)
+		protected override void BuildCommand(int commandNumber, List<CustomerParam> extend)
 		{
-			StringBuilder.AppendLine("SELECT LAST_INSERT_ID()");
+			StringBuilder.AppendLine(";SELECT LAST_INSERT_ID()");
 		}
 
 		protected override ISqlBuilder CreateSqlBuilder()

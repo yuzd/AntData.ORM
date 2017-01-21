@@ -14,12 +14,13 @@ namespace AntData.ORM.DataProvider
 	public interface IDataProvider
 	{
 		string             Name                  { get; }
+		string ParameterSymbol { get; }
+		bool InsertWinthIdentityWithNoCache { get; }
 		string             ConnectionNamespace   { get; }
 		Type               DataReaderType        { get; }
 		MappingSchema      MappingSchema         { get; }
 		SqlProviderFlags   SqlProviderFlags      { get; }
 
-		IDbConnection      CreateConnection      (string connectionString);
 		ISqlBuilder        CreateSqlBuilder      ();
 		ISqlOptimizer      GetSqlOptimizer       ();
 		

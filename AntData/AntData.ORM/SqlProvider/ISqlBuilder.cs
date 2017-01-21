@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using AntData.ORM.Common;
 
 namespace AntData.ORM.SqlProvider
 {
@@ -10,7 +11,7 @@ namespace AntData.ORM.SqlProvider
 	public interface ISqlBuilder
 	{
 		int              CommandCount         (SelectQuery selectQuery);
-		void             BuildSql             (int commandNumber, SelectQuery selectQuery, StringBuilder sb);
+		void             BuildSql             (int commandNumber, SelectQuery selectQuery, StringBuilder sb,List<CustomerParam> extend = null);
 
 		StringBuilder    ConvertTableName     (StringBuilder sb, string database, string owner, string table);
 		StringBuilder    BuildTableName       (StringBuilder sb, string database, string owner, string table);

@@ -322,7 +322,7 @@ namespace AntData.ORM.Data
 
 			    p.ParameterName = parameter.Name;
                 p.DbType = DataTypeConvert.Convert(dataType);
-                result.Add(parameter.Name.StartsWith("@")? parameter.Name : "@" + parameter.Name, p);
+                result.Add(parameter.Name.StartsWith(dataConnection.DataProvider.ParameterSymbol) ? parameter.Name : dataConnection.DataProvider.ParameterSymbol + parameter.Name, p);
 				//dataConnection.Command.Parameters.Add(p);
 			}
 		    return result;

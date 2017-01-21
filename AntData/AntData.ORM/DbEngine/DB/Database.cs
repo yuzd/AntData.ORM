@@ -207,6 +207,7 @@ namespace AntData.ORM.DbEngine.DB
                         parameter.Value = p.Value ?? DBNull.Value;
                         parameter.Direction = p.Direction;
                         parameter.IsNullable = p.IsNullable;
+                        
                         command.Parameters.Add(parameter);
                     }
                     else

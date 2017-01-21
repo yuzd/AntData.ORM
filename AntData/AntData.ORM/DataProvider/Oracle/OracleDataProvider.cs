@@ -276,7 +276,16 @@ namespace AntData.ORM.DataProvider.Oracle
 			}
 		}
 
-		public    override string ConnectionNamespace { get { return OracleTools.AssemblyName + ".Client"; } }
+	    public override string ParameterSymbol
+	    {
+	        get { return ":"; }
+	    }
+
+	    public override bool InsertWinthIdentityWithNoCache {
+	        get { return true; }
+	    }
+
+	    public    override string ConnectionNamespace { get { return OracleTools.AssemblyName + ".Client"; } }
 		protected override string ConnectionTypeName  { get { return "{0}.{1}, {0}".Args(OracleTools.AssemblyName, "Client.OracleConnection"); } }
 		protected override string DataReaderTypeName  { get { return "{0}.{1}, {0}".Args(OracleTools.AssemblyName, "Client.OracleDataReader"); } }
 

@@ -39,7 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mysql\EntityRobotForMysql.cs">
+    <Compile Include="Mysql\EntityRobotForMysql.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EntityRobotForMysql.tt</DependentUpon>
@@ -68,7 +68,7 @@
     <Content Include="code.gen\tools\Oracle.ManagedDataAccess.dll" />
     <Content Include="Mysql\EntityRobotForMysql.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>EntityRobotForMysql.cs</LastGenOutput>
+      <LastGenOutput>EntityRobotForMysql.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Oracal\EntityRobotForOracle.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

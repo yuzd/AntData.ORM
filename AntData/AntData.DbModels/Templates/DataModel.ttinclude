@@ -439,6 +439,35 @@ public TableContext SetTable(string tableName,
 	return ctx;
 }
 
+public void SetIdentity(string tableName,string columnName,string sequenceName,string sequenceFunctionName,string config = "Oracle",bool flag = true)
+{
+	if(string.IsNullOrEmpty(sequenceName))
+    {
+		WriteLine("#error SetIdentity sequenceName is IsNullOrEmpty");
+		return;
+    }
+
+	if(string.IsNullOrEmpty(sequenceFunctionName))
+    {
+		WriteLine("#error SetIdentity sequenceFunctionName is IsNullOrEmpty");
+		return;
+    }
+
+	var c = GetColumn(tableName,columnName);
+
+	if ( c != null)
+	{
+		c.IsIdentity = flag;
+		if(flag)
+		{
+			//Ôö¼ÓSequenceName Attribute
+			c.Attributes.Add(new Attribute("SequenceName","\"" + config + "\"","\"" + sequenceName + "\"","SequenceFunction = \"" + sequenceFunctionName + "\""));
+        }
+		return;
+	}
+	WriteLine("#error SetIdentity '" + tableName + "'.'" + columnName +  "' not found.");
+}
+
 public class TableContext
 {
 	public GeneratedTextTransformation Transformation;

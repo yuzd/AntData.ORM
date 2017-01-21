@@ -18,5 +18,6 @@ namespace AntData.ORM.Mapping
 
 		public string Configuration { get; set; }
 		public string SequenceName  { get; set; }
+		public string SequenceFunction  { get; set; }
 	}
 }

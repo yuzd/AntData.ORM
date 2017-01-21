@@ -23,7 +23,11 @@ namespace AntData.ORM.DataProvider.MySql
 			_sqlOptimizer = new MySqlSqlOptimizer(SqlProviderFlags);
 		}
 
-		public    override string ConnectionNamespace { get { return "MySql.Data.MySqlClient"; } }
+
+	    public override bool InsertWinthIdentityWithNoCache {
+	        get { return false; }
+	    }
+	    public    override string ConnectionNamespace { get { return "MySql.Data.MySqlClient"; } }
 		protected override string ConnectionTypeName  { get { return "{0}.{1}, MySql.Data".Args(ConnectionNamespace, "MySqlConnection"); } }
 		protected override string DataReaderTypeName  { get { return "{0}.{1}, MySql.Data".Args(ConnectionNamespace, "MySqlDataReader"); } }
 
@@ -66,8 +70,11 @@ namespace AntData.ORM.DataProvider.MySql
 		{
 			return _sqlOptimizer;
 		}
-
-		public override void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
+        public override string ParameterSymbol
+        {
+            get { return "@"; }
+        }
+        public override void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
 		{
 			switch (dataType)
 			{

@@ -1,5 +1,5 @@
 <#@ template language="C#" debug="True" hostSpecific="True"                       #>
-<#@ output extension=".cs"                                              #>
+<#@ output extension=".generated.cs"                                              #>
 <#@ include file="..\Templates\LinqToDB.MySql.Tools.ttinclude" #>
 <#@ include file="..\Templates\PluralizationService.ttinclude" #>
 <#

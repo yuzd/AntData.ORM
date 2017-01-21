@@ -443,6 +443,7 @@ namespace AntData.ORM.Dao
                 Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, sql, parameters, hints, operationType);
                 AddSqlToExtendParams(statement, hints);
                 result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
+                parameters = statement.Parameters;
                 return result;
             }
             catch (Exception ex)
