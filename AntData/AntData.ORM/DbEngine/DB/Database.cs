@@ -6,10 +6,11 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
-using AntData.core.Compatibility.System.Data;
+#if NETSTANDARD
+    using AntData.core.Compatibility.System.Data;
+#endif
 using System.Transactions;
 using AntData.ORM.Common.Util;
-using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine.Connection;
 using AntData.ORM.DbEngine.Providers;
 using AntData.ORM.Enums;
@@ -329,19 +330,18 @@ namespace AntData.ORM.DbEngine.DB
                     }
                 }
 
-              
+                statement.ExecStatus = DALState.Success;
                 return dataSet;
-            }
-            catch (DbException ex)
-            {
-                throw;
             }
             catch (Exception ex)
             {
-                throw;
+                statement.ExecStatus = DALState.Fail;
+                throw ex;
             }
             finally
             {
+                watch.Stop();
+                statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
             }
         }
 #endif
@@ -368,19 +368,18 @@ namespace AntData.ORM.DbEngine.DB
                         UpdateStatementParamenters(statement, command);
                     }
                 }
-
+                statement.ExecStatus = DALState.Success;
                 return result;
-            }
-            catch (DbException ex)
-            {
-                throw;
             }
             catch (Exception ex)
             {
-                throw;
+                statement.ExecStatus = DALState.Fail;
+                throw ex;
             }
             finally
             {
+                watch.Stop();
+                statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
             }
         }
 
@@ -407,19 +406,18 @@ namespace AntData.ORM.DbEngine.DB
                         UpdateStatementParamenters(statement, command);
                     }
                 }
-
+                statement.ExecStatus = DALState.Success;
                 return reader;
-            }
-            catch (DbException ex)
-            {
-                throw;
             }
             catch (Exception ex)
             {
-                throw;
+                statement.ExecStatus = DALState.Fail;
+                throw ex;
             }
             finally
             {
+                watch.Stop();
+                statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
             }
         }
 
@@ -446,19 +444,18 @@ namespace AntData.ORM.DbEngine.DB
                         UpdateStatementParamenters(statement, command);
                     }
                 }
-
+                statement.ExecStatus = DALState.Success;
                 return result;
             }
-            catch (DbException ex)
+            catch(Exception ex)
             {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw;
+                statement.ExecStatus = DALState.Fail;
+                throw ex;
             }
             finally
             {
+                watch.Stop();
+                statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
             }
         }
 
@@ -484,22 +481,26 @@ namespace AntData.ORM.DbEngine.DB
                     using (var wrapper = GetOpenConnection(false))
                     {
                         command.Connection = wrapper.Connection;
-                        reader = command.ExecuteReader(Transaction.Current != null ? CommandBehavior.Default : CommandBehavior.CloseConnection);
+                        reader =
+                            command.ExecuteReader(Transaction.Current != null
+                                ? CommandBehavior.Default
+                                : CommandBehavior.CloseConnection);
                         UpdateStatementParamenters(statement, command);
                     }
                 }
 
-                watch.Stop();
-                statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
                 statement.ExecStatus = DALState.Success;
                 return reader;
             }
             catch
             {
                 statement.ExecStatus = DALState.Fail;
+                return null;
+            }
+            finally
+            {
                 watch.Stop();
                 statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
-                return null;
             }
         }
 
@@ -531,8 +532,6 @@ namespace AntData.ORM.DbEngine.DB
                     }
                 }
 
-                watch.Stop();
-                statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
                 statement.ExecStatus = DALState.Success;
                 statement.RecordCount = result == null ? 0 : 1;
                 return result;
@@ -540,9 +539,12 @@ namespace AntData.ORM.DbEngine.DB
             catch
             {
                 statement.ExecStatus = DALState.Fail;
+                return null;
+            }
+            finally
+            {
                 watch.Stop();
                 statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
-                return null;
             }
         }
 

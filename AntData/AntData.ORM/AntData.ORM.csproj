@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FW4;OVERRIDETOSTRING1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -300,6 +300,7 @@
     <Compile Include="Metadata\MetadataReader.cs" />
     <Compile Include="Metadata\MetaMemberInfo.cs" />
     <Compile Include="Metadata\MetaTypeInfo.cs" />
+    <Compile Include="Metadata\SystemComponentModelDataAnnotationsSchemaAttributeReader.cs" />
     <Compile Include="Metadata\SystemDataLinqAttributeReader.cs" />
     <Compile Include="Metadata\SystemDataSqlServerAttributeReader.cs" />
     <Compile Include="Metadata\XmlAttributeReader.cs" />

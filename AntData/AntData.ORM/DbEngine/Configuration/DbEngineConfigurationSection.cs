@@ -54,7 +54,10 @@ namespace AntData.ORM.DbEngine.Configuration
         [ConfigurationProperty("name", DefaultValue = "DALFx")]
         public String Name
         {
-            get { return (String)base["name"]; }
+            get { return (String)base["name"];}
+#if NETSTANDARD
+            set { Name = value; }
+#endif
         }
 
         #endregion
@@ -68,6 +71,9 @@ namespace AntData.ORM.DbEngine.Configuration
         public DatabaseSetElementCollection DatabaseSets
         {
             get { return (DatabaseSetElementCollection)base[databaseSets]; }
+#if NETSTANDARD
+            set { DatabaseSets = value; }
+#endif
         }
 
         /// <summary>
@@ -77,9 +83,12 @@ namespace AntData.ORM.DbEngine.Configuration
         public DatabaseProviderElementCollection DatabaseProviders
         {
             get { return (DatabaseProviderElementCollection)base[databaseProviders]; }
+#if NETSTANDARD
+            set { DatabaseProviders = value; }
+#endif
         }
 
-      
+
 
         #endregion
     }

@@ -72,7 +72,7 @@ namespace AntData.ORM.DbEngine.HA
 
             try
             {
-               // ExecutorManager.Executor.Daemon();
+                // ExecutorManager.Executor.Daemon();
                 //被Mark Down了，且当前Request没有放行
                 //while (haBean.EnableHA && retryTimes > 0 && !currentOperateDatabase.Available)
                 //{
@@ -92,7 +92,7 @@ namespace AntData.ORM.DbEngine.HA
             }
             catch (DbException ex)
             {
-             
+
                 var exception = ex;
                 Boolean failoverSucceed = false;
                 String databaseSet = currentOperateDatabase.DatabaseSetName;
@@ -108,7 +108,8 @@ namespace AntData.ORM.DbEngine.HA
                         if (!failoverNecessary)
                             throw;
                         //有备用的就去备用的执行试试
-                        var failoverDatabase = FallToNextDatabase(currentOperateDatabase, databases.OtherCandidates, bitArray);
+                        var failoverDatabase = FallToNextDatabase(currentOperateDatabase, databases.OtherCandidates,
+                            bitArray);
                         if (failoverDatabase == null)
                             throw;
 
@@ -130,6 +131,10 @@ namespace AntData.ORM.DbEngine.HA
 
                 if (!failoverSucceed)
                     throw;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
 
             return result;

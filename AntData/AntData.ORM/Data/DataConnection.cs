@@ -7,6 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using AntData.core.DbEngine.Configuration;
 using AntData.ORM.Dao;
 using JetBrains.Annotations;
 
@@ -80,7 +81,7 @@ namespace AntData.ORM.Data
 
         #region Public Properties
 
-
+        public static DBSettings DefaultSettings { get; set; }
         /// <summary>
         /// 逻辑数据库名称
         /// </summary>
@@ -143,10 +144,10 @@ namespace AntData.ORM.Data
 
         #endregion
 
-       
-     
+	   
 
-        #region 执行sql操作
+
+	    #region 执行sql操作
         /// <summary>
         /// 执行insert update delete 语句(不包括insertWithIdentity)
         /// </summary>

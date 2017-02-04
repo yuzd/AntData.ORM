@@ -4,9 +4,8 @@ using System;
 using System.Reflection;
 using AntData.ORM.Common;
 using AntData.ORM.Mapping;
-using AntData.ORM.Metadata;
 
-namespace LinqToDB.Metadata
+namespace AntData.ORM.Metadata
 {
 
 

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 
 using JetBrains.Annotations;
-using LinqToDB.Metadata;
 
 namespace AntData.ORM.Metadata
 {

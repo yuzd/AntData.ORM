@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
-using AntData.core.Compatibility.System.Data;
+#if NETSTANDARD
+    using AntData.core.Compatibility.System.Data;
+#endif
 using AntData.ORM.DbEngine.HA;
 using AntData.ORM.Properties;
 
@@ -60,7 +62,8 @@ namespace AntData.ORM.DbEngine.DB
             {
            
                 var databases = DatabaseFactory.GetDatabasesByStatement(statement);
-                return HAFactory.GetInstance(statement.DatabaseSet).ExecuteWithHa(db => db.ExecuteReader(statement), databases);
+                return databases.FirstCandidate.ExecuteReader(statement);
+                //return HAFactory.GetInstance(statement.DatabaseSet).ExecuteWithHa(db => db.ExecuteReader(statement), databases);
             }
             finally
             {

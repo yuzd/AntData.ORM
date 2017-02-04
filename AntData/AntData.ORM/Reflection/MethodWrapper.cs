@@ -215,7 +215,7 @@ namespace AntData.ORM.Reflection
 #if NETSTANDARD
                 _caller = DynamicMethodFactory.CreateDelegate(typeof(TDelegate), method) as TDelegate;
 #else
-                caller = Delegate.CreateDelegate(typeof(TDelegate), null, method) as TDelegate;
+                _caller = Delegate.CreateDelegate(typeof(TDelegate), null, method) as TDelegate;
 #endif
         }
 

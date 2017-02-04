@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0.0-*",
+  "testRunner": "mstest",
+  "buildOptions": {
+    "copyToOutput": {
+      "mappings": {
+        "App.config": "App.config",
+        "Config/": "Config/"
+      }
+    }
+  },
+  "dependencies": {
+    "AntData.DbModels.linux": "1.0.0-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.1"
+    },
+    "MySql.Data": "7.0.5-IR21",
+    "MSTest.TestFramework": "1.0.8-rc2",
+    "MSTest.TestAdapter": "1.1.10-rc2",
+    "dotnet-test-mstest": "1.1.2-preview"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
+    }
+  }
+}
