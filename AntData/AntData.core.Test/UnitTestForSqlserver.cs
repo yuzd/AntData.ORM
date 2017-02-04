@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using AntData.core.DbEngine.Configuration;
+using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM;
 using AntData.ORM.Data;
 using AntData.ORM.DataProvider.SqlServer;
