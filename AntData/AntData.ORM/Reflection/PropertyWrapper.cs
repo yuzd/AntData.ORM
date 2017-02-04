@@ -220,7 +220,7 @@ namespace AntData.ORM.Reflection
 
     internal class StaticSetterWrapper<TValue> : ISetValue
     {
-        private Action<TTarget, TValue> _setter;
+        private Action<TValue> _setter;
 
         public StaticSetterWrapper(PropertyInfo propertyInfo)
         {
