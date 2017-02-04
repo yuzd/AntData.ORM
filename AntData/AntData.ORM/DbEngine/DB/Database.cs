@@ -4,11 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
-using System.Globalization;
 using System.Threading;
-#if NETSTANDARD
-    using AntData.core.Compatibility.System.Data;
-#endif
 using System.Transactions;
 using AntData.ORM.Common.Util;
 using AntData.ORM.DbEngine.Connection;
@@ -28,7 +24,6 @@ namespace AntData.ORM.DbEngine.DB
         /// </summary>
         private String m_ConnectionString;
 
-        private readonly ReaderWriterLockSlim connectionStringLock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// 数据库提供者对象

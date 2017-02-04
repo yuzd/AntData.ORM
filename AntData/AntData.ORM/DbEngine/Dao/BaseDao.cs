@@ -8,9 +8,6 @@
 
 using System.Collections;
 using System.Data;
-#if NETSTANDARD
-    using AntData.core.Compatibility.System.Data;
-#endif
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.Dao.sql;
