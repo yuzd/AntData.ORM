@@ -4,7 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Threading;
 using System.Xml;
-
+using System.Linq;
 namespace AntData.ORM.DbEngine.ConnectionString
 {
     /// <summary>
@@ -69,7 +69,7 @@ namespace AntData.ORM.DbEngine.ConnectionString
             if (array.Length == 0)
                 return collection;
 
-            var keys = new List<String>(array).ConvertAll(n => n.ToLower());
+            var keys = new List<String>(array).Select(r=>r.ToLower()).ToList();
             var settings = new XmlReaderSettings
             {
                 ConformanceLevel = ConformanceLevel.Fragment,

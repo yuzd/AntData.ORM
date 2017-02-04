@@ -7,14 +7,15 @@
 //-----------------------------------------------------------------------
 
 using System.Transactions;
+
 using AntData.ORM.DataProvider;
-using AntData.ORM.DataProvider.MySql;
 
 namespace AntData.ORM.Data
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ namespace AntData.ORM.Data
             }
         }
 
-        public DbContext(string dbMappingName,IDataProvider provider)
+        public DbContext(string dbMappingName, IDataProvider provider)
             : base(provider, dbMappingName)
         {
 #if DEBUG
@@ -216,5 +217,6 @@ namespace AntData.ORM.Data
             }
         }
         #endregion
+
     }
 }

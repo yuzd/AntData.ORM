@@ -94,7 +94,7 @@ namespace AntData.ORM.DbEngine
         /// </summary>
         public String DatabaseSet { get; set; }
 
-  
+
         /// <summary>
         /// All in one的Key名称
         /// </summary>

@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using AntData.ORM.Extensions;
+
 namespace AntData.ORM.Properties {
     using System;
     
@@ -39,7 +41,7 @@ namespace AntData.ORM.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AntData.ORM.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AntData.ORM.Properties.Resources", typeof(Resources).AssemblyEx());
                     resourceMan = temp;
                 }
                 return resourceMan;

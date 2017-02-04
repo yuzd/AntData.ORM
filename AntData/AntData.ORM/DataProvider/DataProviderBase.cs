@@ -204,17 +204,21 @@ namespace AntData.ORM.DataProvider
 			return false;
 		}
 
-		public virtual bool? IsDBNullAllowed(IDataReader reader, int idx)
-		{
+        public virtual bool? IsDBNullAllowed(IDataReader reader, int idx)
+        {
+#if !NETSTANDARD
 			var st = ((DbDataReader)reader).GetSchemaTable();
 			return st == null || (bool)st.Rows[idx]["AllowDBNull"];
-		}
+#else
+            return true;
+#endif
+        }
 
-		#endregion
+        #endregion
 
-		#region SetParameter
+        #region SetParameter
 
-		public virtual void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
+        public virtual void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
 		{
 			switch (dataType)
 			{

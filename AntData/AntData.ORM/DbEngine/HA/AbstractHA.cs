@@ -31,6 +31,7 @@ namespace AntData.ORM.DbEngine.HA
 
         private Boolean SatisfyRetryFailOverCondition(DbException ex)
         {
+
             //如果使用了事务，不进行重试或者Fail Over
             if (Transaction.Current != null || ex == null)
                 return false;

@@ -4,6 +4,7 @@ using System.Data;
 using System.Reflection;
 
 using JetBrains.Annotations;
+using LinqToDB.DataProvider;
 
 namespace AntData.ORM.DataProvider.MySql
 {

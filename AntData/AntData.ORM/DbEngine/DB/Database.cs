@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+using AntData.core.Compatibility.System.Data;
 using System.Transactions;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
@@ -43,7 +44,7 @@ namespace AntData.ORM.DbEngine.DB
             get
             {
                 // 原来是 重新读取All In One中的连接串
-               // connectionStringLock.EnterReadLock();
+                // connectionStringLock.EnterReadLock();
                 //String result = m_ConnectionString;
                 //connectionStringLock.ExitReadLock();
                 return m_ConnectionString;
@@ -176,7 +177,7 @@ namespace AntData.ORM.DbEngine.DB
         {
             DbCommand command = m_DatabaseProvider.CreateCommand();
             command.CommandText = statement.StatementText;
-            command.CommandType = statement.StatementType ==StatementType.Sql ? CommandType.Text : CommandType.StoredProcedure;
+            command.CommandType = statement.StatementType == StatementType.Sql ? CommandType.Text : CommandType.StoredProcedure;
             command.CommandTimeout = statement.Timeout;
             String providerName = m_DatabaseProvider.GetType().Name;
 
@@ -207,7 +208,7 @@ namespace AntData.ORM.DbEngine.DB
                         parameter.Value = p.Value ?? DBNull.Value;
                         parameter.Direction = p.Direction;
                         parameter.IsNullable = p.IsNullable;
-                        
+
                         command.Parameters.Add(parameter);
                     }
                     else
@@ -248,6 +249,7 @@ namespace AntData.ORM.DbEngine.DB
                     p.Value = command.Parameters[m_DatabaseProvider.CreateParameterName(p.Name)].Value;
             }
         }
+#if !NETSTANDARD
 
         /// <summary>
         /// 加载程序集
@@ -296,8 +298,11 @@ namespace AntData.ORM.DbEngine.DB
                 adapter.Fill(dataSet);
             }
         }
-
+#endif
         #endregion
+
+#if !NETSTANDARD
+        
 
         /// <summary>
         /// 执行返回数据集指令
@@ -339,7 +344,7 @@ namespace AntData.ORM.DbEngine.DB
             {
             }
         }
-
+#endif
         /// <summary>
         /// 执行非查询指令
         /// </summary>

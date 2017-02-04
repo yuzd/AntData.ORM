@@ -31,7 +31,7 @@ namespace AntData.ORM.SqlQuery
 		{
 		}
 
-#if !SILVERLIGHT && !NETFX_CORE
+#if !NETSTANDARD
 
 		protected SqlException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
@@ -39,6 +39,6 @@ namespace AntData.ORM.SqlQuery
 		}
 
 #endif
-	}
+    }
 }
 

@@ -4,10 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
-
-#if !SILVERLIGHT && !NETFX_CORE
 using System.Data.SqlTypes;
-#endif
+
 
 namespace AntData.ORM.Common
 {
@@ -24,10 +22,10 @@ namespace AntData.ORM.Common
 			try
 			{
 				return Convert.ChangeType(value, conversionType
-#if !NETFX_CORE
+#if !NETSTANDARD
 					, Thread.CurrentThread.CurrentCulture
 #endif
-					);
+                    );
 			}
 			catch (Exception ex)
 			{
@@ -168,10 +166,10 @@ namespace AntData.ORM.Common
 				{
 					var val = values.GetValue(i);
 					var lv  = (long)Convert.ChangeType(val, typeof(long)
-#if !NETFX_CORE
+#if !NETSTANDARD
 						, Thread.CurrentThread.CurrentCulture
 #endif
-						);
+                        );
 
 					dic[lv.ToString()] = val;
 

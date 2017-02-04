@@ -95,11 +95,13 @@ namespace AntData.ORM.Dao.sql
             Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints);
             statement.StatementText = sql;
             statement.Parameters = parameters;
+            #if !NETSTANDARD
             CurrentStackCustomizedLog(statement);
+#endif
             return statement;
         }
 
-      
+#if !NETSTANDARD
 
         private static void CurrentStackCustomizedLog(Statement statement)
         {
@@ -140,6 +142,7 @@ namespace AntData.ORM.Dao.sql
             var method = stackFrame.GetMethod();
             return method.DeclaringType == null || method.DeclaringType.FullName == null || !method.DeclaringType.FullName.Contains(BaseDaoName);
         }
+#endif
 
         private const String BaseDaoName = "Arch.Data";
 

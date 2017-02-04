@@ -5,6 +5,7 @@ using AntData.ORM;
 using AntData.ORM.Common;
 using AntData.ORM.DataProvider;
 using AntData.ORM.Expressions;
+using AntData.ORM.Extensions;
 using AntData.ORM.Mapping;
 using AntData.ORM.SqlQuery;
 
@@ -55,7 +56,7 @@ namespace AntData.ORM.DataProvider.Oracle
 
 		public override LambdaExpression TryGetConvertExpression(Type from, Type to)
 		{
-			if (to.IsEnum && from == typeof(decimal))
+			if (to.IsEnumEx() && from == typeof(decimal))
 			{
 				var type = Converter.GetDefaultMappingFromEnumType(this, to);
 

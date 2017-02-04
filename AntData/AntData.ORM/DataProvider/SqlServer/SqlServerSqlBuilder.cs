@@ -266,12 +266,14 @@ namespace AntData.ORM.DataProvider.SqlServer
 			return ((System.Data.SqlClient.SqlParameter)parameter).TypeName;
 		}
 
+#if !NETSTANDARD
 		protected override string GetUdtTypeName(IDbDataParameter parameter)
 		{
 			return ((System.Data.SqlClient.SqlParameter)parameter).UdtTypeName;
 		}
+#endif
 
-		protected override string GetProviderTypeName(IDbDataParameter parameter)
+        protected override string GetProviderTypeName(IDbDataParameter parameter)
 		{
 			return ((System.Data.SqlClient.SqlParameter)parameter).SqlDbType.ToString();
 		}

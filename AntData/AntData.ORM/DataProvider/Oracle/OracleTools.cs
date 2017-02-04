@@ -5,6 +5,8 @@ using System.IO;
 using System.Reflection;
 using AntData.ORM.Data;
 using AntData.ORM.DataProvider;
+using AntData.ORM.Extensions;
+using LinqToDB.DataProvider;
 
 namespace AntData.ORM.DataProvider.Oracle
 {
@@ -19,7 +21,7 @@ namespace AntData.ORM.DataProvider.Oracle
 		{
 			try
 			{
-				var path = typeof(OracleTools).Assembly.CodeBase.Replace("file:///", "");
+				var path = typeof(OracleTools).AssemblyEx().CodeBase.Replace("file:///", "");
 
 				path = Path.GetDirectoryName(path);
 

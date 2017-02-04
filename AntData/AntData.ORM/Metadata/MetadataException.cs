@@ -64,7 +64,7 @@ namespace AntData.ORM.Metadata
 		{
 		}
 
-#if !SILVERLIGHT && !NETFX_CORE
+#if !NETSTANDARD
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MetadataException"/> class
@@ -81,5 +81,5 @@ namespace AntData.ORM.Metadata
 		}
 
 #endif
-	}
+    }
 }

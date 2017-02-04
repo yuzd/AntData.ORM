@@ -7,6 +7,7 @@
 //-----------------------------------------------------------------------
 
 using AntData.ORM.Data;
+using AntData.ORM.Extensions;
 using AntData.ORM.Mapping;
 
 namespace AntData.ORM.DataProvider.Oracle
@@ -29,7 +30,7 @@ namespace AntData.ORM.DataProvider.Oracle
             var id = base.Columns.FirstOrDefault(r => r.IsIdentity);
             if (id != null)
             {
-                var seq = id.MemberInfo.GetCustomAttributes(typeof(SequenceNameAttribute), true).FirstOrDefault();
+                var seq = id.MemberInfo.GetCustomAttributesEx(typeof(SequenceNameAttribute), true).FirstOrDefault();
                 var seqName = seq as SequenceNameAttribute;
                 if (seqName != null)
                 {

@@ -2,9 +2,12 @@
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Threading;
-using System.Transactions;
+
 using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.DB;
+
+
+using System.Transactions;
 
 namespace AntData.ORM.DbEngine.Connection
 {
@@ -25,7 +28,7 @@ namespace AntData.ORM.DbEngine.Connection
 
         /// <summary>
         /// 获取数据库链接
-        /// 当在同一个事务中的时候获取到的相同数据库的链接应该是一个对象
+        /// 当在同一个事务中的时候获取到的相同数据库的链接应该是一个对象k
         /// 避免分布式事务,仅支持TransactionScope
         /// </summary>
         /// <param name="db"></param>

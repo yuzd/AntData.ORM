@@ -329,7 +329,7 @@ namespace AntData.ORM.Linq
                     var resourceInfo = type.GetCanWritePropertyInfo().ToList();
                     foreach (var p in resourceInfo)
                     {
-                        var attributes = p.GetCustomAttributes(typeof(IdentityAttribute), false).ToList();
+                        var attributes = p.GetCustomAttributesEx(typeof(IdentityAttribute), false).ToList();
                         if(attributes.Count>0)
                         {
                             var pType = p.PropertyType;

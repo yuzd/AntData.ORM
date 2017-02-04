@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.Common;
+#if !NETSTANDARD
 using System.Data.Odbc;
 
 namespace AntData.ORM.DbEngine.Providers
@@ -66,3 +67,4 @@ namespace AntData.ORM.DbEngine.Providers
         }
     }
 }
+#endif

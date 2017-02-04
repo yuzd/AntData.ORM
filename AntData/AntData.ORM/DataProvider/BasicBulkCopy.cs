@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
+using AntData.ORM.Extensions;
 
 namespace AntData.ORM.DataProvider
 {
@@ -79,7 +81,7 @@ namespace AntData.ORM.DataProvider
 			var l  = Expression.Lambda<Func<IDbConnection,int,IDisposable>>(
 				Expression.Convert(
 					Expression.New(
-						bulkCopyType.GetConstructor(new[] { connectionType, bulkCopyOptionType }),
+						bulkCopyType.GetConstructorEx(new[] { connectionType, bulkCopyOptionType }),
 						Expression.Convert(p1, connectionType),
 						Expression.Convert(p2, bulkCopyOptionType)),
 					typeof(IDisposable)),
@@ -95,7 +97,7 @@ namespace AntData.ORM.DataProvider
 			var l  = Expression.Lambda<Func<int,string,object>>(
 				Expression.Convert(
 					Expression.New(
-						columnMappingType.GetConstructor(new[] { typeof(int), typeof(string) }),
+						columnMappingType.GetConstructorEx(new[] { typeof(int), typeof(string) }),
 						new [] { p1, p2 }),
 					typeof(object)),
 				p1, p2);
@@ -103,52 +105,61 @@ namespace AntData.ORM.DataProvider
 			return l.Compile();
 		}
 
-		protected Action<object,Action<object>> CreateBulkCopySubscriber(object bulkCopy, string eventName)
-		{
-			var eventInfo   = bulkCopy.GetType().GetEvent(eventName);
-			var handlerType = eventInfo.EventHandlerType;
-			var eventParams = handlerType.GetMethod("Invoke").GetParameters();
+        protected Action<object, Action<object>> CreateBulkCopySubscriber(object bulkCopy, string eventName)
+        {
+            var eventInfo = bulkCopy.GetType().GetEventEx(eventName);
+            var handlerType = eventInfo.EventHandlerType;
+            var eventParams = handlerType.GetMethodEx("Invoke").GetParameters();
 
-			// Expression<Func<Action<object>,Delegate>> lambda =
-			//     actionParameter => Delegate.CreateDelegate(
-			//         typeof(int),
-			//         (Action<object,DB2RowsCopiedEventArgs>)((o,e) => actionParameter(e)),
-			//         "Invoke",
-			//         false);
+            // Expression<Func<Action<object>,Delegate>> lambda =
+            //     actionParameter => Delegate.CreateDelegate(
+            //         typeof(int),
+            //         (Action<object,DB2RowsCopiedEventArgs>)((o,e) => actionParameter(e)),
+            //         "Invoke",
+            //         false);
 
-			var actionParameter = Expression.Parameter(typeof(Action<object>), "p1");
-			var senderParameter = Expression.Parameter(eventParams[0].ParameterType, eventParams[0].Name);
-			var argsParameter   = Expression.Parameter(eventParams[1].ParameterType, eventParams[1].Name);
+            var actionParameter = Expression.Parameter(typeof(Action<object>), "p1");
+            var senderParameter = Expression.Parameter(eventParams[0].ParameterType, eventParams[0].Name);
+            var argsParameter = Expression.Parameter(eventParams[1].ParameterType, eventParams[1].Name);
 
-			var lambda = Expression.Lambda<Func<Action<object>, Delegate>>(
-				Expression.Call(
-					null,
-					MemberHelper.MethodOf(() => Delegate.CreateDelegate(typeof(string), (object)null, "", false)),
-					new Expression[]
-					{
-						Expression.Constant(handlerType, typeof(Type)),
+#if !NETSTANDARD
+			var mi = MemberHelper.MethodOf(() =>Delegate.CreateDelegate(typeof(string), (object) null, "", false));
+#else
+            MethodInfo mi = null;
+            throw new NotImplementedException("This is not implemented for .Net Core");
+            //Func<string> func = () => null;
+            //var del = func.GetMethodInfo().CreateDelegate(typeof(string));
+#endif
+
+            var lambda = Expression.Lambda<Func<Action<object>, Delegate>>(
+                Expression.Call(
+                    null,
+                    mi,
+                    new Expression[]
+                    {
+                        Expression.Constant(handlerType, typeof(Type)),
 						//Expression.Convert(
 							Expression.Lambda(
-								Expression.Invoke(actionParameter, new Expression[] { argsParameter }),
-								new[] { senderParameter, argsParameter }),
+                                Expression.Invoke(actionParameter, new Expression[] { argsParameter }),
+                                new[] { senderParameter, argsParameter }),
 						//	typeof(Action<object, EventArgs>)),
 						Expression.Constant("Invoke", typeof(string)),
-						Expression.Constant(false, typeof(bool))
-					}),
-				new[] { actionParameter });
+                        Expression.Constant(false, typeof(bool))
+                    }),
+                new[] { actionParameter });
 
-			var dgt = lambda.Compile();
+            var dgt = lambda.Compile();
 
-			return (obj,action) => eventInfo.AddEventHandler(obj, dgt(action));
-		}
+            return (obj, action) => eventInfo.AddEventHandler(obj, dgt(action));
+        }
 
-		
 
-		#endregion
 
-		#region MultipleRows Support
+        #endregion
 
-		protected BulkCopyRowsCopied MultipleRowsCopy1<T>(
+        #region MultipleRows Support
+
+        protected BulkCopyRowsCopied MultipleRowsCopy1<T>(
 			DataConnection dataConnection, BulkCopyOptions options, bool enforceKeepIdentity, IEnumerable<T> source)
 		{
 			return MultipleRowsCopy1(

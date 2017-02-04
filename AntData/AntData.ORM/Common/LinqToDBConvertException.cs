@@ -63,7 +63,7 @@ namespace AntData.ORM.Common
 		{
 		}
 
-#if !SILVERLIGHT && !NETFX_CORE
+#if  !NETSTANDARD
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LinqToDBConvertException"/> class
@@ -80,5 +80,5 @@ namespace AntData.ORM.Common
 		}
 
 #endif
-	}
+    }
 }

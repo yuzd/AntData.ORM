@@ -40,6 +40,8 @@ namespace AntData.ORM.Dao
 
         public static DataTable CustomerExecuteQueryTable(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = false)
         {
+#if !NETSTANDARD
+
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var isNonQuery = false;
             var dic = ConvertStatement(paras, out isNonQuery);
@@ -56,6 +58,9 @@ namespace AntData.ORM.Dao
                 return baseDao.SelectDataTable(sql, null, hints, isWrite);
             }
             return baseDao.SelectDataTable(sql, isWrite);
+#else
+            throw new NotSupportedException("not support in dotnet core");
+#endif
         }
 
         public static object CustomerExecuteScalar(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = false)

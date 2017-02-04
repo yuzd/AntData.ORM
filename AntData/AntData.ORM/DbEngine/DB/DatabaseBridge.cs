@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using AntData.core.Compatibility.System.Data;
 using AntData.ORM.DbEngine.HA;
 using AntData.ORM.Properties;
 
@@ -12,7 +13,7 @@ namespace AntData.ORM.DbEngine.DB
         private static readonly DatabaseBridge instance = new DatabaseBridge();
 
         public static DatabaseBridge Instance { get { return instance; } }
-
+#if !NETSTANDARD
         /// <summary>
         /// 根据Statement，返回DataSet结果集
         /// </summary>
@@ -30,7 +31,7 @@ namespace AntData.ORM.DbEngine.DB
             {
             }
         }
-
+#endif
         /// <summary>
         /// 根据Statement,执行增删改操作
         /// </summary>

@@ -33,10 +33,11 @@ namespace AntData.ORM.Dao
         {
         }
 
+#if !NETSTANDARD
         protected DalException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-
+#endif
         public DalException(String message, Exception innerException) : base(message, innerException)
         {
         }

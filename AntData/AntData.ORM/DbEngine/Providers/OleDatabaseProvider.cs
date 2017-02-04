@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Data.Common;
+#if !NETSTANDARD
+
+
 using System.Data.OleDb;
 
 namespace AntData.ORM.DbEngine.Providers
@@ -70,3 +73,4 @@ namespace AntData.ORM.DbEngine.Providers
     }
 
 }
+#endif

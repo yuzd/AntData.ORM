@@ -21,8 +21,8 @@ namespace AntData.ORM.SqlQuery
 
 		static SelectQuery()
 		{
-#if NETFX_CORE
-			using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream("ReservedWords.txt"))
+#if NETSTANDARD
+            using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream("ReservedWords.txt"))
 #else
 			using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream(typeof(SelectQuery), "ReservedWords.txt"))
 #endif

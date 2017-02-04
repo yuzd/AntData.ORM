@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -99,3 +100,4 @@ namespace AntData.ORM.Metadata
 		}
 	}
 }
+#endif

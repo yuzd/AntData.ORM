@@ -149,18 +149,18 @@ namespace AntData.ORM.Linq
 			public static MethodInfo IsDBNull = MethodOf(rd => rd.IsDBNull(0));
 		}
 
-		public class Functions
-		{
-			public class String : Expressor<string>
-			{
-#if !SILVERLIGHT && !NETFX_CORE
+        public class Functions
+        {
+            public class String : Expressor<string>
+            {
+#if !NETSTANDARD
 				public static MethodInfo Like11 = MethodOf(s => System.Data.Linq.SqlClient.SqlMethods.Like("", ""));
 				public static MethodInfo Like12 = MethodOf(s => System.Data.Linq.SqlClient.SqlMethods.Like("", "", ' '));
 #endif
 
-				public static MethodInfo Like21 = MethodOf(s => Sql.Like(s, ""));
-				public static MethodInfo Like22 = MethodOf(s => Sql.Like(s, "", ' '));
-			}
-		}
-	}
+                public static MethodInfo Like21 = MethodOf(s => Sql.Like(s, ""));
+                public static MethodInfo Like22 = MethodOf(s => Sql.Like(s, "", ' '));
+            }
+        }
+    }
 }

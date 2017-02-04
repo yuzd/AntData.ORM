@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using JetBrains.Annotations;
 
 namespace AntData.ORM.Common
@@ -22,7 +24,37 @@ namespace AntData.ORM.Common
 		{
 			return string.IsNullOrEmpty(str);
 		}
-	}
+
+        public static string GetPath(this Assembly assembly)
+        {
+            return Path.GetDirectoryName(assembly.GetFileName());
+        }
+
+        public static string GetFileName(this Assembly assembly)
+        {
+            return assembly.CodeBase.GetPathFromUri();
+        }
+
+        public static string GetPathFromUri(this string uriString)
+        {
+            try
+            {
+                var uri = new Uri(Uri.EscapeUriString(uriString));
+                var path =
+                      Uri.UnescapeDataString(uri.AbsolutePath)
+                    + Uri.UnescapeDataString(uri.Query)
+                    + Uri.UnescapeDataString(uri.Fragment);
+
+                return Path.GetFullPath(path);
+            }
+            catch (Exception ex)
+            {
+                throw new LinqToDBException("Error while trying to extract path from " + uriString + " " + ex.Message, ex);
+            }
+        }
+
+    }
+
     /// <summary>
     /// 枚举帮助类
     /// </summary>

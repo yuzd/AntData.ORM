@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Collections;
+using AntData.ORM.Extensions;
 
 namespace AntData.ORM.Reflection
 {
@@ -73,7 +74,7 @@ namespace AntData.ORM.Reflection
 		/// <returns></returns>
 		public static bool IsNullableType(this Type nullableType)
 		{
-			return ((nullableType.IsGenericType && !nullableType.IsGenericTypeDefinition)
+			return ((nullableType.IsGenericTypeEx() && !nullableType.IsGenericTypeDefinitionEx())
 				&& (nullableType.GetGenericTypeDefinition() == typeof(Nullable<>)));
 		}
 
@@ -84,7 +85,7 @@ namespace AntData.ORM.Reflection
 		/// <returns></returns>
 		public static bool IsSupportBinSerializable(this Type testType)
 		{
-			return testType.GetMyAttribute<SerializableAttribute>() != null;
+			return testType.GetAttributes<SerializableAttribute>() != null;
 		}
 
 

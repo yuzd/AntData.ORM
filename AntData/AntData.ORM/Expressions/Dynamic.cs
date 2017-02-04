@@ -1,5 +1,8 @@
 ﻿//Copyright (C) Microsoft Corporation.  All rights reserved.
 
+
+#if !NETSTANDARD
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -2455,4 +2458,5 @@ namespace System.Linq.Dynamic
 
 //orders.Where("OrderDate.DayOfWeek = @0", DayOfWeek.Monday);
 
- 
+
+#endif

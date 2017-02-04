@@ -15,14 +15,14 @@ namespace AntData.ORM.Metadata
 	{
 		readonly Dictionary<string,MetaTypeInfo> _types;
 
-#if !NETFX_CORE
+#if !NETSTANDARD
 		public XmlAttributeReader(string xmlFile)
 			: this(xmlFile, Assembly.GetCallingAssembly())
 		{
 		}
 #endif
 
-		public XmlAttributeReader([NotNull] string xmlFile, [NotNull] Assembly assembly)
+        public XmlAttributeReader([NotNull] string xmlFile, [NotNull] Assembly assembly)
 		{
 			if (xmlFile  == null) throw new ArgumentNullException("xmlFile");
 			if (assembly == null) throw new ArgumentNullException("assembly");
@@ -31,7 +31,7 @@ namespace AntData.ORM.Metadata
 
 			try
 			{
-#if !SILVERLIGHT && !NETFX_CORE
+#if !NETSTANDARD
 				if (File.Exists(xmlFile))
 				{
 					streamReader = File.OpenText(xmlFile);
@@ -45,7 +45,7 @@ namespace AntData.ORM.Metadata
 				}
 #endif
 
-				var embedded = streamReader == null;
+                var embedded = streamReader == null;
 				var stream   = embedded ? assembly.GetManifestResourceStream(xmlFile) : streamReader.BaseStream;
 
 				if (embedded && stream == null)

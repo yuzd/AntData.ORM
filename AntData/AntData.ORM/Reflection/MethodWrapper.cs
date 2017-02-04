@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Reflection.Emit;
+using AntData.ORM.Extensions;
 
 namespace AntData.ORM.Reflection
 {
@@ -82,10 +84,10 @@ namespace AntData.ORM.Reflection
 		{
 			Type reflectMethodBase = typeof(ReflectMethodBase<>).GetGenericTypeDefinition();
 
-			s_genericTypeDefinitions = (from t in typeof(MethodInvokerFactory).Assembly.GetExportedTypes()
-										where t.BaseType != null
-										&& t.BaseType.IsGenericType
-										&& t.BaseType.GetGenericTypeDefinition() == reflectMethodBase
+			s_genericTypeDefinitions = (from t in typeof(MethodInvokerFactory).AssemblyEx().GetExportedTypes()
+										where t.BaseTypeEx() != null
+										&& t.BaseTypeEx().IsGenericTypeEx()
+										&& t.BaseTypeEx().GetGenericTypeDefinition() == reflectMethodBase
 										select t).ToDictionary(x => x.Name);
 
 			// 说明：这个工厂还有一种设计方法，
@@ -158,7 +160,7 @@ namespace AntData.ORM.Reflection
 
 
 			Type instanceType = null;
-			if( genericTypeDefinition.IsGenericTypeDefinition ) {
+			if( genericTypeDefinition.IsGenericTypeDefinitionEx() ) {
 				// 3. 获取填充泛型定义的类型参数。
 				List<Type> list = new List<Type>(pameters.Length + 2);
 				if( method.IsStatic == false )
@@ -204,10 +206,18 @@ namespace AntData.ORM.Reflection
 				throw new ArgumentNullException("method");
 
 			if( method.IsStatic )
-				_caller = Delegate.CreateDelegate(typeof(TDelegate), method) as TDelegate;
-			else
-				_caller = Delegate.CreateDelegate(typeof(TDelegate), null, method) as TDelegate;
-		}
+#if NETSTANDARD
+                _caller = DynamicMethodFactory.CreateDelegate(typeof(TDelegate), method,true) as TDelegate;
+#else
+                _caller = Delegate.CreateDelegate(typeof(TDelegate), method) as TDelegate;
+#endif
+            else
+#if NETSTANDARD
+                _caller = DynamicMethodFactory.CreateDelegate(typeof(TDelegate), method) as TDelegate;
+#else
+                caller = Delegate.CreateDelegate(typeof(TDelegate), null, method) as TDelegate;
+#endif
+        }
 
 		public object Invoke(object target, object[] parameters)
 		{

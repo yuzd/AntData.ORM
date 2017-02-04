@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using AntData.ORM.Common;
 
 namespace AntData.ORM.DbEngine.Providers
 {
@@ -41,7 +42,7 @@ namespace AntData.ORM.DbEngine.Providers
 
             return name;
         }
-
+#if !NETSTANDARD
         /// <summary>
         /// 创建数据库适配器
         /// </summary>
@@ -80,6 +81,8 @@ namespace AntData.ORM.DbEngine.Providers
                 }
             }
         }
+#endif
+
 
         public String ProviderType
         {

@@ -328,3 +328,5 @@ DB.UseTransaction(con =>
 });
 
 ```
+
+# 6.Read-write separation

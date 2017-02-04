@@ -17,6 +17,7 @@ namespace AntData.ORM.Common.Util
         {
             text = text.Trim();
 
+#if !NETSTANDARD
             //1微妙
             using (HashAlgorithm hash = new MD5CryptoServiceProvider())
             {
@@ -29,6 +30,20 @@ namespace AntData.ORM.Common.Util
                 //0.3微秒
                 return Convert.ToBase64String(md5Data);
             }
+#else
+            //1微妙
+            using (HashAlgorithm hash = new HMACMD5())
+            {
+                //0.8微秒
+                Byte[] temp = Encoding.UTF8.GetBytes(text);
+
+                //4微秒
+                Byte[] md5Data = hash.ComputeHash(temp);
+
+                //0.3微秒
+                return Convert.ToBase64String(md5Data);
+            }
+#endif
         }
 
         static readonly String AppIdComment = "/*" + ConfigurationManager.AppSettings["AppID"] + "*/";

@@ -8,12 +8,14 @@
 
 using System.Collections;
 using System.Data;
+using AntData.core.Compatibility.System.Data;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.Dao.sql;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.DB;
 using AntData.ORM.Enums;
+using AntData.ORM.Extensions;
 
 
 namespace AntData.ORM.Dao
@@ -89,7 +91,7 @@ namespace AntData.ORM.Dao
         public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, bool isWrite = false)
         {
 
-            return SelectDataReader(sql, parameters, hints, isWrite? OperationType.Write : OperationType.Read);
+            return SelectDataReader(sql, parameters, hints, isWrite ? OperationType.Write : OperationType.Read);
         }
 
         /// <summary>
@@ -180,7 +182,7 @@ namespace AntData.ORM.Dao
         }
 
         #endregion
-
+#if !NETSTANDARD
         #region SelectDataTable
 
         /// <summary>
@@ -313,7 +315,7 @@ namespace AntData.ORM.Dao
 
 
         #endregion
-
+#endif
         #region ExecScalar
 
         /// <summary>
@@ -457,10 +459,10 @@ namespace AntData.ORM.Dao
 
         #endregion
 
-        public  void AddSqlToExtendParams(Statement statement, IDictionary extendParams)
+        public void AddSqlToExtendParams(Statement statement, IDictionary extendParams)
         {
             if (extendParams == null) return;
-            var types = extendParams.GetType().GetGenericArguments();
+            var types = extendParams.GetType().GetGenericArgumentsEx();
 
             //仅当extendParams是 Dictionary<string, object> 或者 Dictionary<string, string>时，
             //才将SQL填回

@@ -161,26 +161,32 @@ namespace AntData.ORM.DataProvider.SqlServer
 
 		static readonly ConcurrentDictionary<string,bool> _marsFlags = new ConcurrentDictionary<string,bool>();
 
-		
 
-		public override void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
-		{
-			switch (dataType)
-			{
-				case DataType.Udt        :
-					{
-						string s;
-						if (value != null && _udtTypes.TryGetValue(value.GetType(), out s))
-							((SqlParameter)parameter).UdtTypeName = s;
-					}
 
-					break;
+        public override void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
+        {
+            switch (dataType)
+            {
+                case DataType.Udt:
+                    {
+                        string s;
+                        if (value != null && _udtTypes.TryGetValue(value.GetType(), out s))
+                            if (parameter is SqlParameter)
+#if NETSTANDARD
+                                ((SqlParameter)parameter).TypeName = s;
+#else
+								((SqlParameter)parameter).UdtTypeName = s;
+#endif
+
+                    }
+
+                    break;
             }
 
-			base.SetParameter(parameter, name, dataType, value);
-		}
+            base.SetParameter(parameter, name, dataType, value);
+        }
 
-		protected override void SetParameterType(IDbDataParameter parameter, DataType dataType)
+        protected override void SetParameterType(IDbDataParameter parameter, DataType dataType)
 		{
 			if (parameter is BulkCopyReader.Parameter)
 				return;

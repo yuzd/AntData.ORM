@@ -8,131 +8,134 @@ using System.Linq;
 
 namespace AntData.ORM.DataProvider
 {
-	using Mapping;
+    using Mapping;
 
-	class BulkCopyReader : IDataReader
-	{
-		public BulkCopyReader(IDataProvider dataProvider, List<ColumnDescriptor> columns, IEnumerable collection)
-		{
-			_dataProvider = dataProvider;
-			_columns      = columns;
-			_enumerator   = collection.GetEnumerator();
-			_columnTypes  = _columns
-				.Select(c => c.DataType == DataType.Undefined ? dataProvider.MappingSchema.GetDataType(c.MemberType).DataType : c.DataType)
-				.ToArray();
-		}
+    class BulkCopyReader : IDataReader
+    {
+        public BulkCopyReader(IDataProvider dataProvider, List<ColumnDescriptor> columns, IEnumerable collection)
+        {
+            _dataProvider = dataProvider;
+            _columns = columns;
+            _enumerator = collection.GetEnumerator();
+            _columnTypes = _columns
+                .Select(c => c.DataType == DataType.Undefined ? dataProvider.MappingSchema.GetDataType(c.MemberType).DataType : c.DataType)
+                .ToArray();
+        }
 
-		public int Count;
+        public int Count;
 
-		readonly DataType[]             _columnTypes;
-		readonly IDataProvider          _dataProvider;
-		readonly List<ColumnDescriptor> _columns;
-		readonly IEnumerator            _enumerator;
-		readonly Parameter              _valueConverter = new Parameter();
+        readonly DataType[] _columnTypes;
+        readonly IDataProvider _dataProvider;
+        readonly List<ColumnDescriptor> _columns;
+        readonly IEnumerator _enumerator;
+        readonly Parameter _valueConverter = new Parameter();
 
-		internal class Parameter : IDbDataParameter
-		{
-			public DbType             DbType        { get; set; }
-			public ParameterDirection Direction     { get; set; }
-			public bool               IsNullable    { get { return Value == null || Value is DBNull; } }
-			public string             ParameterName { get; set; }
-			public string             SourceColumn  { get; set; }
-			public DataRowVersion     SourceVersion { get; set; }
-			public object             Value         { get; set; }
-			public byte               Precision     { get; set; }
-			public byte               Scale         { get; set; }
-			public int                Size          { get; set; }
-		}
+        internal class Parameter : IDbDataParameter
+        {
+            public DbType DbType { get; set; }
+            public ParameterDirection Direction { get; set; }
+            public bool IsNullable { get { return Value == null || Value is DBNull; } }
+            public string ParameterName { get; set; }
+            public string SourceColumn { get; set; }
+            public DataRowVersion SourceVersion { get; set; }
+            public object Value { get; set; }
+            public byte Precision { get; set; }
+            public byte Scale { get; set; }
+            public int Size { get; set; }
+        }
 
-		#region Implementation of IDataRecord
+        #region Implementation of IDataRecord
 
-		public string GetName(int i)
-		{
-			return _columns[i].ColumnName;
-		}
+        public string GetName(int i)
+        {
+            return _columns[i].ColumnName;
+        }
 
-		public Type GetFieldType(int i)
-		{
-			return _dataProvider.ConvertParameterType(_columns[i].MemberType, _columnTypes[i]);
-		}
+        public Type GetFieldType(int i)
+        {
+            return _dataProvider.ConvertParameterType(_columns[i].MemberType, _columnTypes[i]);
+        }
 
-		public object GetValue(int i)
-		{
-			var value = _columns[i].GetValue(_enumerator.Current);
+        public object GetValue(int i)
+        {
+            var value = _columns[i].GetValue(_enumerator.Current);
 
-			_dataProvider.SetParameter(_valueConverter, string.Empty, _columnTypes[i], value);
+            _dataProvider.SetParameter(_valueConverter, string.Empty, _columnTypes[i], value);
 
-			return _valueConverter.Value;
-		}
+            return _valueConverter.Value;
+        }
 
-		public int GetValues(object[] values)
-		{
-			var count = _columns.Count;
-			var obj   = _enumerator.Current;
+        public int GetValues(object[] values)
+        {
+            var count = _columns.Count;
+            var obj = _enumerator.Current;
 
-			for (var it = 0; it < count; ++it)
-			{
-				var value = _columns[it].GetValue(obj);
-				_dataProvider.SetParameter(_valueConverter, string.Empty, _columnTypes[it], value);
-				values[it] = _valueConverter.Value;
-			}
+            for (var it = 0; it < count; ++it)
+            {
+                var value = _columns[it].GetValue(obj);
+                _dataProvider.SetParameter(_valueConverter, string.Empty, _columnTypes[it], value);
+                values[it] = _valueConverter.Value;
+            }
 
-			return count;
-		}
+            return count;
+        }
 
-		public int FieldCount
-		{
-			get { return _columns.Count; }
-		}
+        public int FieldCount
+        {
+            get { return _columns.Count; }
+        }
 
-		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
-		{
-			throw new NotImplementedException();
-		}
+        public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+        {
+            throw new NotImplementedException();
+        }
 
-		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
-		{
-			throw new NotImplementedException();
-		}
+        public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
+        {
+            throw new NotImplementedException();
+        }
 
-		public string      GetDataTypeName(int i)       { throw new NotImplementedException(); }
-		public int         GetOrdinal     (string name) { throw new NotImplementedException(); }
-		public bool        GetBoolean     (int i)       { throw new NotImplementedException(); }
-		public byte        GetByte        (int i)       { throw new NotImplementedException(); }
-		public char        GetChar        (int i)       { throw new NotImplementedException(); }
-		public Guid        GetGuid        (int i)       { throw new NotImplementedException(); }
-		public short       GetInt16       (int i)       { throw new NotImplementedException(); }
-		public int         GetInt32       (int i)       { throw new NotImplementedException(); }
-		public long        GetInt64       (int i)       { throw new NotImplementedException(); }
-		public float       GetFloat       (int i)       { throw new NotImplementedException(); }
-		public double      GetDouble      (int i)       { throw new NotImplementedException(); }
-		public string      GetString      (int i)       { throw new NotImplementedException(); }
-		public decimal     GetDecimal     (int i)       { throw new NotImplementedException(); }
-		public DateTime    GetDateTime    (int i)       { throw new NotImplementedException(); }
-		public IDataReader GetData        (int i)       { throw new NotImplementedException(); }
-		public bool        IsDBNull       (int i)       { return GetValue(i) == null;          }
+        public string GetDataTypeName(int i) { throw new NotImplementedException(); }
+        public int GetOrdinal(string name) { throw new NotImplementedException(); }
+        public bool GetBoolean(int i) { throw new NotImplementedException(); }
+        public byte GetByte(int i) { throw new NotImplementedException(); }
+        public char GetChar(int i) { throw new NotImplementedException(); }
+        public Guid GetGuid(int i) { throw new NotImplementedException(); }
+        public short GetInt16(int i) { throw new NotImplementedException(); }
+        public int GetInt32(int i) { throw new NotImplementedException(); }
+        public long GetInt64(int i) { throw new NotImplementedException(); }
+        public float GetFloat(int i) { throw new NotImplementedException(); }
+        public double GetDouble(int i) { throw new NotImplementedException(); }
+        public string GetString(int i) { throw new NotImplementedException(); }
+        public decimal GetDecimal(int i) { throw new NotImplementedException(); }
+        public DateTime GetDateTime(int i) { throw new NotImplementedException(); }
+        public IDataReader GetData(int i) { throw new NotImplementedException(); }
+        public bool IsDBNull(int i) { return GetValue(i) == null; }
 
-		object IDataRecord.this[int i]
-		{
-			get { throw new NotImplementedException(); }
-		}
+        object IDataRecord.this[int i]
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		object IDataRecord.this[string name]
-		{
-			get { throw new NotImplementedException(); }
-		}
+        object IDataRecord.this[string name]
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		#endregion
+        #endregion
 
-		#region Implementation of IDataReader
+        #region Implementation of IDataReader
 
-		public void Close()
+        public void Close()
 		{
 			//do nothing
 		}
 
-		public DataTable GetSchemaTable()
-		{
+
+
+        public DataTable GetSchemaTable()
+        {
+#if !NETSTANDARD
 			var table = new DataTable("SchemaTable")
 			{
 				Locale = CultureInfo.InvariantCulture
@@ -185,46 +188,49 @@ namespace AntData.ORM.DataProvider
 			}
 
 			return table;
-		}
+#else
+            return null;
+#endif
+        }
 
-		public bool NextResult()
-		{
-			return false;
-		}
+        public bool NextResult()
+        {
+            return false;
+        }
 
-		public bool Read()
-		{
-			var b = _enumerator.MoveNext();
+        public bool Read()
+        {
+            var b = _enumerator.MoveNext();
 
-			if (b)
-				Count++;
+            if (b)
+                Count++;
 
-			return b;
-		}
+            return b;
+        }
 
-		public int Depth
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public int Depth
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		public bool IsClosed
-		{
-			get { return false; }
-		}
+        public bool IsClosed
+        {
+            get { return false; }
+        }
 
-		public int RecordsAffected
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public int RecordsAffected
+        {
+            get { throw new NotImplementedException(); }
+        }
 
-		#endregion
+        #endregion
 
-		#region Implementation of IDisposable
+        #region Implementation of IDisposable
 
-		public void Dispose()
-		{
-		}
+        public void Dispose()
+        {
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

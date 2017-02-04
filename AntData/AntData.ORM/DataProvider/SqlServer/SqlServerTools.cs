@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
@@ -8,6 +7,7 @@ using AntData.ORM;
 using AntData.ORM.Data;
 using AntData.ORM.DataProvider;
 using JetBrains.Annotations;
+using LinqToDB.DataProvider;
 
 namespace AntData.ORM.DataProvider.SqlServer
 {

@@ -9,6 +9,7 @@ using AntData.ORM;
 using AntData.ORM.Common;
 using AntData.ORM.DataProvider;
 using AntData.ORM.Expressions;
+using AntData.ORM.Extensions;
 using AntData.ORM.Mapping;
 using AntData.ORM.SqlQuery;
 
@@ -51,7 +52,7 @@ namespace AntData.ORM.DataProvider.SqlServer
 					if (type == null)
 						continue;
 
-					var p = type.GetProperty("Null");
+					var p = type.GetPropertyEx("Null");
 					var l = Expression.Lambda<Func<object>>(
 						Expression.Convert(Expression.Property(null, p), typeof(object)));
 
