@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Configuration;
 using AntData.ORM.Enums;
 
@@ -9,7 +10,7 @@ namespace AntData.ORM.DbEngine.Configuration
     /// </summary>
     public sealed class DatabaseElement : ConfigurationElement
     {
-        #region private fields
+#region private fields
 
         /// <summary>
         /// 名称
@@ -46,9 +47,9 @@ namespace AntData.ORM.DbEngine.Configuration
         /// </summary>
         private const String c_SequenceEnd = "end";
 
-        #endregion
+#endregion
 
-        #region public properties
+#region public properties
 
         /// <summary>
         /// 名称,关键字
@@ -111,6 +112,7 @@ namespace AntData.ORM.DbEngine.Configuration
             set { this[c_SequenceEnd] = value; }
         }
 
-        #endregion
+#endregion
     }
 }
+#endif

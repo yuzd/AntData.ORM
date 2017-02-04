@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
@@ -8,16 +9,16 @@ namespace AntData.ORM.DbEngine.Configuration
     /// </summary>
     public sealed class DbEngineConfigurationSection : ConfigurationSection
     {
-        #region private fields
+#region private fields
 
         private readonly ConfigurationProperty databaseSets;
 
         private readonly ConfigurationProperty databaseProviders;
 
 
-        #endregion
+#endregion
 
-        #region construction
+#region construction
 
         /// <summary>
         /// 构造方法
@@ -30,9 +31,9 @@ namespace AntData.ORM.DbEngine.Configuration
           
         }
 
-        #endregion
+#endregion
 
-        #region get configuration
+#region get configuration
 
         /// <summary>
         /// Db引擎配置节名称
@@ -60,9 +61,9 @@ namespace AntData.ORM.DbEngine.Configuration
 #endif
         }
 
-        #endregion
+#endregion
 
-        #region public properties
+#region public properties
 
         /// <summary>
         /// 数据库集配置数组
@@ -90,6 +91,7 @@ namespace AntData.ORM.DbEngine.Configuration
 
 
 
-        #endregion
+#endregion
     }
 }
+#endif

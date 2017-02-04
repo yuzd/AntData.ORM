@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+#if !NETSTANDARD
 using System.Transactions;
+#endif
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.DB;
@@ -31,11 +33,11 @@ namespace AntData.ORM.DbEngine.HA
 
         private Boolean SatisfyRetryFailOverCondition(DbException ex)
         {
-
+#if !NETSTANDARD
             //如果使用了事务，不进行重试或者Fail Over
             if (Transaction.Current != null || ex == null)
                 return false;
-
+#endif
             Int32 errorCode = 0;
             if (errorCode != 0 && RetryFailOverErrorCodes != null && RetryFailOverErrorCodes.Count > 0)
                 return RetryFailOverErrorCodes.Contains(errorCode);

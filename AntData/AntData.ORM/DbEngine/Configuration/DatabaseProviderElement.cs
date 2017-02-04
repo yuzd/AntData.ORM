@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
@@ -8,7 +9,7 @@ namespace AntData.ORM.DbEngine.Configuration
     /// </summary>
     public sealed class DatabaseProviderElement : ConfigurationElement
     {
-        #region private field
+#region private field
 
         /// <summary>
         /// 名称
@@ -20,9 +21,9 @@ namespace AntData.ORM.DbEngine.Configuration
         /// </summary>
         private const String c_TypeProperty = "type";
 
-        #endregion
+#endregion
 
-        #region public properties
+#region public properties
 
         /// <summary>
         /// 名称
@@ -53,6 +54,7 @@ namespace AntData.ORM.DbEngine.Configuration
             set { this[c_TypeProperty] = value; }
         }
 
-        #endregion
+#endregion
     }
 }
+#endif

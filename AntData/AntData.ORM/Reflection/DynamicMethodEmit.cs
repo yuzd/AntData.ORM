@@ -195,7 +195,7 @@ namespace AntData.ORM.Reflection
 			return (GetValueDelegate)dm.CreateDelegate(typeof(GetValueDelegate));
 		}
 
-        public static Delegate CreatePropertyGetter(Type type,PropertyInfo property, bool isStatic = false)
+        public static GetValueDelegate CreatePropertyGetter(Type type,PropertyInfo property, bool isStatic = false)
         {
             if (property == null)
                 throw new ArgumentNullException("property");
@@ -225,9 +225,9 @@ namespace AntData.ORM.Reflection
             il.Emit(OpCodes.Ret);
             if (isStatic)
             {
-                return dm.CreateDelegate(type);
+                return (GetValueDelegate)dm.CreateDelegate(typeof(GetValueDelegate));
             }
-            return dm.CreateDelegate(type, null);
+            return (GetValueDelegate)dm.CreateDelegate(typeof(GetValueDelegate), null);
         }
 
         public static SetValueDelegate CreatePropertySetter(PropertyInfo property)
@@ -263,7 +263,7 @@ namespace AntData.ORM.Reflection
 			return (SetValueDelegate)dm.CreateDelegate(typeof(SetValueDelegate));
 		}
 
-        public static Delegate CreatePropertySetter(Type type,PropertyInfo property,bool isStatic=false)
+        public static SetValueDelegate CreatePropertySetter(Type type,PropertyInfo property,bool isStatic=false)
         {
             if (property == null)
                 throw new ArgumentNullException("property");
@@ -297,9 +297,9 @@ namespace AntData.ORM.Reflection
 
             if (isStatic)
             {
-                return dm.CreateDelegate(type);
+                return (SetValueDelegate)dm.CreateDelegate(typeof(SetValueDelegate));
             }
-            return dm.CreateDelegate(type, null);
+            return (SetValueDelegate)dm.CreateDelegate(typeof(SetValueDelegate), null);
         }
 
         public static GetValueDelegate CreateFieldGetter(FieldInfo field)

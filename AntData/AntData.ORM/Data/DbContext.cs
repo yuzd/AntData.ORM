@@ -5,9 +5,9 @@
 // <author>nainaigu</author>
 // <summary></summary>
 //-----------------------------------------------------------------------
-
+#if !NETSTANDARD
 using System.Transactions;
-
+#endif
 using AntData.ORM.DataProvider;
 
 namespace AntData.ORM.Data
@@ -62,7 +62,7 @@ namespace AntData.ORM.Data
                 return null;
             });
         }
-
+#if !NETSTANDARD
 
         #region New Transaction
 
@@ -217,6 +217,6 @@ namespace AntData.ORM.Data
             }
         }
         #endregion
-
+#endif
     }
 }

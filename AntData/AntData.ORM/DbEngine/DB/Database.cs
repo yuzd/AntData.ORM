@@ -1,13 +1,18 @@
 using System;
+#if !NETSTANDARD
 using System.Configuration;
+#endif
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
+#if !NETSTANDARD
 using System.Transactions;
+#endif
 using AntData.ORM.Common.Util;
+using AntData.ORM.Dao;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine.Connection;
 using AntData.ORM.DbEngine.Providers;
@@ -32,7 +37,7 @@ namespace AntData.ORM.DbEngine.DB
         /// </summary>
         private readonly IDatabaseProvider m_DatabaseProvider;
 
-        #region properties
+#region properties
 
         /// <summary>
         /// 数据库链接
@@ -79,9 +84,9 @@ namespace AntData.ORM.DbEngine.DB
             get { return true; }
         }
 
-        #endregion
+#endregion
 
-        #region construction
+#region construction
 
         /// <summary>
         /// 构造方法
@@ -121,9 +126,9 @@ namespace AntData.ORM.DbEngine.DB
             m_ConnectionString = AllInOneKey;
         }
 
-        #endregion
+#endregion
 
-        #region helper methods
+#region helper methods
 
         /// <summary>
         /// 获取打开的数据库链接
@@ -159,7 +164,7 @@ namespace AntData.ORM.DbEngine.DB
         public DbConnection CreateConnection()
         {
             if (String.IsNullOrEmpty(ConnectionString))
-                throw new ConfigurationErrorsException(String.Format("ConnectionString:{0} can't be found!", AllInOneKey));
+                throw new DalException(String.Format("ConnectionString:{0} can't be found!", AllInOneKey));
 
             var connection = m_DatabaseProvider.CreateConnection();
             connection.ConnectionString = ConnectionString;
@@ -297,7 +302,7 @@ namespace AntData.ORM.DbEngine.DB
             }
         }
 #endif
-        #endregion
+#endregion
 
 #if !NETSTANDARD
         
@@ -399,7 +404,11 @@ namespace AntData.ORM.DbEngine.DB
                     using (var wrapper = GetOpenConnection(false))
                     {
                         command.Connection = wrapper.Connection;
+#if !NETSTANDARD
                         reader = command.ExecuteReader(Transaction.Current != null ? CommandBehavior.Default : CommandBehavior.CloseConnection);
+#else
+                        reader = command.ExecuteReader(CommandBehavior.CloseConnection);
+#endif
                         UpdateStatementParamenters(statement, command);
                     }
                 }
@@ -478,10 +487,15 @@ namespace AntData.ORM.DbEngine.DB
                     using (var wrapper = GetOpenConnection(false))
                     {
                         command.Connection = wrapper.Connection;
-                        reader =
+#if !NETSTANDARD
+                     reader =
                             command.ExecuteReader(Transaction.Current != null
                                 ? CommandBehavior.Default
                                 : CommandBehavior.CloseConnection);
+#else
+                        reader =command.ExecuteReader(CommandBehavior.CloseConnection);
+#endif
+
                         UpdateStatementParamenters(statement, command);
                     }
                 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
@@ -8,7 +9,7 @@ namespace AntData.ORM.DbEngine.Configuration
     /// </summary>
     public sealed class DatabaseSetElement : ConfigurationElement
     {
-        #region private fields
+#region private fields
 
         /// <summary>
         /// 名称
@@ -25,7 +26,7 @@ namespace AntData.ORM.DbEngine.Configuration
         /// </summary>
         private const String c_ShardingStrategyProperty = "shardingStrategy";
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 名称
@@ -68,3 +69,4 @@ namespace AntData.ORM.DbEngine.Configuration
 
     }
 }
+#endif

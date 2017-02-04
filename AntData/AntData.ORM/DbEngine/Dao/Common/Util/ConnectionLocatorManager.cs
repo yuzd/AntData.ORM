@@ -18,8 +18,9 @@ namespace AntData.ORM.DbEngine.ConnectionString
                     {
                         if (instance == null)
                         {
+#if !NETSTANDARD
                             instance = new DefaultConnectionString();
-
+#endif
                             //try
                             //{
                             //    Type locatorType = null;//DALBootstrap.GetConnectionLocatorType();

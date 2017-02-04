@@ -30,7 +30,6 @@
         }
       },
       "dependencies": {
-        "CoreCompat.System.Configuration": "4.2.3-r4",
         "Microsoft.CSharp": "4.0.1",
         "Microsoft.Extensions.DependencyModel": "1.0.0",
         "NETStandard.Library": "1.6.0",
@@ -48,8 +47,8 @@
         "System.Runtime.Loader": "4.0.0",
         "System.Runtime.Serialization.Primitives": "4.3.0",
         "System.Threading.Thread": "4.3.0",
-        "System.Transactions": "4.0.0",
-        "System.Xml.XmlDocument": "4.0.1"
+        "System.Xml.XmlDocument": "4.0.1",
+        "System.Collections.Specialized": "4.0.1"
       }
     }
   }

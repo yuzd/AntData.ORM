@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace AntData.ORM.Properties {
-    
+#if !NETSTANDARD
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
@@ -23,4 +23,5 @@ namespace AntData.ORM.Properties {
             }
         }
     }
+#endif
 }

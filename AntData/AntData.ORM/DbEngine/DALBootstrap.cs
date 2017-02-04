@@ -5,7 +5,9 @@ using AntData.ORM.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+#if !NETSTANDARD
 using System.Configuration;
+#endif
 using System.Linq;
 using AntData.ORM.Dao;
 using AntData.ORM.Data;
@@ -95,7 +97,7 @@ namespace AntData.ORM.DbEngine
             foreach (var provider in databaseProviders)
             {
                 if (provider.Type == null)
-                    throw new ConfigurationErrorsException(String.Format(Resources.InvalidDatabaseProviderException, provider.TypeName));
+                    throw new DalException(String.Format(Resources.InvalidDatabaseProviderException, provider.TypeName));
                 //创建provider实例
                 var databaseProvider = Activator.CreateInstance(provider.Type) as IDatabaseProvider;
                 DatabaseProviders.Add(provider.Name, databaseProvider);

@@ -1,5 +1,7 @@
 ﻿using System;
+#if !NETSTANDARD
 using System.Configuration;
+#endif
 using System.Security.Cryptography;
 using System.Text;
 
@@ -45,9 +47,9 @@ namespace AntData.ORM.Common.Util
             }
 #endif
         }
-
+#if !NETSTANDARD
         static readonly String AppIdComment = "/*" + ConfigurationManager.AppSettings["AppID"] + "*/";
-
+#endif
         /// <summary>
         /// 给SQL打上APPID的Tag
         /// </summary>
@@ -56,7 +58,9 @@ namespace AntData.ORM.Common.Util
         public static String GetTaggedAppIDSql(String sql)
         {
             StringBuilder sb = new StringBuilder();
+#if !NETSTANDARD
             sb.AppendLine(AppIdComment);
+#endif
             sb.Append(sql);
             return sb.ToString();
         }

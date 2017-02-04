@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETSTANDARD
+using System;
 using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
@@ -9,7 +10,7 @@ namespace AntData.ORM.DbEngine.Configuration
     [ConfigurationCollection(typeof(DatabaseSetElement), AddItemName = "databaseSet")]
     public sealed class DatabaseSetElementCollection : ConfigurationElementCollection
     {
-        #region static fields
+#region static fields
         /// <summary>
         /// 属性集合
         /// </summary>
@@ -23,9 +24,9 @@ namespace AntData.ORM.DbEngine.Configuration
             s_Properties = new ConfigurationPropertyCollection();
         }
 
-        #endregion
+#endregion
 
-        #region collection operator
+#region collection operator
 
         protected override String ElementName
         {
@@ -106,6 +107,7 @@ namespace AntData.ORM.DbEngine.Configuration
             base.BaseRemoveAt(index);
         }
 
-        #endregion
+#endregion
     }
 }
+#endif

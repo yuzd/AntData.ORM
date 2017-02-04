@@ -6,9 +6,9 @@ using System.Threading;
 using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.DB;
 
-
+#if !NETSTANDARD
 using System.Transactions;
-
+#endif
 namespace AntData.ORM.DbEngine.Connection
 {
     /// <summary>
@@ -16,6 +16,7 @@ namespace AntData.ORM.DbEngine.Connection
     /// </summary>
     class TransactionConnectionManager
     {
+#if !NETSTANDARD
         #region private field
 
         private static readonly ConcurrentDictionary<Transaction, ConcurrentDictionary<String, DbConnection>> TransactionConnections =
@@ -25,6 +26,7 @@ namespace AntData.ORM.DbEngine.Connection
         private static String connectionString;
 
         #endregion
+#endif
 
         /// <summary>
         /// 获取数据库链接
@@ -35,6 +37,9 @@ namespace AntData.ORM.DbEngine.Connection
         /// <returns></returns>
         internal static DbConnection GetConnection(Database db)
         {
+#if !NETSTANDARD
+            
+
             var currentTransaction = Transaction.Current;
             if (currentTransaction == null) return null;
 
@@ -74,8 +79,11 @@ namespace AntData.ORM.DbEngine.Connection
 
                 return connection;
             });
+#else
+            return null;
+#endif
         }
-
+#if !NETSTANDARD
         /// <summary>
         /// 事务完成事件
         /// </summary>
@@ -94,6 +102,6 @@ namespace AntData.ORM.DbEngine.Connection
                 }
             }
         }
-
+#endif
     }
 }

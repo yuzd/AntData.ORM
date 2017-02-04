@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Text.RegularExpressions;
+#if !NETSTANDARD
 using System.Transactions;
+#endif
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine.Providers;
@@ -238,7 +240,9 @@ namespace AntData.ORM.DbEngine
             DatabaseRWType = databaseRWType;
             DatabaseProvider = databaseProvider;
             ConnectionString = connectionString;
+#if !NETSTANDARD
             InTransaction = Transaction.Current != null;
+#endif
             SQLHash = CommonUtil.GetHashCodeOfSQL(StatementText);
 
             if (StatementType == StatementType.Sql)
@@ -256,7 +260,7 @@ namespace AntData.ORM.DbEngine
                 throw new InvalidOperationException("Please provide statement text.");
         }
 
-        #endregion
+#endregion
 
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AntData.ORM.Common.Util;
+using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.RW;
 using AntData.ORM.Enums;
 
@@ -38,7 +39,7 @@ namespace AntData.ORM.DbEngine.DB
 
             var databaseSetWrapper = DALBootstrap.DatabaseSets[databaseSet];
             if (databaseSetWrapper.DatabaseWrappers.Count == 0)
-                throw new System.Configuration.ConfigurationErrorsException(String.Format("DatabaseSet '{0}' doesn't contain any database.", databaseSetWrapper.Name));
+                throw new DalException(String.Format("DatabaseSet '{0}' doesn't contain any database.", databaseSetWrapper.Name));
 
            
             if (databaseSetWrapper.EnableReadWriteSpliding)
