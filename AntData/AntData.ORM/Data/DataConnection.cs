@@ -7,7 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using AntData.core.DbEngine.Configuration;
+using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.Dao;
 using JetBrains.Annotations;
 

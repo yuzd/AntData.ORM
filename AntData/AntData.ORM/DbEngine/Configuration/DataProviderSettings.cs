@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AntData.core.DbEngine.Configuration
+namespace AntData.ORM.DbEngine.Configuration
 {
     public class DataProviderSettings
     {
