@@ -139,7 +139,13 @@ namespace AntData.ORM.DbEngine.DB
         {
             var connection = TransactionConnectionManager.GetConnection(this);
             if (connection != null)
+            {
+#if DEBUG
+                Debug.WriteLine(connection.ConnectionString);
+#endif
                 return new ConnectionWrapper(connection, false);
+            }
+
 
             try
             {
@@ -165,7 +171,9 @@ namespace AntData.ORM.DbEngine.DB
         {
             if (String.IsNullOrEmpty(ConnectionString))
                 throw new DalException(String.Format("ConnectionString:{0} can't be found!", AllInOneKey));
-
+#if DEBUG
+         Debug.WriteLine(ConnectionString);   
+#endif
             var connection = m_DatabaseProvider.CreateConnection();
             connection.ConnectionString = ConnectionString;
             return connection;
