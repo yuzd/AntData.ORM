@@ -1177,7 +1177,21 @@ namespace AntData.ORM
 
             return GetTask(source.Update, CancellationToken.None);
         }
+        public static Task<int> InsertAsync<T>(this IDataContext dataContext, T obj,
+            string tableName = null, string databaseName = null, string schemaName = null)
+        {
+            return GetTask<int>(()=>dataContext.Insert<T>(obj, tableName, databaseName, schemaName),CancellationToken.None);
+        }
 
+        public static Task<object> InsertWithIdentityAsync<T>(this IDataContext dataContext, T obj)
+        {
+            return GetTask<object>(() => dataContext.InsertWithIdentity<T>(obj), CancellationToken.None); 
+        }
+        public static async Task<F> InsertWithIdentityAsync<T, F>(this IDataContext dataContext, T obj)
+        {
+            var result = await GetTask<object>(() => dataContext.InsertWithIdentity<T>(obj), CancellationToken.None);
+            return (F)Convert.ChangeType(result, typeof(F));
+        }
         public static  Task<int> DeleteAsync<TSource>(this IQueryable<TSource> source)
         {
 
