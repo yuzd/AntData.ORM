@@ -547,5 +547,33 @@ namespace AntDataUnitTest
             DB.InsertWithIdentity(p);
 
         }
+
+        [TestMethod]
+        public async Task TestMethod5_08()
+        {
+            Person p = new Person
+            {
+                Name = "yuzd",
+                Age = 27
+            };
+
+            var insertResult = await DB.InsertAsync(p) > 0;
+            Assert.AreEqual(insertResult, true);
+
+        }
+
+        [TestMethod]
+        public async Task TestMethod5_09()
+        {
+            Person p = new Person
+            {
+                Name = "yuzd",
+                Age = 27
+            };
+
+            var insertResult = await DB.InsertWithIdentityAsync(p);
+            Debug.WriteLine(p.Id);
+
+        }
     }
 }
