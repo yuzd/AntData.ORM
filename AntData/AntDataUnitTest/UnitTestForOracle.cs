@@ -17,11 +17,11 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTestForOracle
     {
-        private static DbContext<Entitys> DB
+        private static OracleDbContext<Entitys> DB
         {
             get
             {
-                var db = new DbContext<Entitys>("testorm_oracle", new OracleDataProvider());
+                var db = new OracleDbContext<Entitys>("testorm_oracle");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;

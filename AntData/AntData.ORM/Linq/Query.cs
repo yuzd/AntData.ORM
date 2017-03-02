@@ -588,9 +588,9 @@ namespace AntData.ORM.Linq
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
-			if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
+			if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.Insert.TryGetValue(key, out ei))
 				lock (_sync)
-					if (!ObjectOperation<T>.Insert.TryGetValue(key, out ei))
+					if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.Insert.TryGetValue(key, out ei))
 					{
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SelectQuery { QueryType = QueryType.Insert };
@@ -631,8 +631,15 @@ namespace AntData.ORM.Linq
 
 						ei.SetNonQueryQuery();
 
-						ObjectOperation<T>.Insert.Add(key, ei);
-					}
+					    if (!AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert)
+					    {
+					        ObjectOperation<T>.Insert.Add(key, ei);
+					    }
+					    else
+					    {
+                            ObjectOperation<T>.Insert.Clear();
+                        }
+                    }
 
 			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
 		}
@@ -650,9 +657,9 @@ namespace AntData.ORM.Linq
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
-			if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
+			if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
 				lock (_sync)
-					if (!ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
+					if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
 					{
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
 						var sqlQuery = new SelectQuery { QueryType = QueryType.Insert };
@@ -689,8 +696,15 @@ namespace AntData.ORM.Linq
 						}
 
 						ei.SetScalarQuery<object>();
-
-						ObjectOperation<T>.InsertWithIdentity.Add(key, ei);
+					    if (!AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert)
+					    {
+					        ObjectOperation<T>.InsertWithIdentity.Add(key, ei);
+					    }
+					    else
+					    {
+                            ObjectOperation<T>.InsertWithIdentity.Clear();
+                        }
+						
 					}
 
 			return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), new object[1] { obj});
@@ -709,11 +723,11 @@ namespace AntData.ORM.Linq
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
-			if (!ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+			if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
 			{
 				lock (_sync)
 				{
-					if (!ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+					if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
 					{
 						var fieldDic = new Dictionary<SqlField, ParameterAccessor>();
 						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
@@ -808,7 +822,16 @@ namespace AntData.ORM.Linq
 						else
 							ei.MakeAlternativeInsertOrUpdate(sqlQuery);
 
-						ObjectOperation<T>.InsertOrUpdate.Add(key, ei);
+					    if (!AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert)
+					    {
+					        ObjectOperation<T>.InsertOrUpdate.Add(key, ei);
+					    }
+					    else
+					    {
+                            ObjectOperation<T>.InsertOrUpdate.Clear();
+
+                        }
+						
 					}
 				}
 			}

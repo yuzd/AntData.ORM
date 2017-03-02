@@ -17,11 +17,11 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTest1
     {
-        private static DbContext<Entitys> DB
+        private static MysqlDbContext<Entitys> DB
         {
             get
             {
-                var db = new DbContext<Entitys>("testorm", new MySqlDataProvider());
+                var db = new MysqlDbContext<Entitys>("testorm");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;
@@ -582,5 +582,29 @@ namespace AntDataUnitTest
             Debug.WriteLine(p.Id);
 
         }
+
+
+        [TestMethod]
+        public void TestMethod6_01()
+        {
+            
+            Person p = new Person
+            {
+                Name = null,
+                Age = 27
+            };
+
+            var insertResult =  DB.Insert(p);
+
+            p.Name = "yuzd";
+            var insertResult2 =  DB.Insert(p);
+
+            p.Name = null;
+            var insertResult3 = DB.Insert(p);
+
+            Debug.WriteLine(p.Id);
+
+        }
+
     }
 }

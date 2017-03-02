@@ -17,11 +17,11 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTest2
     {
-        private static DbContext<Entitys> DB
+        private static SqlServerlDbContext<Entitys> DB
         {
             get
             {
-                var db = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
+                var db = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 db.IsNoLock = true;
@@ -34,7 +34,7 @@ namespace AntDataUnitTest
         {
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             //Insert的时候 忽略Null的字段
-            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
+            //AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
         }
 
         private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)
@@ -570,6 +570,28 @@ namespace AntDataUnitTest
             });
 
             DB.Tables.People.Merge(allPerson);
+        }
+
+        [TestMethod]
+        public void TestMethod6_02()
+        {
+
+            Person p = new Person
+            {
+                Name = "yuzd1",
+                Age = 27
+            };
+
+            var insertResult = DB.Insert(p);
+
+            p.Name = "yuzd2";
+            var insertResult2 = DB.Insert(p);
+
+            p.Name = "yuzd3";
+            var insertResult3 = DB.Insert(p);
+
+            Debug.WriteLine(p.Id);
+
         }
     }
 

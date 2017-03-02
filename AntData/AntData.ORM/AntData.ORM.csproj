@@ -82,6 +82,9 @@
     <Compile Include="DataProvider\SqlServer\SqlServerSqlOptimizer.cs" />
     <Compile Include="DataProvider\SqlServer\SqlServerTools.cs" />
     <Compile Include="DataProvider\SqlServer\SqlServerVersion.cs" />
+    <Compile Include="Data\OracleDbContext.cs" />
+    <Compile Include="Data\SqlServerlDbContext.cs" />
+    <Compile Include="Data\MysqlDbContext.cs" />
     <Compile Include="Data\DbContext.cs" />
     <Compile Include="DbEngine\Configuration\ConnectionStringSettings.cs" />
     <Compile Include="DbEngine\Configuration\DataProviderSettings.cs" />

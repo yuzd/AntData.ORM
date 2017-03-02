@@ -23,9 +23,9 @@ namespace AntData.ORM.Data
     /// <summary>
     /// 
     /// </summary>
-    public class DbContext<T> : AntData.ORM.Data.DataConnection, IDataContext where T : class
+    public abstract class DbContext<T> : AntData.ORM.Data.DataConnection, IDataContext where T : class
     {
-        //private static readonly IDataProvider provider = new MySqlDataProvider();
+        protected abstract IDataProvider provider { get; }
         //private static readonly IDataProvider provider = new SqlServerDataProvider(System.String.Empty, LinqToDB.DataProvider.SqlServer.SqlServerVersion.v2008);
         private readonly Lazy<T> _lazy = null;
         public T Tables
@@ -36,9 +36,10 @@ namespace AntData.ORM.Data
             }
         }
 
-        public DbContext(string dbMappingName, IDataProvider provider)
-            : base(provider, dbMappingName)
+        public DbContext(string dbMappingName):base(dbMappingName)
+
         {
+            base.DataProvider = provider;
 #if DEBUG
             //AntData.ORM.Common.Configuration.Linq.GenerateExpressionTest = true;
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;

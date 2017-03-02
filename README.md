@@ -38,7 +38,8 @@ private static DbContext<Entitys> DB
  {
         get
         {
-            var db = new DbContext<Entitys>("testorm", new MySqlDataProvider());
+            var db = new MysqlDbContext<Entitys>("testorm");
+			//Trance Sql Log
             db.IsEnableLogTrace = true;
             db.OnLogTrace = OnCustomerTraceConnection;
 			//如果是sqlserver的话 可以设置下面
@@ -47,9 +48,7 @@ private static DbContext<Entitys> DB
         }
   }
 
-//Trance Sql Log
-DB.IsEnableLogTrace = true;
-DB.OnLogTrace = OnCustomerTraceConnection;
+
 private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)
 {
 	try

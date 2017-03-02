@@ -32,6 +32,18 @@ namespace AntData.ORM.Data
 
 
         #region  构造方法
+        public DataConnection(string dbMappingName)
+        {
+            ConnectionString = dbMappingName;
+
+            #region 默认实现
+            this.CustomerExecuteNonQuery = DalBridge.CustomerExecuteNonQuery;
+            this.CustomerExecuteScalar = DalBridge.CustomerExecuteScalar;
+            this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
+            this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable;
+            #endregion
+        }
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -183,11 +195,24 @@ namespace AntData.ORM.Data
         /// 数据库引擎集合
         /// </summary>
         static readonly ConcurrentDictionary<string, IDataProvider> _dataProviders = new ConcurrentDictionary<string, IDataProvider>();
-        /// <summary>
-        /// 设置数据库的信息
-        /// 在生成表达式树和SQL语句之前，我们有必要知道数据库的相关信息。比如当前数据库是用什么——Sql Server还是MySql
-        /// </summary>
-        public IDataProvider DataProvider { get; private set; }
+
+	    /// <summary>
+	    /// 设置数据库的信息
+	    /// 在生成表达式树和SQL语句之前，我们有必要知道数据库的相关信息。比如当前数据库是用什么——Sql Server还是MySql
+	    /// </summary>
+	    private IDataProvider _dataProvider;
+        internal IDataProvider DataProvider {
+            get
+            {
+                return _dataProvider;
+            }
+            set
+            {
+                _dataProvider = value;
+                _mappingSchema = _dataProvider.MappingSchema;
+                AddDataProvider(_dataProvider);
+            } 
+        }
 
         /// <summary>
         /// 获取默认的数据库的信息
@@ -390,7 +415,10 @@ namespace AntData.ORM.Data
 
 		public  MappingSchema  MappingSchema
 		{
-			get { return _mappingSchema; }
+		    get
+		    {
+		        return _mappingSchema;
+		    }
 		}
 
 		public bool InlineParameters { get; set; }
