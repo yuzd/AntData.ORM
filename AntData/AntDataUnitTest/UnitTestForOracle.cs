@@ -17,15 +17,21 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTestForOracle
     {
-        private static DbContext<Entitys> DB;
+        private static DbContext<Entitys> DB
+        {
+            get
+            {
+                var db = new DbContext<Entitys>("testorm_oracle", new OracleDataProvider());
+                db.IsEnableLogTrace = true;
+                db.OnLogTrace = OnCustomerTraceConnection;
+                return db;
+            }
+        }
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            DB = new DbContext<Entitys>("testorm_oracle", new OracleDataProvider());
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
-            DB.IsEnableLogTrace = true;
-            DB.OnLogTrace = OnCustomerTraceConnection;
         }
 
         private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)

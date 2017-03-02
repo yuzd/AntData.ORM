@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace AntData.ORM.Common
@@ -52,7 +53,10 @@ namespace AntData.ORM.Common
                 throw new LinqToDBException("Error while trying to extract path from " + uriString + " " + ex.Message, ex);
             }
         }
-
+        public static string ReplaceNumbers(this string st)
+        {
+            return Regex.Replace(st, @"\d", "");
+        }
     }
 
     /// <summary>

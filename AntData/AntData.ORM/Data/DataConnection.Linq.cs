@@ -67,7 +67,7 @@ namespace AntData.ORM.Data
                     {
                         if (v.SqlParameter != null && v.SqlParameter.Value == null)
                         {
-                            ignoreList.Add(v.SqlParameter.Name);
+                            ignoreList.Add(v.SqlParameter.Name.ReplaceNumbers());//如果是关键字会在结尾里面加数字
                         }
                     }
                     if (ignoreList.Count > 0)

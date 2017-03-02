@@ -17,18 +17,24 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTest2
     {
-        private static DbContext<Entitys> DB;
+        private static DbContext<Entitys> DB
+        {
+            get
+            {
+                var db = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
+                db.IsEnableLogTrace = true;
+                db.OnLogTrace = OnCustomerTraceConnection;
+                db.IsNoLock = true;
+                return db;
+            }
+        }
 
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            DB = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             //Insert的时候 忽略Null的字段
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
-            DB.IsEnableLogTrace = true;
-            DB.OnLogTrace = OnCustomerTraceConnection;
-            DB.IsNoLock = true;
         }
 
         private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)
