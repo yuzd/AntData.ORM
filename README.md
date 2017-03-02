@@ -34,7 +34,18 @@ http://note.youdao.com/noteshare?id=5e85736b7f5de49e4f4fecda4e3c1e8b&sub=8A0F25C
 
 ```csharp
 
-private static DbContext<Entitys> DB  = new DbContext<Entitys>("testorm", new MySqlDataProvider());
+private static DbContext<Entitys> DB
+ {
+        get
+        {
+            var db = new DbContext<Entitys>("testorm", new MySqlDataProvider());
+            db.IsEnableLogTrace = true;
+            db.OnLogTrace = OnCustomerTraceConnection;
+			//如果是sqlserver的话 可以设置下面
+			//db.IsNoLock = true;
+            return db;
+        }
+  }
 
 //Trance Sql Log
 DB.IsEnableLogTrace = true;
