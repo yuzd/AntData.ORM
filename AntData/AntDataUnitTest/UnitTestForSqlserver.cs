@@ -380,7 +380,6 @@ namespace AntDataUnitTest
         [ExpectedException(typeof(SqlException))]
         public void TestMethod4_01()
         {
-            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = false;
             Person p = new Person
             {
                 Age = 27
@@ -547,15 +546,14 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod5_09()
         {
-            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             Person p = new Person
             {
                 Name = null,
                 Age = 11,
                 SchoolId = null
             };
-            DB.Insert(p);
-            DB.InsertWithIdentity(p);
+            DB.Insert(p,ignoreNullInsert:true);
+            DB.InsertWithIdentity(p,ignoreNullInsert:true);
 
         }
 
@@ -578,19 +576,42 @@ namespace AntDataUnitTest
 
             Person p = new Person
             {
-                Name = "yuzd1",
+                Name = null,
                 Age = 27
             };
 
-            var insertResult = DB.Insert(p);
+            var insertResult = DB.Insert(p,ignoreNullInsert:true);
 
             p.Name = "yuzd2";
             var insertResult2 = DB.Insert(p);
 
-            p.Name = "yuzd3";
-            var insertResult3 = DB.Insert(p);
 
-            Debug.WriteLine(p.Id);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(SqlException))]
+        public void TestMethod6_03()
+        {
+
+            Person p = new Person
+            {
+                Name = null,
+                Age = 27
+            };
+
+            var insertResult = DB.Insert(p);
+        }
+
+        [TestMethod]
+        public void TestMethod6_04()
+        {
+            var p = DB.Tables.People.FirstOrDefault();
+            if (p == null)
+            {
+                return;
+            }
+            p.Name = null;
+            p.Age = 19;
+            var insertResult = DB.Update(p,ignoreNullUpdate:true);
 
         }
     }

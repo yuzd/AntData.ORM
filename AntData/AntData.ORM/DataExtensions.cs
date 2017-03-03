@@ -202,20 +202,21 @@ namespace AntData.ORM
 			return Query<T>.Insert(dataContextInfo, obj, tableName, databaseName, schemaName);
 		}
 
-        /// <summary>
-        ///  不能插入list 或 ienumer
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="dataContext"></param>
-        /// <param name="obj"></param>
-        /// <param name="tableName"></param>
-        /// <param name="databaseName"></param>
-        /// <param name="schemaName"></param>
-        /// <returns></returns>
-		public static int Insert<T>(this IDataContext dataContext, T obj,
-			string tableName = null, string databaseName = null, string schemaName = null) 
+	    /// <summary>
+	    ///  不能插入list 或 ienumer
+	    /// </summary>
+	    /// <typeparam name="T"></typeparam>
+	    /// <param name="dataContext"></param>
+	    /// <param name="obj"></param>
+	    /// <param name="tableName"></param>
+	    /// <param name="databaseName"></param>
+	    /// <param name="schemaName"></param>
+	    /// <param name="ignoreNullInsert"></param>
+	    /// <returns></returns>
+	    public static int Insert<T>(this IDataContext dataContext, T obj,
+			string tableName = null, string databaseName = null, string schemaName = null, bool ignoreNullInsert = false) 
         {
-			return Query<T>.Insert(DataContextInfo.Create(dataContext), obj, tableName, databaseName, schemaName);
+			return Query<T>.Insert(DataContextInfo.Create(dataContext), obj, tableName, databaseName, schemaName, ignoreNullInsert);
 		}
 
 		#endregion
@@ -243,14 +244,14 @@ namespace AntData.ORM
 			return Query<T>.InsertWithIdentity(dataContextInfo, obj);
 		}
 
-		public static object InsertWithIdentity<T>(this IDataContext dataContext, T obj)
+		public static object InsertWithIdentity<T>(this IDataContext dataContext, T obj, bool ignoreNullInsert = false)
 		{
-			return Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
+			return Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
 		}
 
-        public static F InsertWithIdentity<T,F>(this IDataContext dataContext, T obj)
+        public static F InsertWithIdentity<T,F>(this IDataContext dataContext, T obj, bool ignoreNullInsert = false)
         {
-            var result = Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj);
+            var result = Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
             return (F)Convert.ChangeType(result, typeof(F));
         }
         #endregion
@@ -263,9 +264,9 @@ namespace AntData.ORM
 			return Query<T>.Update(dataContextInfo, obj);
 		}
 
-		public static int Update<T>(this IDataContext dataContext, T obj)
+		public static int Update<T>(this IDataContext dataContext, T obj, bool ignoreNullUpdate = false)
 		{
-			return Query<T>.Update(DataContextInfo.Create(dataContext), obj);
+			return Query<T>.Update(DataContextInfo.Create(dataContext), obj, ignoreNullUpdate);
 		}
 
 		#endregion

@@ -15,6 +15,7 @@ namespace AntData.ORM.Common
 			public static bool AllowMultipleQuery;
 			public static bool GenerateExpressionTest;
             public static bool IgnoreNullInsert;
+            public static bool IgnoreNullUpdate;
         }
 
 		public static class LinqService

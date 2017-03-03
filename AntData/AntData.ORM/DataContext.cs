@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
@@ -167,7 +168,7 @@ namespace AntData.ORM
 			return DataProvider.IsDBNullAllowed(reader, idx);
 		}
 
-		object IDataContext.SetQuery(IQueryContext queryContext)
+		object IDataContext.SetQuery(IQueryContext queryContext, ArrayList arrList = null)
 		{
 			var ctx = GetDataConnection() as IDataContext;
 			return ctx.SetQuery(queryContext);
