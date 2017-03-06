@@ -606,5 +606,25 @@ namespace AntDataUnitTest
 
         }
 
+
+        [TestMethod]
+        public async Task TestMethod6_02()
+        {
+            var p = await DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefaultAsync(r => r.Name.Equals("nainaigu"));
+
+            Assert.IsNotNull(p);
+            Assert.IsNotNull(p.Personsschool);
+            Assert.IsNotNull(p.Personsschool.Name);
+        }
+
+        [TestMethod]
+        public async Task TestMethod6_03()
+        {
+            var p = await DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefaultAsync(r => r.Name.Equals("北京大学"));
+
+            Assert.IsNotNull(p);
+            Assert.IsNotNull(p.Persons);
+            Assert.IsTrue(p.Persons.Any());
+        }
     }
 }
