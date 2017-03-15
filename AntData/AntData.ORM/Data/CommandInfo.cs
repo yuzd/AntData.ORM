@@ -383,7 +383,10 @@ namespace AntData.ORM.Data
 			if (parameters is DataParameter)
 				return new[] { (DataParameter)parameters };
 
-			Func<object,DataParameter[]> func;
+            if (parameters is IEnumerable<DataParameter>)
+                return ((IEnumerable<DataParameter>)parameters).ToArray();
+
+            Func<object,DataParameter[]> func;
 			var type = parameters.GetType();
 			var key  = new ParamKey(type, dataConnection.ID);
 

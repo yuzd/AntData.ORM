@@ -134,6 +134,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _loadWithMethodInfo = MemberHelper.MethodOf(() => LoadWith<int>(null, null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 加载外键
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="table"></param>
+        /// <param name="selector">外键选择器</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static ITable<T> LoadWith<T>(
 			[NotNull]                this ITable<T> table,
@@ -152,7 +159,13 @@ namespace AntData.ORM
 		#endregion
 
 		#region Scalar Select
-
+        /// <summary>
+        /// 选择
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dataContext"></param>
+        /// <param name="selector"></param>
+        /// <returns></returns>
 		public static T Select<T>(
 			[NotNull]                this IDataContext   dataContext,
 			[NotNull, InstantHandle] Expression<Func<T>> selector)
@@ -174,6 +187,12 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _deleteMethodInfo = MemberHelper.MethodOf(() => Delete<int>(null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 执行删除 返回影响条数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
 		public static int Delete<T>([NotNull] this IQueryable<T> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -187,6 +206,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _deleteMethodInfo2 = MemberHelper.MethodOf(() => Delete<int>(null, null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按条件删除 返回影响条数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="predicate">条件</param>
+        /// <returns></returns>
 		public static int Delete<T>(
 			[NotNull]                this IQueryable<T>       source,
 			[NotNull, InstantHandle] Expression<Func<T,bool>> predicate)
@@ -207,6 +233,15 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _updateMethodInfo = MemberHelper.MethodOf(() => Update<int,int>(null, (ITable<int>)null, null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 指定更新的源 根据自定义的表达式去执行更新
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TTarget"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="target">更新对象</param>
+        /// <param name="setter">自定义的表达式从源获取要更新的目标</param>
+        /// <returns></returns>
 		public static int Update<TSource,TTarget>(
 			[NotNull]                this IQueryable<TSource>          source,
 			[NotNull]                ITable<TTarget>                   target,
@@ -225,6 +260,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _updateMethodInfo2 = MemberHelper.MethodOf(() => Update<int>(null, null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 更新的指定字段
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="setter">设置更新的字段和更新的值</param>
+        /// <returns></returns>
 		public static int Update<T>(
 			[NotNull]                this IQueryable<T>    source,
 			[NotNull, InstantHandle] Expression<Func<T,T>> setter)
@@ -241,6 +283,14 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _updateMethodInfo3 = MemberHelper.MethodOf(() => Update<int>(null, null, null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 根据条件去更新的指定字段
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="predicate">指定条件</param>
+        /// <param name="setter">设置更新的字段和更新的值</param>
+        /// <returns></returns>
 		public static int Update<T>(
 			[NotNull]                this IQueryable<T>       source,
 			[NotNull, InstantHandle] Expression<Func<T,bool>> predicate,
@@ -259,6 +309,12 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _updateMethodInfo4 = MemberHelper.MethodOf(() => Update<int>(null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 执行更新操作 返回影响条数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
 		public static int Update<T>([NotNull] this IUpdatable<T> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -297,6 +353,12 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _asUpdatableMethodInfo = MemberHelper.MethodOf(() => AsUpdatable<int>(null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 转换为IUpdatable类型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> AsUpdatable<T>([NotNull] this IQueryable<T> source)
 		{
@@ -314,6 +376,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _setMethodInfo = MemberHelper.MethodOf(() =>
 			Set<int,int>((IQueryable<int>)null,null,(Expression<Func<int,int>>)null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 根据表达式设置新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="extract"></param>
+        /// <param name="update"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> Set<T,TV>(
 			[NotNull]                this IQueryable<T>     source,
@@ -336,6 +407,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _setMethodInfo2 = MemberHelper.MethodOf(() =>
 			Set<int,int>((IUpdatable<int>)null,null,(Expression<Func<int,int>>)null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 设置新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="extract">取出要设置的字段</param>
+        /// <param name="update">根据取出的字段设置新的值</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> Set<T,TV>(
 			[NotNull]                this IUpdatable<T>    source,
@@ -360,6 +440,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _setMethodInfo3 = MemberHelper.MethodOf(() =>
 			Set<int,int>((IQueryable<int>)null,null,(Expression<Func<int>>)null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 根据表达式设置新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="extract">取出要更新值的字段表达式</param>
+        /// <param name="update">设置新值的表达式</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> Set<T,TV>(
 			[NotNull]                this IQueryable<T>     source,
@@ -382,6 +471,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _setMethodInfo4 = MemberHelper.MethodOf(() =>
 			Set<int,int>((IUpdatable<int>)null,null,(Expression<Func<int>>)null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 根据表达式设置新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="extract">取出要设置的字段</param>
+        /// <param name="update">根据取出的字段设置新的值</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> Set<T,TV>(
 			[NotNull]                this IUpdatable<T>    source,
@@ -405,6 +503,15 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _setMethodInfo5 = MemberHelper.MethodOf(() => Set((IQueryable<int>)null,null,0)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 根据表达式设置新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="extract"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> Set<T,TV>(
 			[NotNull]                this IQueryable<T>     source,
@@ -422,8 +529,9 @@ namespace AntData.ORM
 
 			return new Updatable<T> { Query = query };
 		}
+
         /// <summary>
-        /// 
+        /// 根据字段名设置
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TV">如果是string 可以不传 其他类型不传报错</typeparam>
@@ -454,6 +562,15 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _setMethodInfo6 = MemberHelper.MethodOf(() => Set((IUpdatable<int>)null,null,0)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 设置某个字段为新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="extract">获取要设值的字段</param>
+        /// <param name="value">新的值</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IUpdatable<T> Set<T,TV>(
 			[NotNull]                this IUpdatable<T>    source,
@@ -474,6 +591,15 @@ namespace AntData.ORM
 			return new Updatable<T> { Query = query };
 		}
 
+        /// <summary>
+        /// 根据字段的名称来设置新的值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="fieldName">字段名称</param>
+        /// <param name="value">新的值</param>
+        /// <returns></returns>
 
         [LinqTunnel]
         public static IUpdatable<T> Set2<T, TV>(
@@ -504,6 +630,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _insertMethodInfo = MemberHelper.MethodOf(() => Insert<int>(null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 插入数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="target"></param>
+        /// <param name="setter"></param>
+        /// <returns></returns>
 		public static int Insert<T>(
 			[NotNull]                this ITable<T>      target,
 			[NotNull, InstantHandle] Expression<Func<T>> setter)
@@ -522,6 +655,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _insertWithIdentityMethodInfo = MemberHelper.MethodOf(() => InsertWithIdentity<int>(null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 插入并返回自增值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="target"></param>
+        /// <param name="setter"></param>
+        /// <returns></returns>
 		public static object InsertWithIdentity<T>(
 			[NotNull]                this ITable<T>      target,
 			[NotNull, InstantHandle] Expression<Func<T>> setter)
@@ -566,6 +706,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _valueMethodInfo =
 			MemberHelper.MethodOf(() => Value<int,int>((ITable<int>)null,null,(Expression<Func<int>>)null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按字段设值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="field">获取字段</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IValueInsertable<T> Value<T,TV>(
 			[NotNull]                this ITable<T>         source,
@@ -590,6 +739,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _valueMethodInfo2 =
 			MemberHelper.MethodOf(() => Value((ITable<int>)null,null,0)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按字段设值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="field">获取字段</param>
+        /// <param name="value">设值</param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IValueInsertable<T> Value<T,TV>(
 			[NotNull]                this ITable<T>         source,
@@ -613,6 +771,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _valueMethodInfo3 =
 			MemberHelper.MethodOf(() => Value<int,int>((IValueInsertable<int>)null,null,(Expression<Func<int>>)null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按字段设值
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IValueInsertable<T> Value<T,TV>(
 			[NotNull]                this IValueInsertable<T> source,
@@ -637,6 +804,15 @@ namespace AntData.ORM
 		static readonly MethodInfo _valueMethodInfo4 =
 			MemberHelper.MethodOf(() => Value((IValueInsertable<int>)null,null,0)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按字段设置
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TV"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IValueInsertable<T> Value<T,TV>(
 			[NotNull]                this IValueInsertable<T> source,
@@ -659,6 +835,12 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _insertMethodInfo2 = MemberHelper.MethodOf(() => Insert<int>(null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 插入
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
 		public static int Insert<T>([NotNull] this IValueInsertable<T> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -674,6 +856,12 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _insertWithIdentityMethodInfo2 = MemberHelper.MethodOf(() => InsertWithIdentity<int>(null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 插入并返回主键
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
 		public static object InsertWithIdentity<T>([NotNull] this IValueInsertable<T> source)
 		{
 			if (source == null) throw new ArgumentNullException("source");
@@ -862,55 +1050,55 @@ namespace AntData.ORM
 
 		#region InsertOrUpdate
 
-		static readonly MethodInfo _insertOrUpdateMethodInfo =
-			MemberHelper.MethodOf(() => InsertOrUpdate<int>(null,null,null)).GetGenericMethodDefinition();
+		//static readonly MethodInfo _insertOrUpdateMethodInfo =
+		//	MemberHelper.MethodOf(() => InsertOrUpdate<int>(null,null,null)).GetGenericMethodDefinition();
 
-		public static int InsertOrUpdate<T>(
-			[NotNull]                this ITable<T>        target,
-			[NotNull, InstantHandle] Expression<Func<T>>   insertSetter,
-			[NotNull, InstantHandle] Expression<Func<T,T>> onDuplicateKeyUpdateSetter)
-		{
-			if (target                     == null) throw new ArgumentNullException("target");
-			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
-			if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
+		//public static int InsertOrUpdate<T>(
+		//	[NotNull]                this ITable<T>        target,
+		//	[NotNull, InstantHandle] Expression<Func<T>>   insertSetter,
+		//	[NotNull, InstantHandle] Expression<Func<T,T>> onDuplicateKeyUpdateSetter)
+		//{
+		//	if (target                     == null) throw new ArgumentNullException("target");
+		//	if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
+		//	if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
 
-			IQueryable<T> query = target;
+		//	IQueryable<T> query = target;
 
-			return query.Provider.Execute<int>(
-				Expression.Call(
-					null,
-					_insertOrUpdateMethodInfo.MakeGenericMethod(new[] { typeof(T) }),
-					new[] { query.Expression, Expression.Quote(insertSetter), Expression.Quote(onDuplicateKeyUpdateSetter) }));
-		}
+		//	return query.Provider.Execute<int>(
+		//		Expression.Call(
+		//			null,
+		//			_insertOrUpdateMethodInfo.MakeGenericMethod(new[] { typeof(T) }),
+		//			new[] { query.Expression, Expression.Quote(insertSetter), Expression.Quote(onDuplicateKeyUpdateSetter) }));
+		//}
 
-		static readonly MethodInfo _insertOrUpdateMethodInfo2 =
-			MemberHelper.MethodOf(() => InsertOrUpdate<int>(null,null,null,null)).GetGenericMethodDefinition();
+		//static readonly MethodInfo _insertOrUpdateMethodInfo2 =
+		//	MemberHelper.MethodOf(() => InsertOrUpdate<int>(null,null,null,null)).GetGenericMethodDefinition();
 
-		public static int InsertOrUpdate<T>(
-			[NotNull]                this ITable<T>        target,
-			[NotNull, InstantHandle] Expression<Func<T>>   insertSetter,
-			[NotNull, InstantHandle] Expression<Func<T,T>> onDuplicateKeyUpdateSetter,
-			[NotNull, InstantHandle] Expression<Func<T>>   keySelector)
-		{
-			if (target                     == null) throw new ArgumentNullException("target");
-			if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
-			if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
-			if (keySelector                == null) throw new ArgumentNullException("keySelector");
+		//public static int InsertOrUpdate<T>(
+		//	[NotNull]                this ITable<T>        target,
+		//	[NotNull, InstantHandle] Expression<Func<T>>   insertSetter,
+		//	[NotNull, InstantHandle] Expression<Func<T,T>> onDuplicateKeyUpdateSetter,
+		//	[NotNull, InstantHandle] Expression<Func<T>>   keySelector)
+		//{
+		//	if (target                     == null) throw new ArgumentNullException("target");
+		//	if (insertSetter               == null) throw new ArgumentNullException("insertSetter");
+		//	if (onDuplicateKeyUpdateSetter == null) throw new ArgumentNullException("onDuplicateKeyUpdateSetter");
+		//	if (keySelector                == null) throw new ArgumentNullException("keySelector");
 
-			IQueryable<T> query = target;
+		//	IQueryable<T> query = target;
 
-			return query.Provider.Execute<int>(
-				Expression.Call(
-					null,
-					_insertOrUpdateMethodInfo2.MakeGenericMethod(new[] { typeof(T) }),
-					new[]
-					{
-						query.Expression,
-						Expression.Quote(insertSetter),
-						Expression.Quote(onDuplicateKeyUpdateSetter),
-						Expression.Quote(keySelector)
-					}));
-		}
+		//	return query.Provider.Execute<int>(
+		//		Expression.Call(
+		//			null,
+		//			_insertOrUpdateMethodInfo2.MakeGenericMethod(new[] { typeof(T) }),
+		//			new[]
+		//			{
+		//				query.Expression,
+		//				Expression.Quote(insertSetter),
+		//				Expression.Quote(onDuplicateKeyUpdateSetter),
+		//				Expression.Quote(keySelector)
+		//			}));
+		//}
 
 		#endregion
 
@@ -918,6 +1106,12 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _dropMethodInfo2 = MemberHelper.MethodOf(() => Drop<int>(null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 删除表
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="target"></param>
+        /// <returns></returns>
 		public static int Drop<T>([NotNull] this ITable<T> target)
 		{
 			if (target == null) throw new ArgumentNullException("target");
@@ -962,6 +1156,13 @@ namespace AntData.ORM
 
         static readonly MethodInfo _takeMethodInfo = MemberHelper.MethodOf(() => Take<int>(null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 取数据
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IQueryable<TSource> Take<TSource>(
 			[NotNull]                this IQueryable<TSource> source,
@@ -979,6 +1180,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _skipMethodInfo = MemberHelper.MethodOf(() => Skip<int>(null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 跳过
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IQueryable<TSource> Skip<TSource>(
 			[NotNull]                this IQueryable<TSource> source,
@@ -996,6 +1204,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _elementAtMethodInfo = MemberHelper.MethodOf(() => ElementAt<int>(null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按照index获取
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
 		public static TSource ElementAt<TSource>(
 			[NotNull]                this IQueryable<TSource> source,
 			[NotNull, InstantHandle] Expression<Func<int>>    index)
@@ -1012,6 +1227,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _elementAtOrDefaultMethodInfo = MemberHelper.MethodOf(() => ElementAtOrDefault<int>(null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// 按照index获取 没有就返回null
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
 		public static TSource ElementAtOrDefault<TSource>(
 			[NotNull]                this IQueryable<TSource> source,
 			[NotNull, InstantHandle] Expression<Func<int>>    index)
@@ -1032,6 +1254,13 @@ namespace AntData.ORM
 
 		static readonly MethodInfo _setMethodInfo7 = MemberHelper.MethodOf(() => Having((IQueryable<int>)null,null)).GetGenericMethodDefinition();
 
+        /// <summary>
+        /// having 查询
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
 		[LinqTunnel]
 		public static IQueryable<TSource> Having<TSource>(
 			[NotNull]                this IQueryable<TSource>       source,

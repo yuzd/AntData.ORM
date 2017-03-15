@@ -626,5 +626,17 @@ namespace AntDataUnitTest
             Assert.IsNotNull(p.Persons);
             Assert.IsTrue(p.Persons.Any());
         }
+
+        [TestMethod]
+        public void TestMethod6_04()
+        {
+            var name = "yuzd";
+            var age = 20;
+            var paramList = new List<DataParameter>();
+            paramList.Add(new DataParameter { Name = "name", Value = name });
+            paramList.Add(new DataParameter { Name = "age", Value = age });
+            var list =DB.Query<MyClass>("select * from person where name=@name and age=@age", paramList).ToList();
+
+        }
     }
 }
