@@ -12,6 +12,7 @@ using System.Linq;
 using AntData.ORM.Dao;
 using AntData.ORM.Data;
 using AntData.ORM.Enums;
+using Arch.Data.DbEngine.Sharding;
 
 namespace AntData.ORM.DbEngine
 {
@@ -166,10 +167,29 @@ namespace AntData.ORM.DbEngine
                     Name = databaseSet.Name,
                     EnableReadWriteSpliding = false,//默认关闭读写分离
                     ProviderType = DatabaseProviderTypeFactory.GetProviderType(provider.ProviderType),
+                    ShardingStrategy = ShardingStrategyFactory.Instance.GetShardingStrategy(databaseSet)
                 };
 
                 foreach (DatabaseElement database in databaseSet.Databases)
                 {
+                    String shard = database.Sharding ?? String.Empty;
+                    Int32 ratio = 0;
+                    Int32 ratioStart = 0;
+                    Int32 ratioEnd = 0;
+                    if (shard.Length > 0)
+                    {
+                        if (database.DatabaseType == DatabaseType.Slave)
+                        {
+                            ratioStart = ratio;
+                            ratio += database.Ratio;
+                            ratioEnd = ratio;
+                        }
+
+                        databaseSetWrapper.AllShards.Add(shard);
+                        if (!databaseSetWrapper.TotalRatios.ContainsKey(shard))
+                            databaseSetWrapper.TotalRatios.Add(shard, ratio);
+                    }
+
                     databaseSetWrapper.DatabaseWrappers.Add(new DatabaseWrapper
                     {
                         Name = database.Name,
@@ -177,6 +197,9 @@ namespace AntData.ORM.DbEngine
                         DatabaseType = database.DatabaseType,
                         DatabaseProvider = provider,
                         Database = new Database(databaseSet.Name, database.Name, database.ConnectionString, provider) { DatabaseRWType = database.DatabaseType },
+                        Sharding = shard,
+                        RatioStart = ratioStart,
+                        RatioEnd = ratioEnd
                     });
 
                     if (database.DatabaseType == DatabaseType.Slave && !databaseSetWrapper.EnableReadWriteSpliding)
@@ -226,6 +249,12 @@ namespace AntData.ORM.DbEngine
 #endif
         }
 
+        public static IShardingStrategy GetShardingStrategy(String logicDbName)
+        {
+            if (!DatabaseSets.ContainsKey(logicDbName))
+                throw new ArgumentOutOfRangeException(String.Format(Resources.DatabaseSetDoesNotExistException, logicDbName));
+            return DatabaseSets[logicDbName].ShardingStrategy;
+        }
 
         public static DatabaseProviderType GetProviderType(String logicDbName)
         {
@@ -234,6 +263,15 @@ namespace AntData.ORM.DbEngine
             return DatabaseSets[logicDbName].ProviderType;
         }
 
-       
+        /// <summary>
+        /// 获取读取真实数据库字符串的文本地址
+        /// </summary>
+        /// <returns></returns>
+        public static String GetConnectionLocatorPath()
+        {
+            if (ConfigurationSection == null || ConfigurationSection.ConnectionLocator == null)
+                return null;
+            return ConfigurationSection.ConnectionLocator.Path;
+        }
     }
 }

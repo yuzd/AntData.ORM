@@ -21,9 +21,11 @@ namespace AntData.ORM.DbEngine.ConnectionString
         {
             try
             {
-               
+
                 //这里原来的意思是从一个固定的地址去根据逻辑数据库名(key)去读真实的连接字符串
-                
+                //String path = DALBootstrap.GetConnectionLocatorPath();
+                //if (String.IsNullOrEmpty(path))
+                //    throw new Exception("ConnectionString file doesn't exist.");
                 //rwLock.EnterWriteLock();
                 //var collection = DALBootstrap.ConnectionStringKeys;
                 //if (collection != null && collection.Count > 0)

@@ -9,16 +9,17 @@ namespace AntData.ORM.DbEngine.Configuration
     /// </summary>
     public sealed class DbEngineConfigurationSection : ConfigurationSection
     {
-#region private fields
+        #region private fields
 
         private readonly ConfigurationProperty databaseSets;
 
         private readonly ConfigurationProperty databaseProviders;
 
+        private readonly ConfigurationProperty connectionLocator;
 
-#endregion
+        #endregion
 
-#region construction
+        #region construction
 
         /// <summary>
         /// 构造方法
@@ -28,12 +29,12 @@ namespace AntData.ORM.DbEngine.Configuration
             databaseSets = new ConfigurationProperty("databaseSets", typeof(DatabaseSetElementCollection), null, ConfigurationPropertyOptions.None);
             databaseProviders = new ConfigurationProperty("databaseProviders", typeof(DatabaseProviderElementCollection), null, ConfigurationPropertyOptions.None);
 
-          
+            connectionLocator = new ConfigurationProperty("connectionLocator", typeof(ConnectionLocatorElement), null, ConfigurationPropertyOptions.None);
         }
 
-#endregion
+        #endregion
 
-#region get configuration
+        #region get configuration
 
         /// <summary>
         /// Db引擎配置节名称
@@ -55,15 +56,15 @@ namespace AntData.ORM.DbEngine.Configuration
         [ConfigurationProperty("name", DefaultValue = "DALFx")]
         public String Name
         {
-            get { return (String)base["name"];}
+            get { return (String)base["name"]; }
 #if NETSTANDARD
             set { Name = value; }
 #endif
         }
 
-#endregion
+        #endregion
 
-#region public properties
+        #region public properties
 
         /// <summary>
         /// 数据库集配置数组
@@ -89,9 +90,19 @@ namespace AntData.ORM.DbEngine.Configuration
 #endif
         }
 
+        /// <summary>
+        /// Connection String
+        /// </summary>
+        [ConfigurationProperty("connectionLocator")]
+        public ConnectionLocatorElement ConnectionLocator
+        {
+            get { return (ConnectionLocatorElement)base[connectionLocator]; }
+#if NETSTANDARD
+            set { ConnectionLocator = value; }
+#endif
+        }
 
-
-#endregion
+        #endregion
     }
 }
 #endif

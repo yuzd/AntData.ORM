@@ -10,7 +10,7 @@ namespace AntData.ORM.DbEngine.Configuration
     /// </summary>
     public sealed class DatabaseElement : ConfigurationElement
     {
-#region private fields
+        #region private fields
 
         /// <summary>
         /// 名称
@@ -47,9 +47,9 @@ namespace AntData.ORM.DbEngine.Configuration
         /// </summary>
         private const String c_SequenceEnd = "end";
 
-#endregion
+        #endregion
 
-#region public properties
+        #region public properties
 
         /// <summary>
         /// 名称,关键字
@@ -81,6 +81,15 @@ namespace AntData.ORM.DbEngine.Configuration
             set { this[c_DatabaseTypeProperty] = value; }
         }
 
+        /// <summary>
+        /// 分片标识
+        /// </summary>
+        [ConfigurationProperty(c_ShardingProperty, DefaultValue = "")]
+        public String Sharding
+        {
+            get { return (String)this[c_ShardingProperty]; }
+            set { this[c_ShardingProperty] = value; }
+        }
 
         /// <summary>
         /// 链接字符串名称
@@ -112,7 +121,7 @@ namespace AntData.ORM.DbEngine.Configuration
             set { this[c_SequenceEnd] = value; }
         }
 
-#endregion
+        #endregion
     }
 }
 #endif
