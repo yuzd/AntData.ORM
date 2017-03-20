@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.Configuration;
 
-namespace Arch.Data.DbEngine.Sharding
+namespace AntData.DbEngine.Sharding
 {
     class ShardingStrategyFactory
     {

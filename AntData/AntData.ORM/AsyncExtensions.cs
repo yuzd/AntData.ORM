@@ -598,11 +598,12 @@ namespace AntData.ORM
 			return GetTask(() => source.All(predicate), cancellationToken);
 		}
 
-		#endregion
+        #endregion
 
-		#region CountAsync
+        
+        #region CountAsync
 
-		public static Task<int> CountAsync<TSource>(
+        public static Task<int> CountAsync<TSource>(
 			this IQueryable<TSource> source)
 		{
 			return GetTask(source.Count);

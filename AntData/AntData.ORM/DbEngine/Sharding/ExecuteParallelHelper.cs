@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using AntData.ORM.Dao;
 
-namespace Arch.Data.DbEngine.Sharding
+namespace AntData.DbEngine.Sharding
 {
     class ExecuteParallelHelper
     {

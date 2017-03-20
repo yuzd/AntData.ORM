@@ -41,7 +41,10 @@ namespace AntData.ORM.DbEngine.DB
             if (databaseSetWrapper.DatabaseWrappers.Count == 0)
                 throw new DalException(String.Format("DatabaseSet '{0}' doesn't contain any database.", databaseSetWrapper.Name));
 
-           
+            String shard = statement.ShardID ?? String.Empty;
+            if (shard.Length > 0 && !databaseSetWrapper.TotalRatios.ContainsKey(shard))
+                throw new ArgumentOutOfRangeException(String.Format("Shard '{0}' doesn't exist.", shard));
+
             if (databaseSetWrapper.EnableReadWriteSpliding)
             {
                 if (readWriteSplit == null)
@@ -59,8 +62,40 @@ namespace AntData.ORM.DbEngine.DB
             if (result == null || (result.FirstCandidate == null && result.OtherCandidates.Count == 0))
             {
                 result = new OperationalDatabases();
-                Database master = databaseSetWrapper.DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master).Database;
-                result.FirstCandidate = master;
+                Database master = databaseSetWrapper.DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master && item.Sharding == shard).Database;
+                if (databaseSetWrapper.EnableReadWriteSpliding && statement.OperationType == OperationType.Read)
+                {
+                    //首先选出所有Slave
+                    var slaves = databaseSetWrapper.DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave && item.Sharding == shard);
+                    Int32 count = slaves.Count();
+
+                    //如果多于1个Slave，随机选择一个
+                    if (count > 0)
+                    {
+                        Int32 index = Random.Next(0, count);
+                        result.OtherCandidates = new List<Database>();
+
+                        for (Int32 i = 0; i < count; i++)
+                        {
+                            if (i == index)
+                            {
+                                result.FirstCandidate = slaves.ElementAt(index).Database;
+                            }
+                            else
+                            {
+                                result.OtherCandidates.Add(slaves.ElementAt(i).Database);
+                            }
+                        }
+
+                        //将主库加入作为最后的备选
+                        result.OtherCandidates.Add(master);
+                    }
+                }
+                else
+                {
+                    //如果强制到写库，仅作Retry，不做Fail Over，因此不提供Candidate Slaves
+                    result.FirstCandidate = master;
+                }
             }
 
             if (result.FirstCandidate == null && (result.OtherCandidates == null || result.OtherCandidates.Count == 0))

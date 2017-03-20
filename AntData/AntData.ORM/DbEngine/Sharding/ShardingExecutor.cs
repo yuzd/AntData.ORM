@@ -4,7 +4,7 @@ using System.Data;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.DB;
 
-namespace Arch.Data.DbEngine.Sharding
+namespace AntData.DbEngine.Sharding
 {
     class ShardingExecutor
     {

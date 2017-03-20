@@ -8,7 +8,7 @@ using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.DbEngine.Dao.Common.Util;
 
-namespace Arch.Data.DbEngine.Sharding
+namespace AntData.DbEngine.Sharding
 {
     class ModShardingStrategy : IShardingStrategy
     {

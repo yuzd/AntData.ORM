@@ -283,7 +283,7 @@ namespace AntData.ORM.Data
 			return ExecuteScalar(pq.Commands[1], pq.Params);
 		}
 
-		IDataReader IDataContext.ExecuteReader(object query)
+		IList<IDataReader> IDataContext.ExecuteReader(object query)
 		{
 			var pq = (PreparedQuery)query;
 

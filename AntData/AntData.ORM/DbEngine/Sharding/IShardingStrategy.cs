@@ -23,7 +23,7 @@ using AntData.ORM.DbEngine.Configuration;
 //3. 查询,单Shard操作，直接返回, Cross-Shard, tricky
 //    a. Sharding依赖于字段，In，Between等查询条件不会直接影响落向哪个Shard，目前的Sharding策略需要用户显示传入Sharding字段的值，即使查询中没有此字段返回或者作为查询条件
 //    b. 
-namespace Arch.Data.DbEngine.Sharding
+namespace AntData.DbEngine.Sharding
 {
     /// <summary>
     /// 新的Sharding策略：

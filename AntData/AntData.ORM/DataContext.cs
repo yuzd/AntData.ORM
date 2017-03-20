@@ -191,7 +191,7 @@ namespace AntData.ORM
             var ctx = GetDataConnection() as IDataContext;
             return ctx.ExecuteScalar(query, Identity);
         }
-		IDataReader IDataContext.ExecuteReader(object query)
+		IList<IDataReader> IDataContext.ExecuteReader(object query)
 		{
 			var ctx = GetDataConnection() as IDataContext;
 			return ctx.ExecuteReader(query);

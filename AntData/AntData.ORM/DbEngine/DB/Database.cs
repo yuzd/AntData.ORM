@@ -37,7 +37,7 @@ namespace AntData.ORM.DbEngine.DB
         /// </summary>
         private readonly IDatabaseProvider m_DatabaseProvider;
 
-#region properties
+        #region properties
 
         /// <summary>
         /// 数据库链接
@@ -84,9 +84,9 @@ namespace AntData.ORM.DbEngine.DB
             get { return true; }
         }
 
-#endregion
+        #endregion
 
-#region construction
+        #region construction
 
         /// <summary>
         /// 构造方法
@@ -114,7 +114,7 @@ namespace AntData.ORM.DbEngine.DB
         }
 
         /// <summary>
-        /// 重新读取All In One中的连接串
+        /// 重新读取All In One中的连接串 这里为了方便直接用了配置文件里面的
         /// </summary>
         private void LoadActualConnectionString()
         {
@@ -126,9 +126,9 @@ namespace AntData.ORM.DbEngine.DB
             m_ConnectionString = AllInOneKey;
         }
 
-#endregion
+        #endregion
 
-#region helper methods
+        #region helper methods
 
         /// <summary>
         /// 获取打开的数据库链接
@@ -172,7 +172,7 @@ namespace AntData.ORM.DbEngine.DB
             if (String.IsNullOrEmpty(ConnectionString))
                 throw new DalException(String.Format("ConnectionString:{0} can't be found!", AllInOneKey));
 #if DEBUG
-         Debug.WriteLine(ConnectionString);   
+            Debug.WriteLine(ConnectionString);
 #endif
             var connection = m_DatabaseProvider.CreateConnection();
             connection.ConnectionString = ConnectionString;
@@ -219,7 +219,6 @@ namespace AntData.ORM.DbEngine.DB
                         parameter.Value = p.Value ?? DBNull.Value;
                         parameter.Direction = p.Direction;
                         parameter.IsNullable = p.IsNullable;
-
                         command.Parameters.Add(parameter);
                     }
                     else
@@ -310,10 +309,10 @@ namespace AntData.ORM.DbEngine.DB
             }
         }
 #endif
-#endregion
+        #endregion
 
 #if !NETSTANDARD
-        
+
 
         /// <summary>
         /// 执行返回数据集指令
@@ -328,7 +327,7 @@ namespace AntData.ORM.DbEngine.DB
             {
                 DataSet dataSet = new DataSet { Locale = CultureInfo.InvariantCulture };
                 statement.PreProcess(AllInOneKey, ActualDatabaseName, DatabaseRWType, m_DatabaseProvider, ConnectionString);
-           
+
 
                 using (DbCommand command = PrepareCommand(statement))
                 {
@@ -461,7 +460,7 @@ namespace AntData.ORM.DbEngine.DB
                 statement.ExecStatus = DALState.Success;
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 statement.ExecStatus = DALState.Fail;
                 throw ex;
@@ -496,10 +495,10 @@ namespace AntData.ORM.DbEngine.DB
                     {
                         command.Connection = wrapper.Connection;
 #if !NETSTANDARD
-                     reader =
-                            command.ExecuteReader(Transaction.Current != null
-                                ? CommandBehavior.Default
-                                : CommandBehavior.CloseConnection);
+                        reader =
+                               command.ExecuteReader(Transaction.Current != null
+                                   ? CommandBehavior.Default
+                                   : CommandBehavior.CloseConnection);
 #else
                         reader =command.ExecuteReader(CommandBehavior.CloseConnection);
 #endif

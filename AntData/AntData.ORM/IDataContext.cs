@@ -31,7 +31,7 @@ namespace AntData.ORM
         int ExecuteNonQuery(object query);
         object ExecuteScalar(object query);
         object ExecuteScalar(object query, bool Identity);
-        IDataReader ExecuteReader(object query);
+        IList<IDataReader> ExecuteReader(object query);
         void ReleaseQuery(object query);
 
         #endregion

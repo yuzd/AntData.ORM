@@ -1,6 +1,6 @@
 using System;
 
-namespace Arch.Data.ORM
+namespace AntData.ORM
 {
 	public static class LinqToDBConstants
 	{

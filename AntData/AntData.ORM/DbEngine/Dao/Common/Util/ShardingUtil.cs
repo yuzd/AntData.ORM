@@ -7,10 +7,11 @@
 //-----------------------------------------------------------------------
 
 using System.Collections;
+using AntData.DbEngine.Sharding;
 using AntData.ORM.Dao;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine.Enums;
-using Arch.Data.DbEngine.Sharding;
+using AntData.ORM.Enums;
 
 namespace AntData.ORM.DbEngine.Dao.Common.Util
 {
@@ -247,7 +248,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
         #endregion Shuffled Items
 
         public static IList<Statement> GetShardStatement(String logicDbName, IShardingStrategy shardingStrategy,
-            StatementParameterCollection parameters, IDictionary hints, Func<IDictionary, Statement> func)
+            StatementParameterCollection parameters, IDictionary hints, Func<IDictionary, Statement> func, SqlStatementType sqlStatementType)
         {
             IList<Statement> statements;
             if (shardingStrategy == null)
@@ -263,18 +264,18 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                 {
                     IList<String> temp = null;
 
-                    if (shardingType == ShardingType.ShardByDB)
+                    if (shardingType == ShardingType.ShardByDB)//是分库的情况
                     {
-                        if (hints.Contains(DALExtStatementConstant.SHARD_IDS))
+                        if (hints.Contains(DALExtStatementConstant.SHARD_IDS))//看下hints里面有没有指定分配id(一组)
                         {
                             temp = hints[DALExtStatementConstant.SHARD_IDS] as List<String>;
                         }
-                        else if (hints.Contains(DALExtStatementConstant.SHARDID))
+                        else if (hints.Contains(DALExtStatementConstant.SHARDID))//单个的分配id
                         {
                             temp = new List<String> { hints[DALExtStatementConstant.SHARDID] as String };
                         }
                     }
-                    else if (shardingType == ShardingType.ShardByTable)
+                    else if (shardingType == ShardingType.ShardByTable)//是分表的情况
                     {
                         if (hints.Contains(DALExtStatementConstant.TABLE_IDS))
                         {
@@ -289,25 +290,29 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                     if (temp != null)
                         shards = temp;
                 }
+                // Get shards from parameters 目前去掉解析
+                //if (shards == null)
+                //{
+                    
+                //    if (shardingType == ShardingType.ShardByDB)
+                //    {
+                //        //从hits里面DALExtStatementConstant.SHARDID
+                //        String shardId = GetShardId(logicDbName, shardingStrategy, hints);
+                //        if (!String.IsNullOrEmpty(shardId))
+                //            shards = new List<String> { shardId };
+                //    }
+                //    else if (shardingType == ShardingType.ShardByTable)
+                //    {
+                //        //从hits里面DALExtStatementConstant.TABLEID
+                //        String tableId = GetTableId(logicDbName, shardingStrategy, hints);
+                //        if (!String.IsNullOrEmpty(tableId))
+                //            shards = new List<String> { tableId };
+                //    }
+                //}
 
-                //Get shards from parameters
-                if (shards == null)
+                if (shards == null && sqlStatementType.Equals(SqlStatementType.SELECT))
                 {
-                    if (parameters != null)
-                    {
-                        if (shardingType == ShardingType.ShardByDB)
-                        {
-                            String shardId = GetShardId(logicDbName, shardingStrategy, hints);
-                            if (!String.IsNullOrEmpty(shardId))
-                                shards = new List<String> { shardId };
-                        }
-                        else if (shardingType == ShardingType.ShardByTable)
-                        {
-                            String tableId = GetTableId(logicDbName, shardingStrategy, hints);
-                            if (!String.IsNullOrEmpty(tableId))
-                                shards = new List<String> { tableId };
-                        }
-                    }
+                    shards = shardingStrategy.AllShards;
                 }
 
                 if (shards == null)
@@ -431,6 +436,23 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
 
             return statements;
         }
+        public static Statement GetQueryStatement(String logicDbName,string sql, IShardingStrategy shardingStrategy, IDictionary hints, OperationType? operationType = null)
+        {
 
+            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, hints);
+            Statement statement = new Statement
+            {
+                DatabaseSet = logicDbName,
+                StatementType = StatementType.Sql,
+                OperationType = operationType ?? OperationType.Default,
+                Hints = hints,
+                ShardID = tuple.Item1,
+                TableName = "",//TODO 根据sql解析 table name
+                SqlOperationType = SqlStatementType.SELECT
+            };
+
+            statement.StatementText = sql;
+            return statement;
+        }
     }
 }

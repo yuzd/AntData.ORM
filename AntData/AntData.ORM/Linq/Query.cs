@@ -379,9 +379,12 @@ namespace AntData.ORM.Linq
 			{
 				query = SetCommand(dataContext, expr, parameters, queryNumber, true);
 
-				using (var dr = dataContext.ExecuteReader(query))
-					while (dr.Read())
-						yield return dr;
+			    foreach (var dr in dataContext.ExecuteReader(query))
+			    {
+                    using (dr)
+                        while (dr.Read())
+                            yield return dr;
+                }
 			}
 			finally
 			{
@@ -1164,9 +1167,13 @@ namespace AntData.ORM.Linq
 			{
 				query = SetCommand(dataContext, expr, parameters, 0, true);
 
-				using (var dr = dataContext.ExecuteReader(query))
-					while (dr.Read())
-						return mapper(ctx, dataContext, dr, expr, parameters);
+			    foreach (var dr in dataContext.ExecuteReader(query))
+			    {
+                    using (dr)
+                        while (dr.Read())
+                            return mapper(ctx, dataContext, dr, expr, parameters);
+                }
+				
 
 				return Array<TE>.Empty.First();
 			}

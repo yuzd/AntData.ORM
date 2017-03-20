@@ -8,21 +8,30 @@ namespace AntData.ORM.Data
 	public class DataReader : IDisposable
 	{
 		public   CommandInfo CommandInfo { get; set; }
-		public   IDataReader Reader      { get; set; }
+		public   IList<IDataReader> Reader      { get; set; }
 		internal int         ReadNumber  { get; set; }
 
 		public void Dispose()
 		{
-			if (Reader != null)
-				Reader.Dispose();
+		    if (Reader != null)
+		    {
+		        foreach (var reader in Reader)
+		        {
+                    reader.Dispose();
+                }
+		    }
 		}
 
 		#region Query with object reader
 
 		public IEnumerable<T> Query<T>(Func<IDataReader,T> objectReader)
 		{
-			while (Reader.Read())
-				yield return objectReader(Reader);
+		    foreach (var reader in Reader)
+		    {
+                while (reader.Read())
+                    yield return objectReader(reader);
+            }
+			
 		}
 
 		#endregion
@@ -31,9 +40,9 @@ namespace AntData.ORM.Data
 
 		public IEnumerable<T> Query<T>()
 		{
-			if (ReadNumber != 0)
-				if (!Reader.NextResult())
-					return Enumerable.Empty<T>();
+			//if (ReadNumber != 0)
+			//	if (!Reader.NextResult())
+			//		return Enumerable.Empty<T>();
 
 			ReadNumber++;
 
@@ -55,9 +64,9 @@ namespace AntData.ORM.Data
 
 		public T Execute<T>()
 		{
-			if (ReadNumber != 0)
-				if (!Reader.NextResult())
-					return default(T);
+			//if (ReadNumber != 0)
+			//	if (!Reader.NextResult())
+			//		return default(T);
 
 			ReadNumber++;
 

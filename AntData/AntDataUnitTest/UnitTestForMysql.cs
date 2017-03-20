@@ -638,5 +638,24 @@ namespace AntDataUnitTest
             var list =DB.Query<MyClass>("select * from person where name=@name and age=@age", paramList).ToList();
 
         }
+
+        [TestMethod]
+        public void TestMethod6_05()
+        {
+            //分库获取 每个库执行的结果累加
+            var tb = DB.QueryTable("select * from person");
+
+            //分库获取 每个库执行的结果累加
+            var tb1 = DB.ExcuteSharding("select count(*) from person");
+
+            var tb2 = DB.Tables.People.ToList();
+
+           
+            Assert.AreEqual(tb.Rows.Count,tb1);
+            Assert.AreEqual(tb2.Count, tb1);
+
+            var tb3 = DB.Query<Person>("select * from person").ToList();
+            Assert.AreEqual(tb3.Count, tb1);
+        }
     }
 }

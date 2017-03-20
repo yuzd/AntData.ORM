@@ -9,10 +9,10 @@ using System.Collections.Specialized;
 using System.Configuration;
 #endif
 using System.Linq;
+using AntData.DbEngine.Sharding;
 using AntData.ORM.Dao;
 using AntData.ORM.Data;
 using AntData.ORM.Enums;
-using Arch.Data.DbEngine.Sharding;
 
 namespace AntData.ORM.DbEngine
 {

@@ -17,8 +17,7 @@ namespace AntData.ORM.Dao
     {
         protected static readonly ConcurrentDictionary<string, BaseDao> DaoCache = new ConcurrentDictionary<string, BaseDao>();
 
-        [Obsolete("IDataReader一定要在外部关闭可能造成连接泄漏 一定要关闭Idatareader")]
-        public static IDataReader CustomerExecuteQuery(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = false)
+        public static IList<IDataReader> CustomerExecuteQuery(string dbName, string sql, Dictionary<string, CustomerParam> paras, IDictionary hints = null, bool isWrite = false)
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var isNonQuery = false;

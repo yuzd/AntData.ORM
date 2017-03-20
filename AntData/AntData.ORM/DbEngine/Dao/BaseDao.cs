@@ -8,14 +8,15 @@
 
 using System.Collections;
 using System.Data;
+using AntData.DbEngine.Sharding;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.Dao.sql;
 using AntData.ORM.DbEngine;
+using AntData.ORM.DbEngine.Dao.Common.Util;
 using AntData.ORM.DbEngine.DB;
 using AntData.ORM.Enums;
 using AntData.ORM.Extensions;
-using Arch.Data.DbEngine.Sharding;
 
 
 namespace AntData.ORM.Dao
@@ -70,8 +71,7 @@ namespace AntData.ORM.Dao
         /// <param name="isWrite">默认读</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
-        public IDataReader SelectDataReader(String sql, bool isWrite = false)
+        public IList<IDataReader> SelectDataReader(String sql, bool isWrite = false)
         {
             return SelectDataReader(sql, null, isWrite);
         }
@@ -84,8 +84,7 @@ namespace AntData.ORM.Dao
         /// <param name="isWrite">默认读</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
-        public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters, bool isWrite = false)
+        public IList<IDataReader> SelectDataReader(String sql, StatementParameterCollection parameters, bool isWrite = false)
         {
             return SelectDataReader(sql, parameters, null, isWrite);
         }
@@ -99,8 +98,7 @@ namespace AntData.ORM.Dao
         /// <param name="isWrite">默认读</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
-        public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, bool isWrite = false)
+        public IList<IDataReader> SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, bool isWrite = false)
         {
 
             return SelectDataReader(sql, parameters, hints, isWrite ? OperationType.Write : OperationType.Read);
@@ -115,14 +113,22 @@ namespace AntData.ORM.Dao
         /// <param name="operationType">操作类型，读写分离，默认从master库读取</param>
         /// <returns>IDataReader</returns>
         /// <exception cref="DalException">数据访问框架异常</exception>
-        [Obsolete("此方法有可能造成连接泄漏 一定要关闭Idatareader，不推荐使用，建议使用VisitDataReader！")]
-        public IDataReader SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
+        public IList<IDataReader> SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
         {
             try
             {
-                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
-                AddSqlToExtendParams(statement, hints);
-                return DatabaseBridge.Instance.ExecuteReader(statement);
+                if (!IsShardEnabled)
+                {
+                    Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
+                    AddSqlToExtendParams(statement, hints);
+                    return new List<IDataReader> { DatabaseBridge.Instance.ExecuteReader(statement) };
+
+                }
+                else
+                {
+                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, newHints, operationType), SqlStatementType.SELECT);
+                    return ShardingExecutor.GetShardingDataReaderList(statements);
+                }
             }
             catch (Exception ex)
             {
@@ -133,65 +139,6 @@ namespace AntData.ORM.Dao
             }
         }
 
-        /// <summary>
-        /// 执行查询语句，并返回指定的结果（连接会确认被释放，安全）
-        /// </summary>
-        /// <typeparam name="T">返回值的类型</typeparam>
-        /// <param name="sql">SQL语句</param>
-        /// <param name="callback">回调，接受IDataReader作为参数，返回T类型的结果</param>
-        /// <param name="isWrite">读写配置</param>
-        /// <returns>T</returns>
-        public T VisitDataReader<T>(String sql, Func<IDataReader, T> callback, bool isWrite = false)
-        {
-            return VisitDataReader(sql, null, callback, isWrite);
-        }
-
-        /// <summary>
-        /// 执行查询语句，并返回指定的结果（连接会确认被释放，安全）
-        /// </summary>
-        /// <typeparam name="T">返回值的类型</typeparam>
-        /// <param name="sql">SQL语句</param>
-        /// <param name="parameters">查询参数</param>
-        /// <param name="callback">回调，接受IDataReader作为参数，返回T类型的结果</param>
-        /// <param name="isWrite">读写配置</param>
-        /// <returns>T</returns>
-        public T VisitDataReader<T>(String sql, StatementParameterCollection parameters, Func<IDataReader, T> callback, bool isWrite = false)
-        {
-            return VisitDataReader(sql, parameters, null, callback, isWrite);
-        }
-
-        /// <summary>
-        /// 执行查询语句，并返回指定的结果（连接会确认被释放，安全）
-        /// </summary>
-        /// <typeparam name="T">返回值的类型</typeparam>
-        /// <param name="sql">SQL语句</param>
-        /// <param name="parameters">查询参数</param>
-        /// <param name="hints">指令扩展属性</param>
-        /// <param name="callback">回调，接受IDataReader作为参数，返回T类型的结果</param>
-        /// <param name="isWrite">读写配置</param>
-        /// <returns>T</returns>
-        public T VisitDataReader<T>(String sql, StatementParameterCollection parameters, IDictionary hints, Func<IDataReader, T> callback, bool isWrite = false)
-        {
-            return VisitDataReader(sql, parameters, hints, isWrite ? OperationType.Write : OperationType.Read, callback);
-        }
-
-        /// <summary>
-        /// 执行查询语句，并返回指定的结果（连接会确认被释放，安全）
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="sql">sql语句</param>
-        /// <param name="parameters">查询参数</param>
-        /// <param name="hints">指令扩展属性</param>
-        /// <param name="operationType">操作类型，读写分离，默认从master库读取</param>
-        /// <param name="callback">回调，接受IDataReader作为参数，返回T类型的结果</param>
-        /// <returns>T</returns>
-        public T VisitDataReader<T>(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType, Func<IDataReader, T> callback)
-        {
-            using (var reader = SelectDataReader(sql, parameters, hints, operationType))
-            {
-                return callback(reader);
-            }
-        }
 
         #endregion
 #if !NETSTANDARD
@@ -309,9 +256,19 @@ namespace AntData.ORM.Dao
             try
             {
                 DataSet dataSet;
-                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy,sql, parameters, hints, operationType);
-                AddSqlToExtendParams(statement, hints);
-                dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
+                if (!IsShardEnabled)
+                {
+                    Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters,
+                        hints, operationType);
+                    AddSqlToExtendParams(statement, hints);
+                    dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
+
+                }
+                else
+                {
+                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, newHints, operationType),SqlStatementType.SELECT);
+                    dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
+                }
                 return dataSet;
             }
             catch (Exception ex)
@@ -383,9 +340,33 @@ namespace AntData.ORM.Dao
             try
             {
                 Object result = null;
-                Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
-                AddSqlToExtendParams(statement, hints);
-                result = DatabaseBridge.Instance.ExecuteScalar(statement);
+
+                if (!IsShardEnabled)
+                {
+                    Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
+                    AddSqlToExtendParams(statement, hints);
+                    result = DatabaseBridge.Instance.ExecuteScalar(statement);
+
+                }
+                else
+                {
+                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
+                        newHints => SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType),SqlStatementType.SELECT);
+
+                    var temp = ShardingExecutor.ExecuteShardingScalar(statements);
+
+                    if (temp.Count > 0)
+                    {
+                        if (temp.Count == 1)
+                        {
+                            result = temp[0];
+                        }
+                        else
+                        {
+                            throw new DalException("ExecScalar exception:more than one shard.");
+                        }
+                    }
+                }
                 return result;
             }
             catch (Exception ex)
@@ -454,10 +435,21 @@ namespace AntData.ORM.Dao
             try
             {
                 Int32 result;
-                Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy,sql, parameters, hints, operationType);
-                AddSqlToExtendParams(statement, hints);
-                result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
-                parameters = statement.Parameters;
+
+                if (!IsShardEnabled)
+                {
+                        Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
+                    AddSqlToExtendParams(statement, hints);
+                    result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
+                }
+                else
+                {
+                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
+                        newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints),SqlStatementType.UNKNOWN);
+
+                    result = ShardingExecutor.ExecuteShardingNonQuery(statements).Sum();
+                }
+
                 return result;
             }
             catch (Exception ex)

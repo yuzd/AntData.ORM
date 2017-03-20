@@ -292,6 +292,18 @@ namespace AntData.ORM.Data
         {
             return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).Execute<T>();
         }
+
+        /// <summary>
+        /// 查询分库分表的总数 要求sql是返回数字类型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="sql">SQL对象</param>
+        /// <returns></returns>
+        public static long ExcuteSharding(this DataConnection connection, SQL sql)
+        {
+            return new CommandInfo(connection, sql.ToString(), sql.Parameters.ToArray()).ExcuteSharding();
+        }
         #endregion
 
         #region Execute
@@ -306,6 +318,11 @@ namespace AntData.ORM.Data
 			return new CommandInfo(connection, sql).Execute();
 		}
 
+        public static long ExcuteSharding(this DataConnection connection, string sql)
+        {
+            return new CommandInfo(connection, sql).ExcuteSharding();
+        }
+
         /// <summary>
         /// 带参数执行sql语句返回单个结果 例如查询select count(*)等返回单个结果是int类型的查询
         /// </summary>
@@ -317,7 +334,10 @@ namespace AntData.ORM.Data
 		{
 			return new CommandInfo(connection, sql, parameters).Execute();
 		}
-
+        public static long ExcuteSharding(this DataConnection connection, string sql, params DataParameter[] parameters)
+        {
+            return new CommandInfo(connection, sql, parameters).ExcuteSharding();
+        }
         /// <summary>
         /// 带参数执行存储过程返回单个结果 例如查询select count(*)等返回单个结果是int类型的查询
         /// </summary>
@@ -341,10 +361,13 @@ namespace AntData.ORM.Data
 		{
 			return new CommandInfo(connection, sql, parameters).Execute();
 		}
+        public static long ExcuteSharding(this DataConnection connection, string sql, object parameters)
+        {
+            return new CommandInfo(connection, sql, parameters).ExcuteSharding();
+        }
+        #endregion
 
-		#endregion
-
-		#region Execute scalar
+        #region Execute scalar
         /// <summary>
         /// 执行sql语句返回单个结果
         /// </summary>
@@ -353,11 +376,11 @@ namespace AntData.ORM.Data
         /// <param name="sql">sql语句</param>
         /// <returns></returns>
 
-		public static T Execute<T>(this DataConnection connection, string sql)
+        public static T Execute<T>(this DataConnection connection, string sql)
 		{
 			return new CommandInfo(connection, sql).Execute<T>();
 		}
-
+        
         /// <summary>
         /// 带参数执行sql语句返回单个结果
         /// </summary>

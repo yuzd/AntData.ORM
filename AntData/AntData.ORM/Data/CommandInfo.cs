@@ -68,9 +68,13 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-			using (var rd = DataConnection.ExecuteReader( CommandText, param))
-				while (rd.Read())
-					yield return objectReader(rd);
+		    foreach (var rd in DataConnection.ExecuteReader(CommandText, param))
+		    {
+                using (rd)
+                    while (rd.Read())
+                        yield return objectReader(rd);
+            }
+			
 		}
 
         #endregion
@@ -90,36 +94,40 @@ namespace AntData.ORM.Data
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
 
-            using (var rd = DataConnection.ExecuteReader( CommandText, param))
+            foreach (var rd in DataConnection.ExecuteReader(CommandText, param))
             {
-                if (rd.Read())
+                using (rd)
                 {
-                    var objectReader = GetObjectReader<T>(DataConnection, rd, CommandText);
-                    var isFaulted = false;
-
-                    do
+                    if (rd.Read())
                     {
-                        T result;
+                        var objectReader = GetObjectReader<T>(DataConnection, rd, CommandText);
+                        var isFaulted = false;
 
-                        try
+                        do
                         {
-                            result = objectReader(rd);
-                        }
-                        catch (InvalidCastException)
-                        {
-                            if (isFaulted)
-                                throw;
+                            T result;
 
-                            isFaulted = true;
-                            objectReader = GetObjectReader2<T>(DataConnection, rd, CommandText);
-                            result = objectReader(rd);
-                        }
+                            try
+                            {
+                                result = objectReader(rd);
+                            }
+                            catch (InvalidCastException)
+                            {
+                                if (isFaulted)
+                                    throw;
 
-                        yield return result;
+                                isFaulted = true;
+                                objectReader = GetObjectReader2<T>(DataConnection, rd, CommandText);
+                                result = objectReader(rd);
+                            }
 
-                    } while (rd.Read());
+                            yield return result;
+
+                        } while (rd.Read());
+                    }
                 }
             }
+           
         }
 
         public DataTable QueryTable()
@@ -200,30 +208,67 @@ namespace AntData.ORM.Data
             Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
             if (Parameters != null && Parameters.Length > 0)
                 param = SetParameters(DataConnection, Parameters);
-
-			using (var rd = DataConnection.ExecuteReader(CommandText, param))
-			{
-				if (rd.Read())
-				{
-					var objectReader = GetObjectReader<T>(DataConnection, rd, CommandText);
-					try
-					{
-						return objectReader(rd);
-					}
-					catch (InvalidCastException)
-					{
-						return GetObjectReader2<T>(DataConnection, rd, CommandText)(rd);
-					}
-					catch (FormatException)
-					{
-						return GetObjectReader2<T>(DataConnection, rd, CommandText)(rd);
-					}
-				}
-			}
+            
+          
+            foreach (var rd in DataConnection.ExecuteReader(CommandText, param))
+		    {
+                using (rd)
+                {
+                    if (rd.Read())
+                    {
+                        var objectReader = GetObjectReader<T>(DataConnection, rd, CommandText);
+                        try
+                        {
+                            return objectReader(rd);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            return GetObjectReader2<T>(DataConnection, rd, CommandText)(rd);
+                        }
+                        catch (FormatException)
+                        {
+                            return GetObjectReader2<T>(DataConnection, rd, CommandText)(rd);
+                        }
+                    }
+                }
+            }
+			
 
 			return default(T);
 		}
 
+	    public long ExcuteSharding()
+	    {
+            DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
+            Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
+            if (Parameters != null && Parameters.Length > 0)
+                param = SetParameters(DataConnection, Parameters);
+
+	        var result = 0L;
+            foreach (var rd in DataConnection.ExecuteReader(CommandText, param))
+            {
+                using (rd)
+                {
+                    if (rd.Read())
+                    {
+                        var objectReader = GetObjectReader<long>(DataConnection, rd, CommandText);
+                        try
+                        {
+                            result += objectReader(rd);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            result += GetObjectReader2<long>(DataConnection, rd, CommandText)(rd);
+                        }
+                        catch (FormatException)
+                        {
+                            result += GetObjectReader2<long>(DataConnection, rd, CommandText)(rd);
+                        }
+                    }
+                }
+            }
+	        return result;
+	    }
 		#endregion
 
 
@@ -246,50 +291,57 @@ namespace AntData.ORM.Data
 			return new DataReader { CommandInfo = this, Reader = DataConnection.ExecuteReader( CommandText, param) };
 		}
 
-		internal IEnumerable<T> ExecuteQuery<T>(IDataReader rd, string sql)
+		internal IEnumerable<T> ExecuteQuery<T>(IList<IDataReader> readers, string sql)
 		{
-			if (rd.Read())
-			{
-				var objectReader = GetObjectReader<T>(DataConnection, rd, sql);
-				var isFaulted    = false;
+		    foreach (var rd in readers)
+		    {
+                if (rd.Read())
+                {
+                    var objectReader = GetObjectReader<T>(DataConnection, rd, sql);
+                    var isFaulted = false;
 
-				do
-				{
-					T result;
+                    do
+                    {
+                        T result;
 
-					try
-					{
-						result = objectReader(rd);
-					}
-					catch (InvalidCastException)
-					{
-						if (isFaulted)
-							throw;
+                        try
+                        {
+                            result = objectReader(rd);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            if (isFaulted)
+                                throw;
 
-						isFaulted    = true;
-						objectReader = GetObjectReader2<T>(DataConnection, rd, sql);
-						result       = objectReader(rd);
-					}
+                            isFaulted = true;
+                            objectReader = GetObjectReader2<T>(DataConnection, rd, sql);
+                            result = objectReader(rd);
+                        }
 
-					yield return result;
+                        yield return result;
 
-				} while (rd.Read());
-			}
+                    } while (rd.Read());
+                }
+            }
+			
 		}
 
-		internal T ExecuteScalar<T>(IDataReader rd, string sql)
+		internal T ExecuteScalar<T>(IList<IDataReader> readers, string sql)
 		{
-			if (rd.Read())
-			{
-				try
-				{
-					return GetObjectReader<T>(DataConnection, rd, sql)(rd);
-				}
-				catch (InvalidCastException)
-				{
-					return GetObjectReader2<T>(DataConnection, rd, sql)(rd);
-				}
-			}
+		    foreach (var rd in readers)
+		    {
+                if (rd.Read())
+                {
+                    try
+                    {
+                        return GetObjectReader<T>(DataConnection, rd, sql)(rd);
+                    }
+                    catch (InvalidCastException)
+                    {
+                        return GetObjectReader2<T>(DataConnection, rd, sql)(rd);
+                    }
+                }
+            }
 
 			return default(T);
 		}

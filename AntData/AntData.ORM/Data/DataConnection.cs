@@ -75,7 +75,7 @@ namespace AntData.ORM.Data
         /// <param name="CustomerExecuteScalar">执行查询单个信息(包括insertWithIdentity)</param>
         /// <param name="CustomerExecuteQuery">执行select 序列化成对象 </param>
         /// <param name="CustomerExecuteQueryTable">执行select 不走序列化 生成DataTable</param>
-        public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable)
+        public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, List<IDataReader>> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable)
         {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
@@ -173,7 +173,7 @@ namespace AntData.ORM.Data
         /// <summary>
         /// 执行select 序列化成对象
         /// </summary>
-        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IDataReader> CustomerExecuteQuery { get; set; }
+        private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, IList<IDataReader>> CustomerExecuteQuery { get; set; }
 
         /// <summary>
         /// 执行select 不走序列化 生成DataTable
@@ -352,7 +352,7 @@ namespace AntData.ORM.Data
         /// <param name="Params">执行参数</param>
         /// <param name="isWrite">默认读</param>
         /// <returns></returns>
-		internal IDataReader ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
+		internal IList<IDataReader> ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)

@@ -5,13 +5,13 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using AntData.DbEngine.Sharding;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.Dao.Common.Util;
 using AntData.ORM.Enums;
-using Arch.Data.DbEngine.Sharding;
 using StatementType = AntData.ORM.Enums.StatementType;
 
 namespace AntData.ORM.Dao.sql
@@ -149,7 +149,7 @@ namespace AntData.ORM.Dao.sql
         }
 #endif
 
-        private const String BaseDaoName = "Arch.Data";
+        private const String BaseDaoName = "Ant.Data";
 
     }
 }
