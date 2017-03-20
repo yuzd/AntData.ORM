@@ -9,7 +9,9 @@ using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine;
+using AntData.ORM.DbEngine.Dao.Common.Util;
 using AntData.ORM.Enums;
+using Arch.Data.DbEngine.Sharding;
 using StatementType = AntData.ORM.Enums.StatementType;
 
 namespace AntData.ORM.Dao.sql
@@ -47,10 +49,10 @@ namespace AntData.ORM.Dao.sql
         /// <param name="extendedParameters"></param>
         /// <param name="operationType"></param>
         /// <returns></returns>
-        public static Statement GetSqlStatement(String logicDbName,
+        public static Statement GetSqlStatement(String logicDbName, IShardingStrategy shardingStrategy,
             String sql, StatementParameterCollection parameters, IDictionary extendedParameters, OperationType? operationType = null)
         {
-            return GetDefaultSqlStatement(logicDbName, sql, parameters, extendedParameters, SqlStatementType.SELECT, operationType ?? OperationType.Default);
+            return GetDefaultSqlStatement(logicDbName, shardingStrategy, sql, parameters, extendedParameters, SqlStatementType.SELECT, operationType ?? OperationType.Default);
         }
 
         /// <summary>
@@ -63,10 +65,10 @@ namespace AntData.ORM.Dao.sql
         /// <param name="extendedParameters"></param>
         /// <param name="operationType"></param>
         /// <returns></returns>
-        public static Statement GetScalarStatement(String logicDbName, 
+        public static Statement GetScalarStatement(String logicDbName, IShardingStrategy shardingStrategy,
             String sql, StatementParameterCollection parameters, IDictionary extendedParameters, OperationType? operationType = null)
         {
-            return GetDefaultSqlStatement(logicDbName, sql, parameters, extendedParameters, SqlStatementType.SELECT, operationType ?? OperationType.Default);
+            return GetDefaultSqlStatement(logicDbName, shardingStrategy, sql, parameters, extendedParameters, SqlStatementType.SELECT, operationType ?? OperationType.Default);
         }
 
         /// <summary>
@@ -78,29 +80,32 @@ namespace AntData.ORM.Dao.sql
         /// <param name="extendedParameters"></param>
         /// <param name="operationType"></param>
         /// <returns></returns>
-        public static Statement GetNonQueryStatement(String logicDbName,
+        public static Statement GetNonQueryStatement(String logicDbName, IShardingStrategy shardingStrategy,
             String sql, StatementParameterCollection parameters, IDictionary extendedParameters, OperationType? operationType = null)
         {
-            return GetDefaultSqlStatement(logicDbName, sql, parameters, extendedParameters, SqlStatementType.UNKNOWN, operationType ?? OperationType.Write);
+            return GetDefaultSqlStatement(logicDbName, shardingStrategy, sql, parameters, extendedParameters, SqlStatementType.UNKNOWN, operationType ?? OperationType.Write);
         }
 
-        private static Statement GetDefaultSqlStatement(String logicDbName,
+        private static Statement GetDefaultSqlStatement(String logicDbName, IShardingStrategy shardingStrategy,
             String sql, StatementParameterCollection parameters, IDictionary hints, SqlStatementType sqlType, OperationType? operationType = null)
         {
             if (String.IsNullOrEmpty(logicDbName))
                 throw new DalException("Please specify databaseSet.");
             if (String.IsNullOrEmpty(sql))
                 throw new DalException("Please specify sql.");
-
-            Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints);
-            statement.StatementText = sql;
+            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, hints);
+            Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, tuple.Item1);
+            statement.StatementText = GetSql(sql, tuple.Item2);
             statement.Parameters = parameters;
-            #if !NETSTANDARD
+#if !NETSTANDARD
             CurrentStackCustomizedLog(statement);
 #endif
             return statement;
         }
-
+        private static String GetSql(String sql, String tableId)
+        {
+            return String.IsNullOrEmpty(tableId) ? sql : String.Format(sql, tableId);
+        }
 #if !NETSTANDARD
 
         private static void CurrentStackCustomizedLog(Statement statement)

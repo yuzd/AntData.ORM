@@ -15,6 +15,7 @@ using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.DB;
 using AntData.ORM.Enums;
 using AntData.ORM.Extensions;
+using Arch.Data.DbEngine.Sharding;
 
 
 namespace AntData.ORM.Dao
@@ -35,6 +36,17 @@ namespace AntData.ORM.Dao
         /// </summary>
         private readonly String LogicDbName;
 
+        private readonly Lazy<IShardingStrategy> shardingStrategyLazy;
+
+        /// <summary>
+        ///当前的分片策略， 使用ShardingStrategy时，需要确保已经指定了逻辑数据库名，即 new BaseDao("逻辑数据库名");
+        /// </summary>
+        public IShardingStrategy ShardingStrategy { get { return shardingStrategyLazy.Value; } }
+
+        private Boolean IsShardEnabled
+        {
+            get { return ShardingStrategy != null; }
+        }
 
         /// <summary>
         /// 构造初始化
@@ -46,6 +58,7 @@ namespace AntData.ORM.Dao
                 throw new DalException("Please specify databaseSet.");
 
             LogicDbName = logicDbName;
+            shardingStrategyLazy = new Lazy<IShardingStrategy>(() => DALBootstrap.GetShardingStrategy(logicDbName), true);
         }
 
         #region SelectDataReader VisitDataReader
@@ -107,7 +120,7 @@ namespace AntData.ORM.Dao
         {
             try
             {
-                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, sql, parameters, hints, operationType);
+                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
                 AddSqlToExtendParams(statement, hints);
                 return DatabaseBridge.Instance.ExecuteReader(statement);
             }
@@ -296,7 +309,7 @@ namespace AntData.ORM.Dao
             try
             {
                 DataSet dataSet;
-                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, sql, parameters, hints, operationType);
+                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy,sql, parameters, hints, operationType);
                 AddSqlToExtendParams(statement, hints);
                 dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
                 return dataSet;
@@ -370,7 +383,7 @@ namespace AntData.ORM.Dao
             try
             {
                 Object result = null;
-                Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, sql, parameters, hints, operationType);
+                Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
                 AddSqlToExtendParams(statement, hints);
                 result = DatabaseBridge.Instance.ExecuteScalar(statement);
                 return result;
@@ -441,7 +454,7 @@ namespace AntData.ORM.Dao
             try
             {
                 Int32 result;
-                Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, sql, parameters, hints, operationType);
+                Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy,sql, parameters, hints, operationType);
                 AddSqlToExtendParams(statement, hints);
                 result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
                 parameters = statement.Parameters;
