@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.RW;
@@ -31,6 +32,12 @@ namespace AntData.ORM.DbEngine.DB
         /// <returns></returns>
         public static OperationalDatabases GetDatabasesByStatement(Statement statement)
         {
+#if !NETSTANDARD
+            if (Transaction.Current != null)
+            {
+                statement.OperationType = OperationType.Write;//如果是在事物中强制改成读写都走master
+            }
+#endif
             OperationalDatabases result = null;
             String databaseSet = statement.DatabaseSet;
 
