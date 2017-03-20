@@ -15,7 +15,7 @@ namespace AntData.ORM.SqlQuery
 
 		bool                     _all;
 		Func<IQueryElement,bool> _action1;
-		Action<IQueryElement>    _action2;
+		Action<IQueryElement,string>    _action2;
 
 		public void VisitParentFirst(IQueryElement element, Func<IQueryElement,bool> action)
 		{
@@ -326,7 +326,7 @@ namespace AntData.ORM.SqlQuery
 			}
 		}
 
-		public void Visit(IQueryElement element, Action<IQueryElement> action)
+		public void Visit(IQueryElement element, Action<IQueryElement,string> action)
 		{
 			_visitedElements.Clear();
 			_all     = false;
@@ -334,7 +334,7 @@ namespace AntData.ORM.SqlQuery
 			Visit2(element);
 		}
 
-		public void VisitAll(IQueryElement element, Action<IQueryElement> action)
+		public void VisitAll(IQueryElement element, Action<IQueryElement,string> action)
 		{
 			_visitedElements.Clear();
 			_all     = true;
@@ -342,7 +342,7 @@ namespace AntData.ORM.SqlQuery
 			Visit2(element);
 		}
 
-		void Visit2(IQueryElement element)
+		void Visit2(IQueryElement element,string table_column = null)
 		{
 			if (element == null || !_all && _visitedElements.ContainsKey(element))
 				return;
@@ -432,8 +432,20 @@ namespace AntData.ORM.SqlQuery
 				case QueryElementType.ExprExprPredicate:
 					{
 						//var p = ((SqlQuery.Predicate.ExprExpr)element);
-						Visit2(((SelectQuery.Predicate.ExprExpr)element).Expr1);
-						Visit2(((SelectQuery.Predicate.ExprExpr)element).Expr2);
+					    var p1 = ((SelectQuery.Predicate.ExprExpr) element).Expr1;
+                        Visit2(p1);
+					    string table_column1 = null;
+
+                        var sqlField = p1 as SqlField;
+					    if (sqlField != null)
+					    {
+					        var table = sqlField.Table as SqlTable;
+					        if (table != null)
+					        {
+					           table_column1 = table.PhysicalName + "*" + sqlField.PhysicalName;
+					        }
+                        }
+                        Visit2(((SelectQuery.Predicate.ExprExpr)element).Expr2, table_column1);
 						break;
 					}
 
@@ -636,12 +648,12 @@ namespace AntData.ORM.SqlQuery
 									foreach (var j in t.Joins)
 										Visit2(j);
 
-									_action2(t);
+									_action2(t,null);
 									if (!_all)
 										_visitedElements.Add(t, t);
 								}
 							}
-							_action2(q.From);
+							_action2(q.From,null);
 							if (!_all)
 								_visitedElements.Add(q.From, q.From);
 						}
@@ -666,7 +678,7 @@ namespace AntData.ORM.SqlQuery
 					}
 			}
 
-			_action2(element);
+			_action2(element,table_column);
 
 			if (!_all)
 				_visitedElements.Add(element, element);

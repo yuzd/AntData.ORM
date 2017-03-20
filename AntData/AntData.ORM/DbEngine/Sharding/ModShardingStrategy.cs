@@ -232,7 +232,7 @@ namespace AntData.DbEngine.Sharding
             get { return shardByTable; }
         }
 
-        public IComparable GetShardColumnValue<T>(String logicDbName,StatementParameterCollection parameters, IDictionary hints)
+        public IComparable GetShardColumnValue(String logicDbName,StatementParameterCollection parameters, IDictionary hints)
         {
             if (String.IsNullOrEmpty(logicDbName))
                 return null;
@@ -246,7 +246,10 @@ namespace AntData.DbEngine.Sharding
             if (shardColumnValue == null)
                 shardColumnValue = GetShardColumnValueByMap(shardColumns, hints);
 
-        
+            //Verify by parameters
+            if (shardColumnValue == null)
+                shardColumnValue = GetShardColumnValueByParameters(logicDbName, shardColumns, parameters, hints);
+
             return shardColumnValue;
         }
 
@@ -286,6 +289,56 @@ namespace AntData.DbEngine.Sharding
             return shardColumnValue;
         }
 
+        private static IComparable GetShardColumnValueByParameters(String logicDbName, IList<String> shardColumns, StatementParameterCollection parameters, IDictionary hints)
+        {
+            IComparable shardColumnValue = null;
+
+            if (shardColumns == null || shardColumns.Count == 0)
+                return null;
+            if (parameters == null || parameters.Count == 0)
+                return null;
+
+            var dict = new Dictionary<String, StatementParameter>();
+
+            foreach (var item in parameters)
+            {
+                String parameterName = item.Name;
+                if (String.IsNullOrEmpty(parameterName)) continue;
+
+                parameterName = parameterName.ToLower();
+                if (!dict.ContainsKey(parameterName)) dict.Add(parameterName, item);
+
+                parameterName = item.ColumnName;
+                if (String.IsNullOrEmpty(parameterName)) continue;
+
+                parameterName = parameterName.ToLower();
+                if (!dict.ContainsKey(parameterName)) dict.Add(parameterName, item);
+            }
+
+            var quote = string.Empty;
+            if (hints != null && hints.Contains(DALExtStatementConstant.PARAMETER_SYMBOL))
+            {
+                quote = hints[DALExtStatementConstant.PARAMETER_SYMBOL] as string;
+            }
+            foreach (var item in shardColumns)
+            {
+                String name = quote + item.ToLower();
+
+                if (dict.ContainsKey(name))
+                {
+                    shardColumnValue = dict[name].Value as IComparable;
+                    break;
+                }
+
+                if (dict.ContainsKey(item.ToLower()))
+                {
+                    shardColumnValue = dict[item.ToLower()].Value as IComparable;
+                    break;
+                }
+            }
+
+            return shardColumnValue;
+        }
     }
 }
 

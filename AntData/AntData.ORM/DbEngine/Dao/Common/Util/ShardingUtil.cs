@@ -130,7 +130,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
         /// <param name="shardingStrategy"></param>
         /// <param name="hints"></param>
         /// <returns></returns>
-        public static Tuple<String, String> GetShardInfo(String logicDbName, IShardingStrategy shardingStrategy, IDictionary hints)
+        public static Tuple<String, String> GetShardInfo(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
             String shardId = null;
             String tableId = null;
@@ -138,8 +138,8 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             if (!shardEnabled)
                 return Tuple.Create<String, String>(shardId, tableId);
 
-            shardId = GetShardId(logicDbName, shardingStrategy, hints);//是否有分库
-            tableId = GetTableId(logicDbName, shardingStrategy, hints);//分表
+            shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);//是否有分库
+            tableId = GetTableId(logicDbName, shardingStrategy, parameters,hints);//分表
 
             if (String.IsNullOrEmpty(shardId) && String.IsNullOrEmpty(tableId))
                 throw new DalException("Please provide shard information.");
@@ -147,7 +147,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return Tuple.Create<String, String>(shardId, tableId);
         }
 
-        private static String GetShardId(String logicDbName, IShardingStrategy shardingStrategy, IDictionary hints)
+        private static String GetShardId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
             String shardId = null;
             Boolean shardByDb = IsShardByDb(shardingStrategy);
@@ -155,11 +155,16 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             if (shardByDb)
             {
                 shardId = GetShardIdByHints(hints);
+                if (String.IsNullOrEmpty(shardId))
+                {
+                    IComparable shardColumnValue = shardingStrategy.GetShardColumnValue(logicDbName, parameters, hints);
+                    shardId = CalculateShardId(shardingStrategy, shardColumnValue);
+                }
             }
             return shardId;
         }
 
-        private static String GetTableId(String logicDbName, IShardingStrategy shardingStrategy,IDictionary hints)
+        private static String GetTableId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
             String tableId = null;
             Boolean shardByTable = IsShardByTable(shardingStrategy);
@@ -167,6 +172,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             if (shardByTable)
             {
                 tableId = GetTableIdByHints(hints);
+                if (String.IsNullOrEmpty(tableId))
+                {
+                    IComparable shardColumnValue = shardingStrategy.GetShardColumnValue(logicDbName,parameters, hints);
+                    tableId = CalculateShardId(shardingStrategy, shardColumnValue);
+                }
             }
 
             return tableId;
@@ -174,7 +184,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
 
         #region Shuffled Items
 
-        private static IDictionary<String, IList<T>> ShuffledByDb<T>(String logicDbName, IShardingStrategy shardingStrategy,
+        private static IDictionary<String, IList<T>> ShuffledByDb<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
             IList<T> list, IDictionary hints)
         {
             if (String.IsNullOrEmpty(logicDbName))
@@ -185,7 +195,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
 
             foreach (var item in list)
             {
-                String shardId = GetShardId(logicDbName, shardingStrategy, hints);
+                String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
                 if (String.IsNullOrEmpty(shardId))
                     continue;
 
@@ -197,7 +207,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return dict;
         }
 
-        private static IDictionary<String, IList<T>> ShuffledByTable<T>(String logicDbName, IShardingStrategy shardingStrategy,
+        private static IDictionary<String, IList<T>> ShuffledByTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
             IList<T> list,IDictionary hints)
         {
             if (String.IsNullOrEmpty(logicDbName))
@@ -208,7 +218,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
 
             foreach (var item in list)
             {
-                String tableId = GetTableId(logicDbName, shardingStrategy, hints);
+                String tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);
                 if (String.IsNullOrEmpty(tableId))
                     continue;
 
@@ -220,7 +230,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return dict;
         }
 
-        private static IDictionary<String, IDictionary<String, IList<T>>> ShuffledByDbTable<T>(String logicDbName, IShardingStrategy shardingStrategy,
+        private static IDictionary<String, IDictionary<String, IList<T>>> ShuffledByDbTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
             IList<T> list, IDictionary hints)
         {
             if (String.IsNullOrEmpty(logicDbName))
@@ -232,8 +242,8 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
 
             foreach (var item in list)
             {
-                String shardId = GetShardId(logicDbName, shardingStrategy, hints);
-                String tableId = GetTableId(logicDbName, shardingStrategy ,hints);
+                String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
+                String tableId = GetTableId(logicDbName, shardingStrategy , parameters,hints);
 
                 if (!dict.ContainsKey(shardId))
                     dict.Add(shardId, new Dictionary<String, IList<T>>());
@@ -290,26 +300,28 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                     if (temp != null)
                         shards = temp;
                 }
-                // Get shards from parameters 目前去掉解析
-                //if (shards == null)
-                //{
-                    
-                //    if (shardingType == ShardingType.ShardByDB)
-                //    {
-                //        //从hits里面DALExtStatementConstant.SHARDID
-                //        String shardId = GetShardId(logicDbName, shardingStrategy, hints);
-                //        if (!String.IsNullOrEmpty(shardId))
-                //            shards = new List<String> { shardId };
-                //    }
-                //    else if (shardingType == ShardingType.ShardByTable)
-                //    {
-                //        //从hits里面DALExtStatementConstant.TABLEID
-                //        String tableId = GetTableId(logicDbName, shardingStrategy, hints);
-                //        if (!String.IsNullOrEmpty(tableId))
-                //            shards = new List<String> { tableId };
-                //    }
-                //}
 
+                //Get shards from parameters 这里会根据 查询参数得出分配的信息
+                if (shards == null)
+                {
+
+                    if (shardingType == ShardingType.ShardByDB)
+                    {
+                        //从hits里面DALExtStatementConstant.SHARDID
+                        String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
+                        if (!String.IsNullOrEmpty(shardId))
+                            shards = new List<String> { shardId };
+                    }
+                    else if (shardingType == ShardingType.ShardByTable)
+                    {
+                        //从hits里面DALExtStatementConstant.TABLEID
+                        String tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);
+                        if (!String.IsNullOrEmpty(tableId))
+                            shards = new List<String> { tableId };
+                    }
+                }
+
+                //对于不带条件的查询 都默认查询所有的
                 if (shards == null && sqlStatementType.Equals(SqlStatementType.SELECT))
                 {
                     shards = shardingStrategy.AllShards;
@@ -373,73 +385,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return statements;
         }
 
-        public static IList<Statement> GetShardStatementByEntity<T>(String logicDbName, IShardingStrategy shardingStrategy,
-            IList<T> list,  IDictionary hints, Func<IList<T>, IDictionary, Statement> func) where T : class, new()
-        {
-            if (String.IsNullOrEmpty(logicDbName))
-                return null;
-            if (list == null || list.Count == 0)
-                return null;
-
-            var statements = new List<Statement>();
-            var shardingType = GetShardingType(shardingStrategy);
-
-            if (shardingType == ShardingType.ShardByDB)
-            {
-                var dict = ShuffledByDb(logicDbName, shardingStrategy, list,  hints);
-
-                if (dict != null && dict.Count > 0)
-                {
-                    foreach (var item in dict)
-                    {
-                        var newHints = HintsUtil.CloneHints(hints);
-                        newHints[DALExtStatementConstant.SHARDID] = item.Key;
-                        Statement statement = func.Invoke(item.Value, newHints);
-                        statements.Add(statement);
-                    }
-                }
-            }
-            else if (shardingType == ShardingType.ShardByTable)
-            {
-                var dict = ShuffledByTable(logicDbName, shardingStrategy, list, hints);
-
-                if (dict != null && dict.Count > 0)
-                {
-                    foreach (var item in dict)
-                    {
-                        var newHints = HintsUtil.CloneHints(hints);
-                        newHints[DALExtStatementConstant.TABLEID] = item.Key;
-                        Statement statement = func.Invoke(item.Value, newHints);
-                        statements.Add(statement);
-                    }
-                }
-            }
-            else
-            {
-                var dict = ShuffledByDbTable(logicDbName, shardingStrategy, list, hints);
-
-                if (dict != null && dict.Count > 0)
-                {
-                    foreach (var item in dict)
-                    {
-                        foreach (var item2 in item.Value)
-                        {
-                            var newHints = HintsUtil.CloneHints(hints);
-                            newHints[DALExtStatementConstant.SHARDID] = item.Key;
-                            newHints[DALExtStatementConstant.TABLEID] = item2.Key;
-                            Statement statement = func.Invoke(item2.Value, newHints);
-                            statements.Add(statement);
-                        }
-                    }
-                }
-            }
-
-            return statements;
-        }
-        public static Statement GetQueryStatement(String logicDbName,string sql, IShardingStrategy shardingStrategy, IDictionary hints, OperationType? operationType = null)
+       
+        public static Statement GetQueryStatement(String logicDbName,string sql, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints, OperationType? operationType = null)
         {
 
-            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, hints);
+            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
             Statement statement = new Statement
             {
                 DatabaseSet = logicDbName,
@@ -448,7 +398,8 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                 Hints = hints,
                 ShardID = tuple.Item1,
                 TableName = "",//TODO 根据sql解析 table name
-                SqlOperationType = SqlStatementType.SELECT
+                SqlOperationType = SqlStatementType.SELECT,
+                Parameters = parameters
             };
 
             statement.StatementText = sql;

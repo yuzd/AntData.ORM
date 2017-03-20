@@ -142,7 +142,8 @@ namespace AntData.ORM.Dao
                     {
                         dic.AddInParameter(item.Key, LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType), item.Value.Value);
                     }
-
+                    dic[item.Key].TableName = item.Value.TableName;
+                    dic[item.Key].ColumnName = item.Value.ColumnName;
                 }
                 return dic;
             }

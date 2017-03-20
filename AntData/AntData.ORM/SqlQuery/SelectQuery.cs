@@ -3337,7 +3337,7 @@ namespace AntData.ORM.SqlQuery
 				{
 					query.Parameters.Clear();
 
-					new QueryVisitor().VisitAll(query, expr =>
+					new QueryVisitor().VisitAll(query, (expr, table_cloumn) =>
 					{
 						switch (expr.ElementType)
 						{
@@ -3540,7 +3540,7 @@ namespace AntData.ORM.SqlQuery
 			_parameters.AddRange(clone._parameters.Select(p => (SqlParameter)p.Clone(objectTree, doClone)));
 			IsParameterDependent = clone.IsParameterDependent;
 
-			new QueryVisitor().Visit(this, expr =>
+			new QueryVisitor().Visit(this, (expr, table_cloumn) =>
 			{
 				var sb = expr as SelectQuery;
 
@@ -3625,7 +3625,7 @@ namespace AntData.ORM.SqlQuery
 
 			Parameters.Clear();
 
-			new QueryVisitor().VisitAll(this, expr =>
+			new QueryVisitor().VisitAll(this, (expr,table_cloumn) =>
 			{
 				switch (expr.ElementType)
 				{
@@ -3639,6 +3639,11 @@ namespace AntData.ORM.SqlQuery
 								{
 									objs.Add(expr, expr);
 									p.Name = GetAlias(p.Name, "p");
+								    if (!string.IsNullOrEmpty(table_cloumn))
+								    {
+								        p.TableName = table_cloumn.Split('*')[0];
+								        p.CoumnName = table_cloumn.Split('*')[1];
+								    }
 								}
 
 								Parameters.Add(p);
@@ -3716,8 +3721,9 @@ namespace AntData.ORM.SqlQuery
 			foreach (var table in From.Tables)
 				table.ForEach(action, visitedQueries);
 
-			new QueryVisitor().Visit(this, e =>
-			{
+			new QueryVisitor().Visit(this, (e, table_cloumn)=>
+
+            {
 				if (e is SelectQuery && e != this)
 					((SelectQuery)e).ForEachTable(action, visitedQueries);
 			});

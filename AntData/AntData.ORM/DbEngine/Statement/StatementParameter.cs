@@ -67,6 +67,8 @@ namespace AntData.ORM.DbEngine
         /// 是否是Sharding字段
         /// </summary>
         public Boolean IsShardingColumn { get; set; }
+        public string TableName { get; set; }
+        public string ColumnName { get; set; }
 
     }
 }

@@ -104,5 +104,9 @@ namespace AntData.ORM.Dao.Common
         /// </summary>
         public const String SHARD_TABLE_DICT = "SHARD_TABLE_DICT";
 
+        /// <summary>
+        /// 数据库的字段参数关键字
+        /// </summary>
+        public const String PARAMETER_SYMBOL = "ParameterSymbol";
     }
 }

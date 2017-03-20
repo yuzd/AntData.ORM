@@ -63,6 +63,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="UnitTestForSharing.cs" />
     <Compile Include="UnitTestForOracle.cs" />
     <Compile Include="UnitTestForMysql.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

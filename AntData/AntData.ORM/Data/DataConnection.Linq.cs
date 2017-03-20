@@ -200,6 +200,8 @@ namespace AntData.ORM.Data
 
 			DataProvider.SetParameter(p, name, dataType, parm.Value);
 		    p.DbType = DataTypeConvert.Convert(dataType);
+		    p.TableName = parm.TableName;
+		    p.ColumnName = parm.CoumnName;
 		    return p;
 		;}
 

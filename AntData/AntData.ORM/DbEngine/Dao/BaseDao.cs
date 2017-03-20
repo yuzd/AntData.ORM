@@ -126,7 +126,7 @@ namespace AntData.ORM.Dao
                 }
                 else
                 {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, newHints, operationType), SqlStatementType.SELECT);
+                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
                     return ShardingExecutor.GetShardingDataReaderList(statements);
                 }
             }
@@ -266,7 +266,7 @@ namespace AntData.ORM.Dao
                 }
                 else
                 {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, newHints, operationType),SqlStatementType.SELECT);
+                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType),SqlStatementType.SELECT);
                     dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
                 }
                 return dataSet;

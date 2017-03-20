@@ -93,7 +93,7 @@ namespace AntData.ORM.Dao.sql
                 throw new DalException("Please specify databaseSet.");
             if (String.IsNullOrEmpty(sql))
                 throw new DalException("Please specify sql.");
-            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, hints);
+            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters,hints);
             Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, tuple.Item1);
             statement.StatementText = GetSql(sql, tuple.Item2);
             statement.Parameters = parameters;

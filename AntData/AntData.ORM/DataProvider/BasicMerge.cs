@@ -171,8 +171,9 @@ namespace AntData.ORM.DataProvider
 
 						var fromTable = (SqlTable)sql.From.Tables[0].Source;
 
-						new QueryVisitor().Visit(sql.From, e =>
-						{
+						new QueryVisitor().Visit(sql.From, (e, table_cloumn) =>
+
+                        {
 							if (e.ElementType == QueryElementType.TableSource)
 							{
 								var et = (SelectQuery.TableSource)e;
@@ -199,7 +200,7 @@ namespace AntData.ORM.DataProvider
 									var tempCopy   = sql.Clone();
 									var tempTables = new List<SelectQuery.TableSource>();
 
-									new QueryVisitor().Visit(tempCopy.From, ee =>
+									new QueryVisitor().Visit(tempCopy.From, (ee, table_cloumn)  =>
 									{
 										if (ee.ElementType == QueryElementType.TableSource)
 											tempTables.Add((SelectQuery.TableSource)ee);

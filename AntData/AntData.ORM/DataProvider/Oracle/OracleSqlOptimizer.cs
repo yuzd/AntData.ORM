@@ -16,7 +16,7 @@ namespace AntData.ORM.DataProvider.Oracle
 		{
 			CheckAliases(sqlQuery, 30);
 
-			new QueryVisitor().Visit(((SelectQuery)sqlQuery).Select, element =>
+			new QueryVisitor().Visit(((SelectQuery)sqlQuery).Select, (element, table_cloumn)  =>
 			{
 				if (element.ElementType == QueryElementType.SqlParameter)
 					((SqlParameter)element).IsQueryParameter = false;

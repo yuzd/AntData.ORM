@@ -89,7 +89,7 @@ namespace AntData.ORM.Linq.Builder
 			foreach (var sql in groupSql)
 				 sequence.SelectQuery.GroupBy.Expr(sql.Sql);
 
-			new QueryVisitor().Visit(sequence.SelectQuery.From, e =>
+			new QueryVisitor().Visit(sequence.SelectQuery.From, (e, table_cloumn) =>
 			{
 				if (e.ElementType == QueryElementType.JoinedTable)
 				{

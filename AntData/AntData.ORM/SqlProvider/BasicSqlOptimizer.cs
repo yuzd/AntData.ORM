@@ -42,7 +42,7 @@ namespace AntData.ORM.SqlProvider
 
 		SelectQuery MoveCountSubQuery(SelectQuery selectQuery)
 		{
-			new QueryVisitor().Visit(selectQuery, MoveCountSubQuery);
+			new QueryVisitor().Visit(selectQuery, (e, tt) => MoveCountSubQuery(e));
 			return selectQuery;
 		}
 
@@ -99,13 +99,13 @@ namespace AntData.ORM.SqlProvider
 					var allTables   = new HashSet<ISqlTableSource>();
 					var levelTables = new HashSet<ISqlTableSource>();
 
-					new QueryVisitor().Visit(subQuery, e =>
+					new QueryVisitor().Visit(subQuery, (e, table_cloumn) =>
 					{
 						if (e is ISqlTableSource)
 							allTables.Add((ISqlTableSource)e);
 					});
 
-					new QueryVisitor().Visit(subQuery, e =>
+					new QueryVisitor().Visit(subQuery, (e, table_cloumn) =>
 					{
 						if (e is ISqlTableSource)
 							if (subQuery.From.IsChild((ISqlTableSource)e))
@@ -206,8 +206,9 @@ namespace AntData.ORM.SqlProvider
 		{
 			var dic = new Dictionary<IQueryElement,IQueryElement>();
 
-			new QueryVisitor().Visit(selectQuery, element =>
-			{
+			new QueryVisitor().Visit(selectQuery, (element, table_cloumn) =>
+
+            {
 				if (element.ElementType != QueryElementType.SqlQuery)
 					return;
 
@@ -233,13 +234,13 @@ namespace AntData.ORM.SqlProvider
 							return false;
 						};
 
-						new QueryVisitor().Visit(subQuery, e =>
+						new QueryVisitor().Visit(subQuery, (e, tt) =>
 						{
 							if (e is ISqlTableSource)
 								allTables.Add((ISqlTableSource)e);
 						});
 
-						new QueryVisitor().Visit(subQuery, e =>
+						new QueryVisitor().Visit(subQuery, (e, tt) =>
 						{
 							if (e is ISqlTableSource && subQuery.From.IsChild((ISqlTableSource)e))
 								levelTables.Add((ISqlTableSource)e);
@@ -1309,7 +1310,7 @@ namespace AntData.ORM.SqlProvider
 
 		protected void CheckAliases(SelectQuery selectQuery, int maxLen)
 		{
-			new QueryVisitor().Visit(selectQuery, e =>
+			new QueryVisitor().Visit(selectQuery, (e, tt) =>
 			{
 				switch (e.ElementType)
 				{

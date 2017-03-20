@@ -27,7 +27,9 @@ namespace AntData.ORM.SqlQuery
 		}
 
 		public string   Name             { get; set; }
-		public Type     SystemType       { get; set; }
+		public string   TableName             { get; set; }
+		public string CoumnName { get; set; }
+		public Type     SystemType       { get; set; }  
 		public bool     IsQueryParameter { get; set; }
 		public DataType DataType         { get; set; }
 		public int      DbSize           { get; set; }

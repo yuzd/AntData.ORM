@@ -28,7 +28,7 @@ namespace AntData.ORM.SqlQuery
 
             var dic = new Dictionary<SelectQuery, SelectQuery>();
 
-            new QueryVisitor().VisitAll(_selectQuery, e =>
+            new QueryVisitor().VisitAll(_selectQuery, (e, tt) =>
             {
                 var sql = e as SelectQuery;
 
@@ -321,7 +321,7 @@ namespace AntData.ORM.SqlQuery
         {
             var exprs = new Dictionary<ISqlExpression, ISqlExpression>();
 
-            new QueryVisitor().Visit(_selectQuery, e =>
+            new QueryVisitor().Visit(_selectQuery, (e, tt) =>
             {
                 var sql = e as SelectQuery;
 
@@ -395,7 +395,7 @@ namespace AntData.ORM.SqlQuery
                     OptimizeSearchCondition(join.Condition);
             }, new HashSet<SelectQuery>());
 
-            new QueryVisitor().Visit(_selectQuery, e =>
+            new QueryVisitor().Visit(_selectQuery, (e, tt) =>
             {
                 var sql = e as SelectQuery;
 
@@ -415,7 +415,7 @@ namespace AntData.ORM.SqlQuery
             OptimizeSubQueries(isApplySupported, optimizeColumns);
             OptimizeApplies(isApplySupported, optimizeColumns);
             OptimizeJoins();
-            new QueryVisitor().Visit(_selectQuery, e =>
+            new QueryVisitor().Visit(_selectQuery, (e, tt) =>
             {
                 var sql = e as SelectQuery;
 
@@ -596,7 +596,7 @@ namespace AntData.ORM.SqlQuery
                         {
                             areTablesCollected = true;
 
-                            Action<IQueryElement> tableCollector = expr =>
+                            Action<IQueryElement,string> tableCollector = (expr, tt) =>
                             {
                                 var field = expr as SqlField;
 
@@ -621,7 +621,7 @@ namespace AntData.ORM.SqlQuery
                             if (_selectQuery.IsDelete)
                                 visitor.VisitAll(_selectQuery.Delete, tableCollector);
 
-                            visitor.VisitAll(_selectQuery.From, expr =>
+                            visitor.VisitAll(_selectQuery.From, (expr, tt) =>
                             {
                                 var tbl = expr as SqlTable;
 
@@ -713,7 +713,7 @@ namespace AntData.ORM.SqlQuery
                 var n = 0;
                 var q = query.ParentSelect ?? query;
 
-                visitor.VisitAll(q, e => { if (e == column) n++; });
+                visitor.VisitAll(q, (e, tt) => { if (e == column) n++; });
 
                 return n > 2;
             }
@@ -762,7 +762,7 @@ namespace AntData.ORM.SqlQuery
                 return map.TryGetValue(expr, out fld) ? fld : expr;
             });
 
-            new QueryVisitor().Visit(top, expr =>
+            new QueryVisitor().Visit(top, (expr, tt)  =>
             {
                 if (expr.ElementType == QueryElementType.InListPredicate)
                 {
@@ -948,7 +948,7 @@ namespace AntData.ORM.SqlQuery
 
                 if (query != null && query.From.Tables.Count == 0 && query.Select.Columns.Count == 1)
                 {
-                    new QueryVisitor().Visit(query.Select.Columns[0].Expression, e =>
+                    new QueryVisitor().Visit(query.Select.Columns[0].Expression, (e, tt) =>
                     {
                         if (e.ElementType == QueryElementType.SqlQuery)
                         {
@@ -1182,7 +1182,7 @@ namespace AntData.ORM.SqlQuery
                                 j1.Table.Joins.AddRange(j2.Table.Joins);
                                 --i2;
 
-                                new QueryVisitor().Visit(_selectQuery, element =>
+                                new QueryVisitor().Visit(_selectQuery, (element, tt) =>
                                 {
                                     switch (element.ElementType)
                                     {
