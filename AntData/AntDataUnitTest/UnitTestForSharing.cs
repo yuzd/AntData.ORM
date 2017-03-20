@@ -15,7 +15,7 @@ namespace AntDataUnitTest
         {
             get
             {
-                var db = new MysqlDbContext<Entitys>("testorm");
+                var db = new MysqlDbContext<Entitys>("testsharding");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;
