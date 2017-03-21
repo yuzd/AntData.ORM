@@ -13,5 +13,7 @@
     BaseEntityClass = "BaseEntity";
 	LoadMySqlMetadata("localhost","28747", "testorm", "root", "123456");
 	//LoadMySqlMetadata("localhost","3306", "DBName", "DbUserName", "DbPassword");
+
+	//SetTableSharding("orders_{0}","orders_0","orders_1");
 	GenerateModel();
 #>

@@ -15,7 +15,7 @@ using MySql.Data.MySqlClient;
 namespace AntDataUnitTest
 {
     [TestClass]
-    public class UnitTest1
+    public class UnitTestForMysql
     {
         private static MysqlDbContext<Entitys> DB
         {

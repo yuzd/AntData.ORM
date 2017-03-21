@@ -44,16 +44,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EntityRobotForMysql.tt</DependentUpon>
     </Compile>
-    <Compile Include="Mysql\EntityRobotForMysql2.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EntityRobotForMysql2.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Mysql\EntityRobotForMysql3.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EntityRobotForMysql3.tt</DependentUpon>
-    </Compile>
     <Compile Include="Oracal\EntityRobotForOracle.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -79,14 +69,6 @@
     <Content Include="Mysql\EntityRobotForMysql.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>EntityRobotForMysql.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Mysql\EntityRobotForMysql2.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>EntityRobotForMysql2.generated.cs</LastGenOutput>
-    </Content>
-    <Content Include="Mysql\EntityRobotForMysql3.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>EntityRobotForMysql3.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Oracal\EntityRobotForOracle.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

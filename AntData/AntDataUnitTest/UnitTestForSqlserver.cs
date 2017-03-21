@@ -15,7 +15,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AntDataUnitTest
 {
     [TestClass]
-    public class UnitTest2
+    public class UnitTestForSqlserver
     {
         private static SqlServerlDbContext<Entitys> DB
         {
