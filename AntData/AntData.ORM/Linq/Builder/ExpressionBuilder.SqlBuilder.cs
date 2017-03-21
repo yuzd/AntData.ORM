@@ -1116,6 +1116,7 @@ namespace AntData.ORM.Linq.Builder
 
 		bool CanBeConstant(Expression expr)
 		{
+            return false;
 			if (_lastExpr1 == expr)
 				return _lastResult1;
 

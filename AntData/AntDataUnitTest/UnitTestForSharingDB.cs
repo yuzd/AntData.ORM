@@ -51,7 +51,7 @@ namespace AntDataUnitTest
         public void TestMethod6_01()
         {
             var id = 1;
-            var odIsExist = DB.Tables.Orders.Any(r => r.ID.Equals(id));
+            var odIsExist = DB.Tables.Orders.Any(r => r.ID.Equals(1));
             if (odIsExist)
             {
                 return;
@@ -75,7 +75,7 @@ namespace AntDataUnitTest
         {
 
             var id = 2;
-            var odIsExist = DB.Tables.Orders.Any(r => r.ID.Equals(id));
+            var odIsExist = DB.Tables.Orders.Any(r => r.ID.Equals(2));
             if (odIsExist)
             {
                 return;
@@ -97,7 +97,7 @@ namespace AntDataUnitTest
         public void TestMethod6_03()
         {
             var id = 1;
-            var tb1 = DB.Tables.Orders.FirstOrDefault(r => r.ID.Equals(id));
+            var tb1 = DB.Tables.Orders.FirstOrDefault(r => r.ID.Equals(1));
             Assert.IsNotNull(tb1);
         }
 
@@ -108,7 +108,7 @@ namespace AntDataUnitTest
         public void TestMethod6_04()
         {
             var id = 2;
-            var tb1 = DB.Tables.Orders.FirstOrDefault(r => r.ID.Equals(id));
+            var tb1 = DB.Tables.Orders.FirstOrDefault(r => r.ID.Equals(2));
             Assert.IsNotNull(tb1);
         }
 
@@ -130,7 +130,7 @@ namespace AntDataUnitTest
         public void TestMethod6_06()
         {
             var id = 1;
-            var result = DB.Tables.Orders.Where(r=>r.ID.Equals(id)).Set(r=>r.Name,y=>y.Name+"1").Update();
+            var result = DB.Tables.Orders.Where(r=>r.ID.Equals(1)).Set(r=>r.Name,y=>y.Name+"1").Update();
             Assert.AreEqual(result, 1);
         }
 
@@ -141,7 +141,7 @@ namespace AntDataUnitTest
         public void TestMethod6_07()
         {
             var id = 2;
-            var result = DB.Tables.Orders.Where(r => r.ID.Equals(id)).Set(r => r.Name, y => y.Name + "1").Update();
+            var result = DB.Tables.Orders.Where(r => r.ID.Equals(2)).Set(r => r.Name, y => y.Name + "1").Update();
             Assert.AreEqual(result, 1);
         }
 
@@ -152,7 +152,7 @@ namespace AntDataUnitTest
         public void TestMethod6_08()
         {
             var id = 1;
-            var result = DB.Tables.Orders.Where(r => r.ID.Equals(id)).Delete();
+            var result = DB.Tables.Orders.Where(r => r.ID.Equals(1)).Delete();
             Assert.AreEqual(result, 1);
         }
 
@@ -163,8 +163,24 @@ namespace AntDataUnitTest
         public void TestMethod6_09()
         {
             var id = 2;
-            var result = DB.Tables.Orders.Where(r => r.ID.Equals(id)).Delete();
+            var result = DB.Tables.Orders.Where(r => r.ID.Equals(2)).Delete();
             Assert.AreEqual(result, 1);
+        }
+
+        [TestMethod]
+        public void TestMethod7_01()
+        {
+            var id = 2;
+
+            //var odIsExist = DB.Tables.Orders.Any(r => r.ID.Equals(id));
+
+            var odIsExist = DB.Tables.Orders.Any(r => r.ID.Equals(2));
+            if (odIsExist)
+            {
+                return;
+            }
+           
+
         }
     }
 }

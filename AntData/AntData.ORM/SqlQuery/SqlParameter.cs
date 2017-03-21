@@ -29,7 +29,7 @@ namespace AntData.ORM.SqlQuery
 		public string   Name             { get; set; }
 		public string   TableName             { get; set; }
 		public string CoumnName { get; set; }
-		public Type     SystemType       { get; set; }  
+		
 		public bool     IsQueryParameter { get; set; }
 		public DataType DataType         { get; set; }
 		public int      DbSize           { get; set; }
@@ -65,8 +65,8 @@ namespace AntData.ORM.SqlQuery
 
 			set { _value = value; }
 		}
-
-		internal object RawValue
+        public Type SystemType { get; set; }
+        internal object RawValue
 		{
 			get { return _value; }
 		}
