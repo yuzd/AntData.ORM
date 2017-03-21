@@ -89,16 +89,8 @@ namespace AntData.ORM.Data
         {
             using (var scope = new System.Transactions.TransactionScope())
             {
-                try
-                {
-                    this.IsInTransaction = true;
-                    func(this);
-                    scope.Complete();
-                }
-                finally
-                {
-                    this.IsInTransaction = false;
-                }
+                func(this);
+                scope.Complete();
             }
         }
         /// <summary>
@@ -110,16 +102,8 @@ namespace AntData.ORM.Data
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption))
             {
-                try
-                {
-                    this.IsInTransaction = true;
-                    func(this);
-                    scope.Complete();
-                }
-                finally
-                {
-                    this.IsInTransaction = false;
-                }
+                func(this);
+                scope.Complete();
             }
         }
 
@@ -133,16 +117,8 @@ namespace AntData.ORM.Data
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption, options))
             {
-                try
-                {
-                    this.IsInTransaction = true;
-                    func(this);
-                    scope.Complete();
-                }
-                finally
-                {
-                    this.IsInTransaction = false;
-                }
+                func(this);
+                scope.Complete();
             }
         }
 
@@ -154,17 +130,9 @@ namespace AntData.ORM.Data
         {
             using (var scope = new System.Transactions.TransactionScope())
             {
-                try
+                if (func(this))
                 {
-                    this.IsInTransaction = true;
-                    if (func(this))
-                    {
-                        scope.Complete();
-                    }
-                }
-                finally
-                {
-                    this.IsInTransaction = false;
+                    scope.Complete();
                 }
             }
         }
@@ -178,17 +146,9 @@ namespace AntData.ORM.Data
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption))
             {
-                try
+                if (func(this))
                 {
-                    this.IsInTransaction = true;
-                    if (func(this))
-                    {
-                        scope.Complete();
-                    }
-                }
-                finally
-                {
-                    this.IsInTransaction = false;
+                    scope.Complete();
                 }
             }
         }
@@ -203,17 +163,9 @@ namespace AntData.ORM.Data
         {
             using (var scope = new System.Transactions.TransactionScope(scopeOption, options))
             {
-                try
+                if (func(this))
                 {
-                    this.IsInTransaction = true;
-                    if (func(this))
-                    {
-                        scope.Complete();
-                    }
-                }
-                finally
-                {
-                    this.IsInTransaction = false;
+                    scope.Complete();
                 }
             }
         }

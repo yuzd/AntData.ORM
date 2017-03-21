@@ -63,6 +63,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="UnitTestForRW.cs" />
     <Compile Include="UnitTestForSharingTable.cs" />
     <Compile Include="UnitTestForSharingDB.cs" />
     <Compile Include="UnitTestForOracle.cs" />
