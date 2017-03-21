@@ -397,12 +397,13 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                 OperationType = operationType ?? OperationType.Default,
                 Hints = hints,
                 ShardID = tuple.Item1,
-                TableName = "",//TODO 根据sql解析 table name
+                TableName = "",
                 SqlOperationType = SqlStatementType.SELECT,
                 Parameters = parameters
             };
 
-            statement.StatementText = sql;
+            statement.StatementText =string.IsNullOrEmpty(tuple.Item2)?sql:  string.Format(sql, tuple.Item2);
+
             return statement;
         }
     }

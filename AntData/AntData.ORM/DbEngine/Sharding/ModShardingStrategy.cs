@@ -190,12 +190,25 @@ namespace AntData.DbEngine.Sharding
                 }
             }
 
+            string tableSharding;
+            if (config.TryGetValue("tableSharding", out tableSharding))
+            {
+                var tempTableSharding = tableSharding.Split(',');
+                foreach (var s in tempTableSharding)
+                {
+                    allShards.Add(s);
+                }
+            }
+
             if (!Int32.TryParse(tempMod, out MOD))
                 throw new ArgumentException("Mod settings invalid.");
 
             foreach (DatabaseElement db in databaseSet.Databases)
             {
-                allShards.Add(db.Sharding);
+                if (!string.IsNullOrWhiteSpace(db.Sharding))
+                {
+                    allShards.Add(db.Sharding);
+                }
             }
 
             String shardByDb;
@@ -205,6 +218,11 @@ namespace AntData.DbEngine.Sharding
                 Boolean.TryParse(shardByDb, out shardByDB);
             if (config.TryGetValue("shardByTable", out tmpShardByTable))
                 Boolean.TryParse(tmpShardByTable, out shardByTable);
+
+            if (shardByTable && allShards.Count < 1)
+            {
+                throw new ArgumentException("Mod settings invalid. shardByTable must have key:[tableSharding]");
+            }
         }
 
         public IList<String> AllShards
