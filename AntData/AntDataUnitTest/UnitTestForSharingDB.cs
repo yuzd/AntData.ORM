@@ -9,13 +9,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace AntDataUnitTest
 {
     [TestClass]
-    public class UnitTestForSharing
+    public class UnitTestForSharingDB
     {
         private static MysqlDbContext<Entitys> DB
         {
             get
             {
-                var db = new MysqlDbContext<Entitys>("testsharding");
+                var db = new MysqlDbContext<Entitys>("testshardingdb");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;

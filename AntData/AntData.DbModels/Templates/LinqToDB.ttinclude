@@ -1,5 +1,6 @@
 <#@ assembly name="System.Data"        #>
 <#@ import namespace="System.Data"     #>
+<#@ import namespace="System.Text.RegularExpressions"     #>
 <#@ import namespace="LinqToDB.Data"   #>
 <#@ include file="DataModel.ttinclude" #>
 <#
@@ -24,9 +25,20 @@ bool IsOracle   = false;
 string SchemaNameSuffix          = "Schema";
 string SchemaDataContextTypeName = "DataContext";
 
+
+Dictionary<string,string> ShardingTables = new Dictionary<string,string>();
+
 Dictionary<string,string> SchemaNameMapping = new Dictionary<string,string>();
 string ToPascalCase(string the_string)
 {
+	//如果是sharing table的话 约定好是 带有 { 和 } 符号的
+
+	//if(the_string.Contains("{") && the_string.Contains("}"))
+	//{
+	//	Regex rgx = new Regex("\\{.*\\}");
+	//	the_string = rgx.Replace(the_string, "");
+    //}
+
     // If there are 0 or 1 characters, just return the string.
     if (the_string == null) return the_string;
     if (the_string.Length < 2) return the_string.ToUpper();
@@ -119,7 +131,13 @@ void GenerateTypesFromMetadata()
 	foreach (var t in Tables.Values.OrderBy(tbl => tbl.IsProviderSpecific).ThenBy(tbl=> tbl.TypeName))
 	{
 		if(t.Columns.Values.Count == 0) continue;
-	    t.TypeName = ToPascalCase(t.TypeName);
+		if(ShardingTables.ContainsKey(t.TableName))
+		{
+			 t.TypeName = ToPascalCase(ShardingTables[t.TableName]);//按照约定 sharding table的情况 必须是 _{?}的格式
+        }else{
+			 t.TypeName = ToPascalCase(t.TypeName);
+        }
+	   
 		Action<Class> addType = tp => Model.Types.Add(tp);
 		var props             = defProps;
 		var aliases           = defAliases;
@@ -141,7 +159,7 @@ void GenerateTypesFromMetadata()
 			GenerateProviderSpecificTable(t) :
 			new Property(
 				string.Format("ITable<{0}>", ToPascalCase(t.TypeName)),
-				ToPascalCase(t.DataContextPropertyName),
+				ShardingTables.ContainsKey(t.TableName)?ToPascalCase(t.TypeName):ToPascalCase(t.DataContextPropertyName),
 				new[] { string.Format((schema == null ? "this" : "_dataContext") + ".Get<{0}>()", ToPascalCase(t.TypeName)) },
 				null);
 

@@ -63,7 +63,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTestForSharing.cs" />
+    <Compile Include="UnitTestForSharingTable.cs" />
+    <Compile Include="UnitTestForSharingDB.cs" />
     <Compile Include="UnitTestForOracle.cs" />
     <Compile Include="UnitTestForMysql.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -73,6 +74,9 @@
     <None Include="App.config" />
     <None Include="Config\Dal.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="OrderedTest1.orderedtest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
   </ItemGroup>

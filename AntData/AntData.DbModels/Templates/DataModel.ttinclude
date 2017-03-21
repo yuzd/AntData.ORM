@@ -468,6 +468,56 @@ public void SetIdentity(string tableName,string columnName,string sequenceName,s
 	WriteLine("#error SetIdentity '" + tableName + "'.'" + columnName +  "' not found.");
 }
 
+public void SetTableSharding(string tableNameFormat,params string[] tables)
+{
+	if(string.IsNullOrEmpty(tableNameFormat))
+    {
+		WriteLine("#error SetTableSharding tableNameFormat is IsNullOrEmpty");
+		return;
+    }
+
+	if(tables.Length <= 1)
+    {
+		WriteLine("#error SetTableSharding tables must >1");
+		return;
+    }
+
+	//查看是否有对应的table分片 如果有 取第一个 将剩余的 干掉。
+	//try{
+	//	var t = GetTable(tableNameFormat);
+	//	if(t!=null)
+	//	{
+	//		WriteLine("#error SetTableSharding tableNameFormat invalid");
+	//		return;
+	//	}
+   // }catch{
+    //}
+	
+
+    for (int i = 0; i < tables.Length; i++)
+    {
+		var tt=tables[i];
+		if(i == 0)
+		{
+			//第一个
+			var firstT = GetTable(tt);
+			if(firstT == null)
+			{
+				WriteLine("#error SetTableSharding table not exists：" + tt);
+				return;
+			}
+			firstT.TableName =tableNameFormat;
+			ShardingTables.Add(tableNameFormat,tableNameFormat.Split('_')[0]);
+		}
+		else
+		{
+			
+			Tables.Remove(tt);
+		}
+    }
+
+
+}
 public class TableContext
 {
 	public GeneratedTextTransformation Transformation;
