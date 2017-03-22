@@ -349,3 +349,6 @@ DB.UseTransaction(con =>
 # 6.Read-write separation DEMO
 
 http://note.youdao.com/noteshare?id=6249b5fc2d17569bef12a24d54fc1b30&sub=2A83E464B28D4F41B8A93C87179AE20D
+
+# 6.Sharding By DB And Sharding By Table
+Please see unit test
