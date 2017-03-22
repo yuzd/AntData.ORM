@@ -875,7 +875,7 @@ namespace AntData.ORM.Linq.Builder
 					{
 						var e = (MethodCallExpression)expression;
 
-						if (e.IsQueryable())
+						if (e.IsQueryable() /*&& !ContainsBuilder.IsConstant(e)*/)
 						{
 							if (IsSubQuery(context, e))
 								return SubQueryToSql(context, e);
@@ -1463,11 +1463,8 @@ namespace AntData.ORM.Linq.Builder
 
 		Expression AddEqualTrue(Expression expr)
 		{
-			if (expr.Type != typeof(bool))
-				expr = Expression.Convert(expr, typeof(bool));
-
-			return Expression.Equal(expr, Expression.Constant(true));
-		}
+            return Equal(MappingSchema, Expression.Constant(true), expr);
+        }
 
 		#region ConvertCompare
 
@@ -2312,10 +2309,16 @@ namespace AntData.ORM.Linq.Builder
 						{
 							var p = notCondition.Conditions[0].Predicate as SelectQuery.Predicate.NotExpr;
 							p.IsNot = !p.IsNot;
-							conditions.Add(notCondition.Conditions[0]);
+
+                            var checkIsNull = CheckIsNull(notCondition.Conditions[0].Predicate, true);
+
+                            conditions.Add(checkIsNull ?? notCondition.Conditions[0]);
 						}
 						else
-							conditions.Add(new SelectQuery.Condition(true, notCondition));
+						{
+                            var checkIsNull = CheckIsNull(notCondition.Conditions[0].Predicate, true);
+                            conditions.Add(checkIsNull ?? new SelectQuery.Condition(true, notCondition));
+						}
 
 						break;
 					}
@@ -2339,17 +2342,89 @@ namespace AntData.ORM.Linq.Builder
 						}
 					}
 
-					conditions.Add(new SelectQuery.Condition(false, predicate));
+					conditions.Add(CheckIsNull(predicate, false) ?? new SelectQuery.Condition(false, predicate));
 
 					break;
 			}
 		}
+        private static SelectQuery.Condition CheckIsNull(ISqlPredicate predicate, bool isNot)
+        {
+            if (Configuration.Linq.CheckNullForNotEquals == false)
+                return null;
 
-		#endregion
+            var inList = predicate as SelectQuery.Predicate.InList;
 
-		#region CanBeTranslatedToSql
+            if (predicate is SelectQuery.SearchCondition)
+            {
+                var sc = (SelectQuery.SearchCondition)predicate;
 
-		bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
+                inList = new QueryVisitor()
+                    .Find(sc, _ => _.ElementType == QueryElementType.InListPredicate) as SelectQuery.Predicate.InList;
+
+                if (inList != null)
+                {
+                    isNot = new QueryVisitor().Find(sc, _ =>
+                    {
+                        var condition = _ as SelectQuery.Condition;
+                        return condition != null && condition.IsNot;
+                    }) != null;
+                }
+            }
+
+            if (predicate.CanBeNull && predicate is SelectQuery.Predicate.ExprExpr || inList != null)
+            {
+                var exprExpr = predicate as SelectQuery.Predicate.ExprExpr;
+
+
+                if ((exprExpr != null &&
+                       ((exprExpr.Operator == SelectQuery.Predicate.Operator.NotEqual && isNot == false)
+                         || (exprExpr.Operator == SelectQuery.Predicate.Operator.Equal && isNot == true)
+                       ))
+                    || (inList != null && inList.IsNot || isNot))
+                {
+                    var expr1 = exprExpr != null ? exprExpr.Expr1 : inList.Expr1;
+                    var expr2 = exprExpr != null ? exprExpr.Expr2 : null;
+
+                    var nullValue1 = new QueryVisitor().Find(expr1, _ => _ is SqlField);
+                    var nullValue2 = expr2 != null ? new QueryVisitor().Find(expr2, _ => _ is SqlParameter) : null;
+
+                    var hasNullValue =
+                           nullValue1 != null && ((SqlField)nullValue1).SystemType.ToString().Contains("System.Nullable")
+                       ;
+                    //var hasNullValue2 =
+                    //       nullValue2 != null && ((SqlParameter)nullValue2).SystemType.ToString().Contains("Null")
+                    //   ;
+                    if (hasNullValue/* && !hasNullValue2*/)
+                    {
+                        var expr1IsField = expr1.CanBeNull && new QueryVisitor().Find(expr1, _ => _.ElementType == QueryElementType.SqlField) != null;
+                        var expr2IsField = expr2 != null && expr2.CanBeNull && new QueryVisitor().Find(expr2, _ => _.ElementType == QueryElementType.SqlField) != null;
+
+                        var nullableField = expr1IsField
+                            ? expr1
+                            : expr2IsField ? expr2 : null;
+
+                        if (nullableField != null)
+                        {
+                            var checkNullPredicate = new SelectQuery.Predicate.IsNull(nullableField, false);
+
+                            var orCondition = new SelectQuery.SearchCondition(
+                                new SelectQuery.Condition(false, checkNullPredicate),
+                                new SelectQuery.Condition(isNot && inList == null, predicate));
+
+                            orCondition.Conditions[0].IsOr = true;
+
+                            return new SelectQuery.Condition(false, orCondition);
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        #endregion
+
+        #region CanBeTranslatedToSql
+
+        bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
 		{
 			List<Expression> ignoredMembers = null;
 

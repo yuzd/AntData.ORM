@@ -639,6 +639,28 @@ namespace AntDataUnitTest
 
         }
 
+        [TestMethod]
+        public void TestMethod6_05()
+        {
+            var p = from p1 in DB.Tables.People
+                    from p2 in DB.Tables.Schools.Where(r => r.Id.Equals(p1.SchoolId)).DefaultIfEmpty()
+                    select StaticMethod.BuildPerson(p1, p2);
+
+            var re = p.ToList();
+
+
+        }
+
        
+        [TestMethod]
+        public void TestMethod6_06()
+        {
+            AntData.ORM.Common.Configuration.Linq.CheckNullForNotEquals = false;
+            var p1 = DB.Tables.People.Where(r => r.SchoolId == null || r.SchoolId.Value != 1).ToList();
+            AntData.ORM.Common.Configuration.Linq.CheckNullForNotEquals = true;
+            var p2 = DB.Tables.People.Where(r => r.SchoolId != 1).ToList();
+           Assert.AreEqual(p1.Count,p2.Count);
+        }
     }
+
 }

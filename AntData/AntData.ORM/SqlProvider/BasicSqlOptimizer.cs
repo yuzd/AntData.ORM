@@ -37,7 +37,9 @@ namespace AntData.ORM.SqlProvider
 					SqlProviderFlags.IsApplyJoinSupported,
 					SqlProviderFlags.IsGroupByExpressionSupported);
 
-			return selectQuery;
+            if (Common.Configuration.Linq.OptimizeJoins)
+                selectQuery = OptimizeJoins(selectQuery);
+            return selectQuery;
 		}
 
 		SelectQuery MoveCountSubQuery(SelectQuery selectQuery)
@@ -1393,6 +1395,16 @@ namespace AntData.ORM.SqlProvider
 			return Div<int>(expr1, new SqlValue(value));
 		}
 
-		#endregion
-	}
+        #endregion
+
+        #region Optimizing Joins
+
+        public SelectQuery OptimizeJoins(SelectQuery selectQuery)
+        {
+            var optimizer = new JoinOptimizer();
+            return optimizer.OptimizeJoins(selectQuery);
+        }
+
+        #endregion
+    }
 }
