@@ -445,7 +445,8 @@ namespace AntData.ORM.Data
 
 		public void Dispose()
 		{
-		    this.LastQuery = string.Empty;
+            //注释下面的代码 因为会导致query方法的序列化缓存bug
+		    //this.LastQuery = string.Empty;
 		}
 
 		#endregion
