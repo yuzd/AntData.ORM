@@ -982,7 +982,7 @@ namespace AntData.ORM.Mapping
 						.Select        (s => s.ColumnComparisonOption)
 						.FirstOrDefault(s => s != null)
 						??
-						StringComparison.Ordinal;
+                        Configuration.Linq.ColumnComparisonOption;
 				}
 
 				return Schemas[0].ColumnComparisonOption.Value;
