@@ -1364,6 +1364,31 @@ namespace AntData.ORM
 
         #endregion
 
+	    /// <summary>
+	    /// 动态指定单个字段的 desc or asc的排序
+	    /// </summary>
+	    /// <typeparam name="T"></typeparam>
+	    /// <param name="source"></param>
+	    /// <param name="column">排序字段</param>
+	    /// <param name="squence">排序方式</param>
+	    /// <returns></returns>
+	    public static IOrderedQueryable<T> DynamicOrderBy<T>(this IQueryable<T> source, string column,string squence=null)
+        {
+            if (string.IsNullOrEmpty(column) )
+            {
+                throw new LinqException("OrderBy传参不正确");
+            }
+            if (string.IsNullOrEmpty(squence))
+            {
+                squence = "asc";
+            }
+            squence = squence.ToLower();
+            if (!s_orderSequence.Contains(squence)) squence = "asc";
+
+            IOrderedQueryable<T> sortedCollection = squence.Equals("asc")? source.OrderBy(Construct<T>(column)) : source.OrderByDescending(Construct<T>(column));
+            return sortedCollection;
+        }
+
         /// <summary>
         /// 动态排序 asc
         /// </summary>

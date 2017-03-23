@@ -40,7 +40,7 @@ namespace AntDataUnitTest
             try
             {
                 string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
-                       (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
+                    (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
                 Debug.Write(sql + Environment.NewLine);
             }
             catch (Exception)
@@ -48,6 +48,7 @@ namespace AntDataUnitTest
                 //ignore
             }
         }
+
         [TestMethod]
         public void TestMethod1_00()
         {
@@ -90,6 +91,7 @@ namespace AntDataUnitTest
             Assert.AreEqual(insertResult.RowsCopied, 2);
 
         }
+
         [TestMethod]
         public void TestMethod1_01()
         {
@@ -149,7 +151,8 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod1_06()
         {
-            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set2<Person, int?>("Age", 20).Update() > 0;
+            var updateResult =
+                DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set2<Person, int?>("Age", 20).Update() > 0;
             Assert.AreEqual(updateResult, true);
 
         }
@@ -174,7 +177,8 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod1_09()
         {
-            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderByDescending(r => r.Id).Skip(1).Take(1).ToList();
+            var updateResult =
+                DB.Tables.People.Where(r => r.Name.Equals("yuzd")).OrderByDescending(r => r.Id).Skip(1).Take(1).ToList();
             Assert.AreEqual(updateResult.Count > 0, true);
 
         }
@@ -192,8 +196,8 @@ namespace AntDataUnitTest
         public void TestMethod2_02()
         {
             var list = (from p in DB.Tables.People
-                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
-                        select p).ToList();
+                join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                select p).ToList();
 
             Assert.IsTrue(list.Count > 0);
         }
@@ -202,8 +206,8 @@ namespace AntDataUnitTest
         public void TestMethod2_03()
         {
             var list = (from p in DB.Tables.People
-                        from s in DB.Tables.Schools.Where(r => r.Id.Equals(p.SchoolId)).DefaultIfEmpty()
-                        select p).ToList();
+                from s in DB.Tables.Schools.Where(r => r.Id.Equals(p.SchoolId)).DefaultIfEmpty()
+                select p).ToList();
 
             Assert.IsTrue(list.Count > 0);
         }
@@ -264,8 +268,8 @@ namespace AntDataUnitTest
         {
             var name = "yuzd";
             var list = await (from p in DB.Tables.People
-                              join s in DB.Tables.Schools on p.SchoolId equals s.Id
-                              select p).ToListAsync();
+                join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                select p).ToListAsync();
             Assert.AreEqual(list.Count > 0, true);
 
         }
@@ -280,7 +284,9 @@ namespace AntDataUnitTest
         public void TestMethod3_01()
         {
             var name = "yuzd";
-            var list = DB.Query<MyClass>("select * from person where name=@name", new DataParameter { Name = "name", Value = name }).ToList();
+            var list =
+                DB.Query<MyClass>("select * from person where name=@name",
+                    new DataParameter {Name = "name", Value = name}).ToList();
             Assert.IsNotNull(list);
             Assert.AreEqual(list.Count > 0, true);
         }
@@ -292,9 +298,17 @@ namespace AntDataUnitTest
             var age = 20;
             var name2 = "nainaigu";
             var age2 = 18;
-            var list = DB.Query<MyClass>("select * from person where name=@name and age=@age", new DataParameter { Name = "name", Value = name }, new DataParameter { Name = "age", Value = age }).ToListAsync();
-            var list2 = DB.Query<MyClass>("select * from person where name=@name and age=@age", new DataParameter { Name = "name", Value = name2 }, new DataParameter { Name = "age", Value = age2 }).ToListAsync();
-            var list3 = DB.Query<MyClass>("select * from person where name=@name", new DataParameter { Name = "name", Value = name }).ToListAsync();
+            var list =
+                DB.Query<MyClass>("select * from person where name=@name and age=@age",
+                        new DataParameter {Name = "name", Value = name}, new DataParameter {Name = "age", Value = age})
+                    .ToListAsync();
+            var list2 =
+                DB.Query<MyClass>("select * from person where name=@name and age=@age",
+                        new DataParameter {Name = "name", Value = name2}, new DataParameter {Name = "age", Value = age2})
+                    .ToListAsync();
+            var list3 =
+                DB.Query<MyClass>("select * from person where name=@name",
+                    new DataParameter {Name = "name", Value = name}).ToListAsync();
             Assert.AreEqual((await list).Count > 0, true);
             Assert.AreEqual((await list2).Count > 0, true);
             Assert.AreEqual((await list3).Count > 0, true);
@@ -305,7 +319,7 @@ namespace AntDataUnitTest
         {
             var name = "yuzd";
             var list = DB.Query(new MyClass(), "select * from person where name=@name",
-                new DataParameter { Name = "name", Value = name }).ToList();
+                new DataParameter {Name = "name", Value = name}).ToList();
             Assert.IsNotNull(list);
             Assert.AreEqual(list.Count > 0, true);
         }
@@ -314,8 +328,8 @@ namespace AntDataUnitTest
         public void TestMethod3_05()
         {
             var name = "yuzd";
-            var list = DB.Query(new { Id = 0, Name = "", Age = 0 }, "select * from person where name=@name",
-                new DataParameter { Name = "name", Value = name }).ToList();
+            var list = DB.Query(new {Id = 0, Name = "", Age = 0}, "select * from person where name=@name",
+                new DataParameter {Name = "name", Value = name}).ToList();
             Assert.IsNotNull(list);
             Assert.AreEqual(list.Count > 0, true);
         }
@@ -422,11 +436,22 @@ namespace AntDataUnitTest
         {
             var age = 10;
             //var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where("age > @age", new { age = age }).ToList();
-            var bbb = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).ToList(); ;
-            var bbbd = DB.Tables.People.Where("age > @age", new { age = age }).Where("name = @name", new { name = "nainaigu" }).ToList();
-            var bbbc = DB.Tables.People.Where("age > @age and name = @name", new { age = age, name = "nainaigu" }).Where(r => r.Name.Equals("aaa")).ToList();
-            var bbbcc = DB.Tables.People.Where(r => r.SchoolId.Equals(2)).Where("age > @age", new { age = age }).Where(r => r.Name.Equals("nainaigu")).ToList();
+            var bb = DB.Tables.People.Where("age > @age", new {age = age}).ToList();
+            var bbb = DB.Tables.People.Where("age > @age and name = @name", new {age = age, name = "nainaigu"}).ToList();
+            ;
+            var bbbd =
+                DB.Tables.People.Where("age > @age", new {age = age})
+                    .Where("name = @name", new {name = "nainaigu"})
+                    .ToList();
+            var bbbc =
+                DB.Tables.People.Where("age > @age and name = @name", new {age = age, name = "nainaigu"})
+                    .Where(r => r.Name.Equals("aaa"))
+                    .ToList();
+            var bbbcc =
+                DB.Tables.People.Where(r => r.SchoolId.Equals(2))
+                    .Where("age > @age", new {age = age})
+                    .Where(r => r.Name.Equals("nainaigu"))
+                    .ToList();
         }
 
         [TestMethod]
@@ -434,7 +459,11 @@ namespace AntDataUnitTest
         {
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).Select(r => r.Name).ToList();
+            var bb =
+                DB.Tables.People.Where(r => r.Age > age)
+                    .Where("age > @age", new {age = age})
+                    .Select(r => r.Name)
+                    .ToList();
         }
 
         [TestMethod]
@@ -443,8 +472,11 @@ namespace AntDataUnitTest
             var age = 10;
 
             var list = (from p in DB.Tables.People
-                        join s in DB.Tables.Schools on p.SchoolId equals s.Id
-                        select new { Name = p.Name, SchoolName = s.Name, Age = p.Age }).Where(r => r.Age > age).Where("school.name = @name", new { name = "nainaigu" }).Where("person.name = @name", new { name = "nainaigu" }).ToList();
+                    join s in DB.Tables.Schools on p.SchoolId equals s.Id
+                    select new {Name = p.Name, SchoolName = s.Name, Age = p.Age}).Where(r => r.Age > age)
+                .Where("school.name = @name", new {name = "nainaigu"})
+                .Where("person.name = @name", new {name = "nainaigu"})
+                .ToList();
         }
 
         [TestMethod]
@@ -453,7 +485,11 @@ namespace AntDataUnitTest
         {
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where(r => r.Age > age).Where("person.age2 > @age", new { age = age }).Select(r => r.Name).ToList();
+            var bb =
+                DB.Tables.People.Where(r => r.Age > age)
+                    .Where("person.age2 > @age", new {age = age})
+                    .Select(r => r.Name)
+                    .ToList();
         }
 
         [TestMethod]
@@ -462,14 +498,20 @@ namespace AntDataUnitTest
         {
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("aa").ToList();
+            var bb =
+                DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new {age = age}).OrderBy("aa").ToList();
         }
+
         [TestMethod]
         public void TestMethod4_09()
         {
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderBy("age", "name").ToList();
+            var bb =
+                DB.Tables.People.Where(r => r.Age > age)
+                    .Where("age > @age", new {age = age})
+                    .OrderBy("age", "name")
+                    .ToList();
         }
 
         [TestMethod]
@@ -477,7 +519,11 @@ namespace AntDataUnitTest
         {
             var age = 10;
             //、var bb = DB.Tables.People.Where(r=>r.Age> age).ToList();
-            var bb = DB.Tables.People.Where(r => r.Age > age).Where("age > @age", new { age = age }).OrderByMultiple("age desc, name asc").ToList();
+            var bb =
+                DB.Tables.People.Where(r => r.Age > age)
+                    .Where("age > @age", new {age = age})
+                    .OrderByMultiple("age desc, name asc")
+                    .ToList();
         }
 
         [TestMethod]
@@ -506,16 +552,17 @@ namespace AntDataUnitTest
         public void TestMethod5_04()
         {
             var bb = DB.Tables.People.GroupBy("name").Select(r => r.Key).ToList();
-            var bbb = DB.Tables.People.GroupBy(r => new { r.Name, r.Age }).Select(r => r.ToList()).ToList();
+            var bbb = DB.Tables.People.GroupBy(r => new {r.Name, r.Age}).Select(r => r.ToList()).ToList();
             var bbbbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => r.Key).ToList();
         }
+
         [TestMethod]
         public void TestMethod5_05()
         {
             //var expression = AntData.ORM.Expressions.Extensions.GenerateMemberExpression<Person, string>("name");
-            var bbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => new { Value = r.ToList() }).ToList();
+            var bbb = DB.Tables.People.GroupBy(r => r.Name).Select(r => new {Value = r.ToList()}).ToList();
 
-            var bb = DB.Tables.People.GroupBy(r => r.Age).Select(r => new { Key = r.Key, Value = r.ToList() }).ToList();
+            var bb = DB.Tables.People.GroupBy(r => r.Age).Select(r => new {Key = r.Key, Value = r.ToList()}).ToList();
 
         }
 
@@ -523,7 +570,7 @@ namespace AntDataUnitTest
         public void TestMethod5_06()
         {
             var name = "yuzd";
-            var list = DB.Query<Person>("select * from person where name=@name", new { name = name }).ToList();
+            var list = DB.Query<Person>("select * from person where name=@name", new {name = name}).ToList();
             Assert.IsNotNull(list);
             Assert.AreEqual(list.Count > 0, true);
         }
@@ -545,7 +592,7 @@ namespace AntDataUnitTest
             Assert.AreEqual(insertResult > 0, true);
             Assert.AreEqual(p.Id, insertResult);
 
-             p = new Person
+            p = new Person
             {
                 Name = null,
                 Age = 11
@@ -587,17 +634,17 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod6_01()
         {
-            
+
             Person p = new Person
             {
                 Name = null,
                 Age = 27
             };
 
-            var insertResult =  DB.Insert(p);
+            var insertResult = DB.Insert(p);
 
             p.Name = "yuzd";
-            var insertResult2 =  DB.Insert(p);
+            var insertResult2 = DB.Insert(p);
 
             p.Name = null;
             var insertResult3 = DB.Insert(p);
@@ -610,7 +657,9 @@ namespace AntDataUnitTest
         [TestMethod]
         public async Task TestMethod6_02()
         {
-            var p = await DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefaultAsync(r => r.Name.Equals("nainaigu"));
+            var p =
+                await DB.Tables.People.LoadWith(r => r.Personsschool)
+                    .FirstOrDefaultAsync(r => r.Name.Equals("nainaigu"));
 
             Assert.IsNotNull(p);
             Assert.IsNotNull(p.Personsschool);
@@ -633,9 +682,9 @@ namespace AntDataUnitTest
             var name = "yuzd";
             var age = 20;
             var paramList = new List<DataParameter>();
-            paramList.Add(new DataParameter { Name = "name", Value = name });
-            paramList.Add(new DataParameter { Name = "age", Value = age });
-            var list =DB.Query<MyClass>("select * from person where name=@name and age=@age", paramList).ToList();
+            paramList.Add(new DataParameter {Name = "name", Value = name});
+            paramList.Add(new DataParameter {Name = "age", Value = age});
+            var list = DB.Query<MyClass>("select * from person where name=@name and age=@age", paramList).ToList();
 
         }
 
@@ -643,15 +692,15 @@ namespace AntDataUnitTest
         public void TestMethod6_05()
         {
             var p = from p1 in DB.Tables.People
-                    from p2 in DB.Tables.Schools.Where(r => r.Id.Equals(p1.SchoolId)).DefaultIfEmpty()
-                    select StaticMethod.BuildPerson(p1, p2);
+                from p2 in DB.Tables.Schools.Where(r => r.Id.Equals(p1.SchoolId)).DefaultIfEmpty()
+                select StaticMethod.BuildPerson(p1, p2);
 
             var re = p.ToList();
 
 
         }
 
-       
+
         [TestMethod]
         public void TestMethod6_06()
         {
@@ -659,8 +708,14 @@ namespace AntDataUnitTest
             var p1 = DB.Tables.People.Where(r => r.SchoolId == null || r.SchoolId.Value != 1).ToList();
             AntData.ORM.Common.Configuration.Linq.CheckNullForNotEquals = true;
             var p2 = DB.Tables.People.Where(r => r.SchoolId != 1).ToList();
-           Assert.AreEqual(p1.Count,p2.Count);
+            Assert.AreEqual(p1.Count, p2.Count);
+        }
+
+        [TestMethod]
+        public void TestMethod6_07()
+        {
+            var updateResult = DB.Tables.People.Where(r => r.Name.Equals("nainaigu")).DynamicOrderBy("name", "desc").ToList();
+
         }
     }
-
 }
