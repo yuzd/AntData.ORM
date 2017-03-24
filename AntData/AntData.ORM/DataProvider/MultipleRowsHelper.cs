@@ -53,33 +53,37 @@ namespace AntData.ORM.DataProvider
 		}
 
         
-		public virtual void BuildColumns(object item)
+		public virtual void BuildColumns(object item, string tableName,Func<ColumnDescriptor, bool> skipConvert = null)
 		{
-			for (var i = 0; i < Columns.Length; i++)
-			{
-				var column = Columns[i];
-                var value  = column.GetValue(item);
+            skipConvert = skipConvert ?? (_ => false);
 
-				if (!ValueConverter.TryConvert(StringBuilder, ColumnTypes[i], value))
-				{
-					var name = ParameterName == "?" ? ParameterName : ParameterName + ++ParameterIndex;
+            for (var i = 0; i < Columns.Length; i++)
+            {
+                var column = Columns[i];
+                var value = column.GetValue(item);
 
-					StringBuilder.Append(name);
+                if (!skipConvert(column) /*|| !ValueConverter.TryConvert(StringBuilder, ColumnTypes[i], value)*/)
+                {
+                    var name = ParameterName == "?" ? ParameterName : ParameterName + ++ParameterIndex;
 
-					if (value is DataParameter)
-					{
-						value = ((DataParameter)value).Value;
-					}
+                    StringBuilder.Append(name);
 
-					Parameters.Add(new DataParameter(ParameterName == "?" ? ParameterName : "p" + ParameterIndex, value,
-						column.DataType));
-				}
+                    if (value is DataParameter)
+                    {
+                        value = ((DataParameter)value).Value;
+                    }
+                    var p = new DataParameter(ParameterName == "?" ? ParameterName : "p" + ParameterIndex, value,
+                        column.DataType);
+                    p.TableName = tableName;
+                    p.ColumnName = column.ColumnName;
+                    Parameters.Add(p);
+                }
 
-				StringBuilder.Append(",");
-			}
+                StringBuilder.Append(",");
+            }
 
-			StringBuilder.Length--;
-		}
+            StringBuilder.Length--;
+        }
 
 		public bool Execute()
 		{

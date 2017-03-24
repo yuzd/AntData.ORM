@@ -363,8 +363,10 @@ namespace AntData.ORM.Data
                 var p = new CustomerParam();  //p = dataConnection.Command.CreateParameter();
 				var dataType = parameter.DataType;
 				var value    = parameter.Value;
+			    p.TableName = parameter.TableName;
+			    p.ColumnName = parameter.ColumnName;
 
-				if (dataType == DataType.Undefined && value != null)
+                if (dataType == DataType.Undefined && value != null)
 					dataType = dataConnection.MappingSchema.GetDataType(value.GetType()).DataType;
 
                 //if (parameter.Direction != null) p.Direction = parameter.Direction.Value;

@@ -301,7 +301,7 @@ namespace AntData.ORM.DataProvider.Oracle
             if (identityField == null)
                 throw new SqlException("Identity field must be defined for '{0}'.", SelectQuery.Insert.Into.Name);
 
-            //var table = identityField.Table as SqlTable;
+            var table = identityField.Table as SqlTable;
             //      if (table ==null)
             //      {
             //          throw new SqlException("Identity field must have table attributer for '{0}'.", SelectQuery.Insert.Into.Name);
@@ -321,7 +321,9 @@ namespace AntData.ORM.DataProvider.Oracle
                 ParameterName = "IDENTITY_PARAMETER",
                 DbType = DataTypeConvert.Convert(identityField.DataType),
                 Value = identityField.Name,
-                ParameterDirection = ParameterDirection.Output
+                ParameterDirection = ParameterDirection.Output,
+                ColumnName = identityField.PhysicalName,
+                TableName = table!=null ? table.PhysicalName:string.Empty
             });
 
             //         if (SelectQuery.CreateTable.IsDrop)

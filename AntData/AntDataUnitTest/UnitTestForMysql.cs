@@ -717,5 +717,26 @@ namespace AntDataUnitTest
             var updateResult = DB.Tables.People.Where(r => r.Name.Equals("nainaigu")).DynamicOrderBy("name", "desc").ToList();
 
         }
+
+        [TestMethod]
+        public void TestMethod6_08()
+        {
+            List<School> sList = new List<School>
+                {
+                    new School
+                    {
+                        Name = "上海大学",
+                        Address = "上海"
+                    },
+                    new School
+                    {
+                        Name = "北京大学",
+                        Address = "北京"
+                    }
+                };
+
+            var rows =  DB.BulkCopy(sList);
+            Assert.AreEqual(rows.RowsCopied,2);
+        }
     }
 }

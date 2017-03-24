@@ -227,28 +227,7 @@ namespace AntData.DbEngine.Sharding
             get { return shardByTable; }
         }
 
-        public IComparable GetShardColumnValue(String logicDbName, StatementParameterCollection parameters, IDictionary hints)
-        {
-            IComparable shardColumnValue = null;
-
-            if (String.IsNullOrEmpty(logicDbName))
-                return shardColumnValue;
-
-            if (shardColumns == null || shardColumns.Count == 0)
-                return shardColumnValue;
-
-            //Verify by shard column value in hints
-            shardColumnValue = getShardColumnValueByValue(hints);
-
-            //Verify by map in hints
-            if (shardColumnValue == null)
-                shardColumnValue = getShardColumnValueByMap(shardColumns, hints);
-
-            //Verify by parameters
-            if (shardColumnValue == null)
-                shardColumnValue = getShardColumnValueByParameters(logicDbName, shardColumns, parameters);
-            return shardColumnValue;
-        }
+       
 
 
         private static IComparable getShardColumnValueByMap(IList<String> shardColumns, IDictionary hints)
@@ -291,15 +270,40 @@ namespace AntData.DbEngine.Sharding
             shardColumnValue = hints[DALExtStatementConstant.SHARD_COLUMN_VALUE] as IComparable;
             return shardColumnValue;
         }
-        private static IComparable getShardColumnValueByParameters(String logicDbName, IList<String> shardColumns, StatementParameterCollection parameters, Boolean quote = true)
+        #region 要删除
+
+        public IComparable GetShardColumnValue(String logicDbName, StatementParameterCollection parameters, IDictionary hints)
         {
             IComparable shardColumnValue = null;
+
+            if (String.IsNullOrEmpty(logicDbName))
+                return shardColumnValue;
 
             if (shardColumns == null || shardColumns.Count == 0)
                 return shardColumnValue;
 
+            //Verify by shard column value in hints
+            shardColumnValue = getShardColumnValueByValue(hints);
+
+            //Verify by map in hints
+            if (shardColumnValue == null)
+                shardColumnValue = getShardColumnValueByMap(shardColumns, hints);
+
+            //Verify by parameters
+            if (shardColumnValue == null)
+                shardColumnValue = getShardColumnValueByParameters(logicDbName, shardColumns, parameters, hints);
+            return shardColumnValue;
+        }
+
+        private static IComparable getShardColumnValueByParameters(String logicDbName, IList<String> shardColumns, StatementParameterCollection parameters, IDictionary hints)
+        {
+            IComparable shardColumnValue = null;
+
+            if (shardColumns == null || shardColumns.Count == 0)
+                return null;
+
             if (parameters == null || parameters.Count == 0)
-                return shardColumnValue;
+                return null;
 
 
             IDictionary<String, StatementParameter> dict = new Dictionary<String, StatementParameter>();
@@ -315,8 +319,18 @@ namespace AntData.DbEngine.Sharding
 
                 if (!dict.ContainsKey(parameterName))
                     dict.Add(parameterName, item);
-            }
 
+                parameterName = item.ColumnName;
+                if (String.IsNullOrEmpty(parameterName)) continue;
+
+                parameterName = parameterName.ToLower();
+                if (!dict.ContainsKey(parameterName)) dict.Add(parameterName, item);
+            }
+            var quote = string.Empty;
+            if (hints != null && hints.Contains(DALExtStatementConstant.PARAMETER_SYMBOL))
+            {
+                quote = hints[DALExtStatementConstant.PARAMETER_SYMBOL] as string;
+            }
             foreach (var item in shardColumns)
             {
                 String name = item.ToLower();
@@ -326,9 +340,74 @@ namespace AntData.DbEngine.Sharding
                     shardColumnValue = dict[name].Value as IComparable;
                     break;
                 }
+
+                if (dict.ContainsKey(item.ToLower()))
+                {
+                    shardColumnValue = dict[item.ToLower()].Value as IComparable;
+                    break;
+                }
             }
 
             return shardColumnValue;
+        }
+
+        #endregion
+        public List<IComparable> GetShardColumnValueList(string logicDbName, StatementParameterCollection parameters, IDictionary hints)
+        {
+            List<IComparable> shardColumnValueList = new List<IComparable>();
+
+            if (shardColumns == null || shardColumns.Count == 0)
+                return shardColumnValueList;
+            if (parameters == null || parameters.Count == 0)
+                return shardColumnValueList;
+
+            var dict = new List<Tuple<String, StatementParameter>>();
+
+            foreach (var item in parameters)
+            {
+                String parameterName = item.Name;
+                if (String.IsNullOrEmpty(parameterName)) continue;
+
+                parameterName = parameterName.ToLower();
+                dict.Add(Tuple.Create<string, StatementParameter>(parameterName, item));
+
+                parameterName = item.ColumnName;
+                if (String.IsNullOrEmpty(parameterName)) continue;
+
+                parameterName = parameterName.ToLower();
+                dict.Add(Tuple.Create<string, StatementParameter>(parameterName, item));
+            }
+
+            var quote = string.Empty;
+            if (hints != null && hints.Contains(DALExtStatementConstant.PARAMETER_SYMBOL))
+            {
+                quote = hints[DALExtStatementConstant.PARAMETER_SYMBOL] as string;
+            }
+            foreach (var item in shardColumns)
+            {
+               
+                String name = quote + item.ToLower();
+
+                foreach (var itemKv in dict)
+                {
+                    IComparable shardColumnValue = null;
+                    if (itemKv.Item1.Equals(name))
+                    {
+                        shardColumnValue = itemKv.Item2.Value as IComparable;
+                    }
+                    else if (itemKv.Item1.Equals(item.ToLower()))
+                    {
+                        shardColumnValue = itemKv.Item2.Value as IComparable;
+                    }
+
+                    if (shardColumnValue != null)
+                    {
+                        shardColumnValueList.Add(shardColumnValue);
+                    }
+                }
+            }
+
+            return shardColumnValueList;
         }
     }
 }

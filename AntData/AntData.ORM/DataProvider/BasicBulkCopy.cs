@@ -173,7 +173,7 @@ namespace AntData.ORM.DataProvider
 			MultipleRowsHelper<T> helper, DataConnection dataConnection, BulkCopyOptions options, IEnumerable<T> source)
 		{
 			helper.StringBuilder
-				.AppendFormat("INSERT INTO {0}", helper.TableName).AppendLine()
+				.AppendFormat("BulkCopy INSERT INTO {0}", helper.TableName).AppendLine()
 				.Append("(");
 
 			foreach (var column in helper.Columns)
@@ -199,7 +199,7 @@ namespace AntData.ORM.DataProvider
 				helper.StringBuilder
 					.AppendLine()
 					.Append("(");
-				helper.BuildColumns(item);
+				helper.BuildColumns(item, helper.TableName);
 				helper.StringBuilder.Append("),");
 
 				helper.RowsCopied.RowsCopied++;
@@ -259,7 +259,7 @@ namespace AntData.ORM.DataProvider
 				helper.StringBuilder
 					.AppendLine()
 					.Append("SELECT ");
-				helper.BuildColumns(item);
+				helper.BuildColumns(item, helper.TableName);
 				helper.StringBuilder.Append(from);
 				helper.StringBuilder.Append(" UNION ALL");
 
@@ -312,7 +312,7 @@ namespace AntData.ORM.DataProvider
 				helper.StringBuilder
 					.AppendLine()
 					.Append("\tSELECT ");
-				helper.BuildColumns(item);
+				helper.BuildColumns(item,helper.TableName);
 				helper.StringBuilder.Append(from);
 				helper.StringBuilder.Append(" UNION ALL");
 

@@ -110,7 +110,7 @@ namespace AntData.DbEngine.Sharding
         /// <returns></returns>
         String ComputeShardId<TColumnType>(TColumnType columnValue) where TColumnType : IComparable;
 
-        IComparable GetShardColumnValue(String logicDbName,StatementParameterCollection parameters, IDictionary hints);
-
+        //IComparable GetShardColumnValue(String logicDbName,StatementParameterCollection parameters, IDictionary hints);
+        List<IComparable> GetShardColumnValueList(String logicDbName, StatementParameterCollection parameters, IDictionary hints);
     }
 }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.Dao;
+using AntData.ORM.Dao.Common;
 using JetBrains.Annotations;
 
 namespace AntData.ORM.Data
@@ -301,6 +302,11 @@ namespace AntData.ORM.Data
 		    {
                 dic.Add("TIMEOUT", this.CommandTimeout);
 		    }
+		    if (sqlString.StartsWith(DALExtStatementConstant.BULK_COPY))
+		    {
+                sqlString = sqlString.Substring(DALExtStatementConstant.BULK_COPY.Length);
+                dic.Add(DALExtStatementConstant.BULK_COPY, true);
+            }
             if (OnLogTrace != null && IsEnableLogTrace)
             {
                 OnLogTrace(new CustomerTraceInfo

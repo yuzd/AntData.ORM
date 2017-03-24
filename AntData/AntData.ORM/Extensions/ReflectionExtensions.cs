@@ -303,7 +303,7 @@ namespace AntData.ORM.Extensions
 
         public static TypeCode GetTypeCodeEx(this Type type)
         {
-#if NETFX_CORE && !NETSTANDARD
+#if !NETSTANDARD
 			if (type == null)
 				return TypeCode.Empty;
 

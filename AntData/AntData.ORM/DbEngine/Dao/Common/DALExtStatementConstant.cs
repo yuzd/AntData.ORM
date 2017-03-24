@@ -108,5 +108,9 @@ namespace AntData.ORM.Dao.Common
         /// 数据库的字段参数关键字
         /// </summary>
         public const String PARAMETER_SYMBOL = "ParameterSymbol";
+        /// <summary>
+        /// 是否是BulkCopy
+        /// </summary>
+        public const String BULK_COPY = "BulkCopy";
     }
 }

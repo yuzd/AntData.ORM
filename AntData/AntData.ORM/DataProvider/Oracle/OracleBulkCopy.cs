@@ -23,7 +23,7 @@ namespace AntData.ORM.DataProvider.Oracle
             var helper = new OracleMultipleRowsHelper<T>(dataConnection, options, true);
 
 
-            helper.StringBuilder.AppendLine("INSERT ALL");
+            helper.StringBuilder.AppendLine("BulkCopy INSERT ALL");
 			helper.SetHeader();
             foreach (var item in source)
 			{
@@ -41,7 +41,7 @@ namespace AntData.ORM.DataProvider.Oracle
 				helper.StringBuilder.Length -= 2;
 
 				helper.StringBuilder.Append(") VALUES (");
-				helper.BuildColumns(item);
+				helper.BuildColumns(item, helper.TableName);
 				helper.StringBuilder.AppendLine(")");
 
 				helper.RowsCopied.RowsCopied++;

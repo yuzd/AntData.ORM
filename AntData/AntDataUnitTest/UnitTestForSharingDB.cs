@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AntData.ORM;
@@ -121,6 +122,9 @@ namespace AntDataUnitTest
             var tb1 = DB.Tables.Orders.ToList();
             Assert.IsNotNull(tb1);
             Assert.AreEqual(tb1.Count,2);
+
+            var odIsExist = DB.Tables.Orders.Where(r => r.ID.Equals(1) || r.ID.Equals(2)).ToList();
+            Assert.AreEqual(odIsExist.Count, 2);
         }
 
         /// <summary>
@@ -181,6 +185,28 @@ namespace AntDataUnitTest
             }
            
 
+        }
+
+        /// <summary>
+        /// 测试mod分库批量插入到testorm2数据库
+        /// </summary>
+        [TestMethod]
+        public void TestMethod7_02()
+        {
+
+            var orderList = new List<Order>();
+            orderList.Add(new Order
+            {
+                ID = 3,
+                Name = "上海大学"
+            });
+            orderList.Add(new Order
+            {
+                ID = 4,
+                Name = "上海大学"
+            });
+            var rows = DB.BulkCopy(orderList);
+            Assert.AreEqual(rows.RowsCopied, 2);
         }
     }
 }

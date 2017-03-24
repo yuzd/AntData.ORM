@@ -119,7 +119,7 @@ namespace AntData.ORM.Dao
             {
                 if (!IsShardEnabled)
                 {
-                    Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
+                    Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     return new List<IDataReader> { DatabaseBridge.Instance.ExecuteReader(statement) };
 
@@ -259,7 +259,7 @@ namespace AntData.ORM.Dao
                 if (!IsShardEnabled)
                 {
                     Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters,
-                        hints, operationType);
+                        hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
 
@@ -343,7 +343,7 @@ namespace AntData.ORM.Dao
 
                 if (!IsShardEnabled)
                 {
-                    Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
+                    Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     result = DatabaseBridge.Instance.ExecuteScalar(statement);
 
@@ -438,14 +438,15 @@ namespace AntData.ORM.Dao
 
                 if (!IsShardEnabled)
                 {
-                        Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType);
+                    Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
                 }
                 else
                 {
+                   
                     var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                        newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints),SqlStatementType.UNKNOWN);
+                        newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType, SqlStatementType.UNKNOWN), SqlStatementType.UNKNOWN);
 
                     result = ShardingExecutor.ExecuteShardingNonQuery(statements).Sum();
                 }

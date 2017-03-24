@@ -121,6 +121,9 @@ namespace AntDataUnitTest
             var tb1 = DB.Tables.Orders.ToList();
             Assert.IsNotNull(tb1);
             Assert.AreEqual(tb1.Count, 2);
+
+            var odIsExist = DB.Tables.Orders.Where(r => r.ID.Equals(1) || r.ID.Equals(2)).ToList();
+            Assert.AreEqual(odIsExist.Count, 2);
         }
 
         /// <summary>

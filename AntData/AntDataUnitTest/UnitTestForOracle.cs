@@ -553,5 +553,26 @@ namespace AntDataUnitTest
             DB.InsertWithIdentity(p);
 
         }
+
+        [TestMethod]
+        public void TestMethod5_08()
+        {
+            List<School> sList = new List<School>
+                {
+                    new School
+                    {
+                        Name = "上海大学",
+                        Address = "上海"
+                    },
+                    new School
+                    {
+                        Name = "北京大学",
+                        Address = "北京"
+                    }
+                };
+
+            var rows = DB.BulkCopy(sList);
+            Assert.AreEqual(rows.RowsCopied, 2);
+        }
     }
 }

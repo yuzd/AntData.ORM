@@ -29,14 +29,15 @@ namespace AntData.ORM.Data
 			Value    = value;
 			DataType = dataType;
 		}
-
-		/// <summary>
-		/// Gets or sets the <see cref="T:LinqToDB.DataType"/> of the parameter.
-		/// </summary>
-		/// <returns>
-		/// One of the <see cref="T:LinqToDB.DataType"/> values. The default is <see cref="F:LinqToDB.DataType.Undefined"/>.
-		/// </returns>
-		public DataType DataType { get; set; }
+        public string TableName { get; set; }
+        public string ColumnName { get; set; }
+        /// <summary>
+        /// Gets or sets the <see cref="T:LinqToDB.DataType"/> of the parameter.
+        /// </summary>
+        /// <returns>
+        /// One of the <see cref="T:LinqToDB.DataType"/> values. The default is <see cref="F:LinqToDB.DataType.Undefined"/>.
+        /// </returns>
+        public DataType DataType { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the parameter is input-only, output-only, bidirectional, or a stored procedure return value parameter.

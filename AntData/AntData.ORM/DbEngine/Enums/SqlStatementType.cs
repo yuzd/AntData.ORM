@@ -8,6 +8,6 @@ namespace AntData.ORM.Enums
         INSERT,
         UPDATE,
         DELETE,
-        SP
+        SP,
     }
 }

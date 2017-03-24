@@ -84,7 +84,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return shardingStrategy != null && shardingStrategy.ShardByTable;
         }
 
-        
+
 
         /// <summary>
         /// 从hints中提取ShardID 这种情况是手动指定 读哪个库
@@ -130,135 +130,182 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
         /// <param name="shardingStrategy"></param>
         /// <param name="hints"></param>
         /// <returns></returns>
-        public static Tuple<String, String> GetShardInfo(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
+        public static List<Tuple<String, String>> GetShardInfo(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
-            String shardId = null;
-            String tableId = null;
+            List<String> shardId = null;
+            List<String> tableId = null;
+            var result = new List<Tuple<string, string>>();
             Boolean shardEnabled = IsShardEnabled(shardingStrategy);
             if (!shardEnabled)
-                return Tuple.Create<String, String>(shardId, tableId);
+                return result;
 
             shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);//是否有分库
-            tableId = GetTableId(logicDbName, shardingStrategy, parameters,hints);//分表
+            tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);//分表
 
-            if (String.IsNullOrEmpty(shardId) && String.IsNullOrEmpty(tableId))
+            if (shardId.Count < 1 && tableId.Count < 1)
                 throw new DalException("Please provide shard information.");
 
-            return Tuple.Create<String, String>(shardId, tableId);
+            if (shardId.Count > 0 && tableId.Count == 0)
+            {
+                foreach (var d in shardId)
+                {
+                    result.Add(Tuple.Create<String, String>(d, null));
+
+                }
+            }
+            else if (shardId.Count == 0 && tableId.Count > 0)
+            {
+                foreach (var d in tableId)
+                {
+                    result.Add(Tuple.Create<String, String>(null, d));
+                }
+
+            }
+            else
+            {
+                foreach (var d in shardId)
+                {
+                    foreach (var t in tableId)
+                    {
+                        result.Add(Tuple.Create<String, String>(d, t));
+                    }
+
+                }
+            }
+
+            return result;
         }
 
-        private static String GetShardId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
+        private static List<String> GetShardId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
-            String shardId = null;
+            List<String> shardIdList = new List<string>();
             Boolean shardByDb = IsShardByDb(shardingStrategy);
 
             if (shardByDb)
             {
-                shardId = GetShardIdByHints(hints);
+                var shardId = GetShardIdByHints(hints);
                 if (String.IsNullOrEmpty(shardId))
                 {
-                    IComparable shardColumnValue = shardingStrategy.GetShardColumnValue(logicDbName, parameters, hints);
-                    shardId = CalculateShardId(shardingStrategy, shardColumnValue);
+                    List<IComparable> shardColumnValue = shardingStrategy.GetShardColumnValueList(logicDbName, parameters, hints);
+                    foreach (var comparable in shardColumnValue)
+                    {
+                        shardId = CalculateShardId(shardingStrategy, comparable);
+                        shardIdList.Add(shardId);
+                    }
+                }
+                else
+                {
+                    shardIdList.Add(shardId);
                 }
             }
-            return shardId;
+            return shardIdList;
         }
 
-        private static String GetTableId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
+
+        private static List<String> GetTableId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
-            String tableId = null;
+            List<String> tableIdList = new List<string>();
             Boolean shardByTable = IsShardByTable(shardingStrategy);
 
             if (shardByTable)
             {
-                tableId = GetTableIdByHints(hints);
+                var tableId = GetTableIdByHints(hints);
                 if (String.IsNullOrEmpty(tableId))
                 {
-                    IComparable shardColumnValue = shardingStrategy.GetShardColumnValue(logicDbName,parameters, hints);
-                    tableId = CalculateShardId(shardingStrategy, shardColumnValue);
+                    List<IComparable> shardColumnValue = shardingStrategy.GetShardColumnValueList(logicDbName, parameters, hints);
+
+                    foreach (var comparable in shardColumnValue)
+                    {
+                        tableId = CalculateShardId(shardingStrategy, comparable);
+                        tableIdList.Add(tableId);
+                    }
+                }
+                else
+                {
+                    tableIdList.Add(tableId);
                 }
             }
 
-            return tableId;
+            return tableIdList;
         }
 
         #region Shuffled Items
 
-        private static IDictionary<String, IList<T>> ShuffledByDb<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
-            IList<T> list, IDictionary hints)
-        {
-            if (String.IsNullOrEmpty(logicDbName))
-                return null;
-            if (list == null || list.Count == 0)
-                return null;
-            var dict = new Dictionary<String, IList<T>>();
+        //private static IDictionary<String, IList<T>> ShuffledByDb<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
+        //    IList<T> list, IDictionary hints)
+        //{
+        //    if (String.IsNullOrEmpty(logicDbName))
+        //        return null;
+        //    if (list == null || list.Count == 0)
+        //        return null;
+        //    var dict = new Dictionary<String, IList<T>>();
 
-            foreach (var item in list)
-            {
-                String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
-                if (String.IsNullOrEmpty(shardId))
-                    continue;
+        //    foreach (var item in list)
+        //    {
+        //        String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
+        //        if (String.IsNullOrEmpty(shardId))
+        //            continue;
 
-                if (!dict.ContainsKey(shardId))
-                    dict.Add(shardId, new List<T>());
-                dict[shardId].Add(item);
-            }
+        //        if (!dict.ContainsKey(shardId))
+        //            dict.Add(shardId, new List<T>());
+        //        dict[shardId].Add(item);
+        //    }
 
-            return dict;
-        }
+        //    return dict;
+        //}
 
-        private static IDictionary<String, IList<T>> ShuffledByTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
-            IList<T> list,IDictionary hints)
-        {
-            if (String.IsNullOrEmpty(logicDbName))
-                return null;
-            if (list == null || list.Count == 0)
-                return null;
-            var dict = new Dictionary<String, IList<T>>();
+        //private static IDictionary<String, IList<T>> ShuffledByTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
+        //    IList<T> list,IDictionary hints)
+        //{
+        //    if (String.IsNullOrEmpty(logicDbName))
+        //        return null;
+        //    if (list == null || list.Count == 0)
+        //        return null;
+        //    var dict = new Dictionary<String, IList<T>>();
 
-            foreach (var item in list)
-            {
-                String tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);
-                if (String.IsNullOrEmpty(tableId))
-                    continue;
+        //    foreach (var item in list)
+        //    {
+        //        String tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);
+        //        if (String.IsNullOrEmpty(tableId))
+        //            continue;
 
-                if (!dict.ContainsKey(tableId))
-                    dict.Add(tableId, new List<T>());
-                dict[tableId].Add(item);
-            }
+        //        if (!dict.ContainsKey(tableId))
+        //            dict.Add(tableId, new List<T>());
+        //        dict[tableId].Add(item);
+        //    }
 
-            return dict;
-        }
+        //    return dict;
+        //}
 
-        private static IDictionary<String, IDictionary<String, IList<T>>> ShuffledByDbTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
-            IList<T> list, IDictionary hints)
-        {
-            if (String.IsNullOrEmpty(logicDbName))
-                return null;
-            if (list == null || list.Count == 0)
-                return null;
+        //private static IDictionary<String, IDictionary<String, IList<T>>> ShuffledByDbTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
+        //    IList<T> list, IDictionary hints)
+        //{
+        //    if (String.IsNullOrEmpty(logicDbName))
+        //        return null;
+        //    if (list == null || list.Count == 0)
+        //        return null;
 
-            var dict = new Dictionary<String, IDictionary<String, IList<T>>>();
+        //    var dict = new Dictionary<String, IDictionary<String, IList<T>>>();
 
-            foreach (var item in list)
-            {
-                String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
-                String tableId = GetTableId(logicDbName, shardingStrategy , parameters,hints);
+        //    foreach (var item in list)
+        //    {
+        //        String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
+        //        String tableId = GetTableId(logicDbName, shardingStrategy , parameters,hints);
 
-                if (!dict.ContainsKey(shardId))
-                    dict.Add(shardId, new Dictionary<String, IList<T>>());
-                if (!dict[shardId].ContainsKey(tableId))
-                    dict[shardId].Add(tableId, new List<T>());
-                dict[shardId][tableId].Add(item);
-            }
+        //        if (!dict.ContainsKey(shardId))
+        //            dict.Add(shardId, new Dictionary<String, IList<T>>());
+        //        if (!dict[shardId].ContainsKey(tableId))
+        //            dict[shardId].Add(tableId, new List<T>());
+        //        dict[shardId][tableId].Add(item);
+        //    }
 
-            return dict;
-        }
+        //    return dict;
+        //}
 
         #endregion Shuffled Items
 
         public static IList<Statement> GetShardStatement(String logicDbName, IShardingStrategy shardingStrategy,
-            StatementParameterCollection parameters, IDictionary hints, Func<IDictionary, Statement> func, SqlStatementType sqlStatementType)
+            StatementParameterCollection parameters, IDictionary hints, Func<IDictionary, List<Statement>> func, SqlStatementType sqlStatementType)
         {
             IList<Statement> statements;
             if (shardingStrategy == null)
@@ -301,39 +348,34 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                         shards = temp;
                 }
 
+               
+
                 //Get shards from parameters 这里会根据 查询参数得出分配的信息
                 if (shards == null)
                 {
-
                     if (shardingType == ShardingType.ShardByDB)
                     {
-                        //从hits里面DALExtStatementConstant.SHARDID
-                        String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
-                        if (!String.IsNullOrEmpty(shardId))
-                            shards = new List<String> { shardId };
+                        shards = GetShardId(logicDbName, shardingStrategy, parameters, hints);
                     }
                     else if (shardingType == ShardingType.ShardByTable)
                     {
-                        //从hits里面DALExtStatementConstant.TABLEID
-                        String tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);
-                        if (!String.IsNullOrEmpty(tableId))
-                            shards = new List<String> { tableId };
+                        shards = GetTableId(logicDbName, shardingStrategy, parameters, hints);
                     }
                 }
 
                 //对于不带条件的查询 都默认查询所有的
-                if (shards == null && sqlStatementType.Equals(SqlStatementType.SELECT))
+                if ((shards == null || shards.Count == 0) && sqlStatementType.Equals(SqlStatementType.SELECT))
                 {
                     shards = shardingStrategy.AllShards;
                 }
 
-                if (shards == null)
+                if (shards == null || shards.Count == 0)
                     throw new DalException("Please provide shard information.");
 
                 //Build statements
                 statements = new List<Statement>();
 
-                foreach (var item in shards)
+                foreach (var item in shards.Distinct())
                 {
                     var newHints = HintsUtil.CloneHints(hints);
 
@@ -347,8 +389,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                             break;
                     }
 
-                    Statement statement = func.Invoke(newHints);
-                    statements.Add(statement);
+                    var statement = func.Invoke(newHints);
+                    foreach (var ss in statement)
+                    {
+                        statements.Add(ss);
+                    }
                 }
             }
             else
@@ -363,8 +408,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                     var newHints = HintsUtil.CloneHints(hints);
                     newHints[DALExtStatementConstant.SHARDID] = GetShardIdByHints(hints);
                     newHints[DALExtStatementConstant.TABLEID] = GetTableIdByHints(hints);
-                    Statement statement = func.Invoke(newHints);
-                    statements.Add(statement);
+                    var statement = func.Invoke(newHints);
+                    foreach (var ss in statement)
+                    {
+                        statements.Add(ss);
+                    }
                 }
                 else
                 {
@@ -375,8 +423,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                             var newHints = HintsUtil.CloneHints(hints);
                             newHints[DALExtStatementConstant.SHARDID] = shard.Key;
                             newHints[DALExtStatementConstant.TABLEID] = table;
-                            Statement statement = func.Invoke(newHints);
-                            statements.Add(statement);
+                            var statement = func.Invoke(newHints);
+                            foreach (var ss in statement)
+                            {
+                                statements.Add(ss);
+                            }
                         }
                     }
                 }
@@ -385,26 +436,31 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return statements;
         }
 
-       
-        public static Statement GetQueryStatement(String logicDbName,string sql, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints, OperationType? operationType = null)
+
+        public static List<Statement> GetQueryStatement(String logicDbName, string sql, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints, OperationType? operationType = null)
         {
-
-            var tuple = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
-            Statement statement = new Statement
+            var result = new List<Statement>();
+            var tupleList = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
+            foreach (var tuple in tupleList)
             {
-                DatabaseSet = logicDbName,
-                StatementType = StatementType.Sql,
-                OperationType = operationType ?? OperationType.Default,
-                Hints = hints,
-                ShardID = tuple.Item1,
-                TableName = "",
-                SqlOperationType = SqlStatementType.SELECT,
-                Parameters = parameters
-            };
+                Statement statement = new Statement
+                {
+                    DatabaseSet = logicDbName,
+                    StatementType = StatementType.Sql,
+                    OperationType = operationType ?? OperationType.Default,
+                    Hints = hints,
+                    ShardID = tuple.Item1,
+                    TableName = "",
+                    SqlOperationType = SqlStatementType.SELECT,
+                    Parameters = parameters
+                };
 
-            statement.StatementText =string.IsNullOrEmpty(tuple.Item2)?sql:  string.Format(sql, tuple.Item2);
+                statement.StatementText = string.IsNullOrEmpty(tuple.Item2) ? sql : string.Format(sql, tuple.Item2);
+                result.Add(statement);
+            }
 
-            return statement;
+
+            return result;
         }
     }
 }
