@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using AntData.ORM;
@@ -168,6 +169,33 @@ namespace AntDataUnitTest
             var id = 2;
             var result = DB.Tables.Orders.Where(r => r.ID.Equals(id)).Delete();
             Assert.AreEqual(result, 1);
+        }
+        /// <summary>
+        /// 测试mod分库批量分别插入到testorm3数据库orders_0表 orders_1表
+        /// </summary>
+        [TestMethod]
+        public void TestMethod7_01()
+        {
+
+            var orderList = new List<Orders>();
+            orderList.Add(new Orders
+            {
+                ID = 3,
+                Name = "上海大学"
+            });
+            orderList.Add(new Orders
+            {
+                ID = 4,
+                Name = "上海大学"
+            });
+            //没有指定 shading column的话是默认分到第一个分片
+            orderList.Add(new Orders
+            {
+                ID = null,
+                Name = "上海大学"
+            });
+            var rows = DB.BulkCopy(orderList);
+            Assert.AreEqual(rows.RowsCopied, 3);
         }
     }
 }

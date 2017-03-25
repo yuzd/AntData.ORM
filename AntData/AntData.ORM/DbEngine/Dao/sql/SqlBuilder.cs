@@ -153,13 +153,13 @@ namespace AntData.ORM.Dao.sql
                 //又分表又分库的情况
 
             }
-            else if (shardingStrategy.ShardByDB)
+            else if (shardingStrategy.ShardByDB || shardingStrategy.ShardByTable)
             {
                
                 var dicValues = new Dictionary<string,Tuple<List<string>, StatementParameterCollection>>();
                 foreach (var tuple in tupleList)
                 {
-                    dicValues.Add(tuple.Item1,Tuple.Create(new List<string>(),new StatementParameterCollection()));
+                    dicValues.Add(shardingStrategy.ShardByDB?tuple.Item1: tuple.Item2, Tuple.Create(new List<string>(),new StatementParameterCollection()));
                 }
                 var defaultSharding = dicValues.Keys.First();
                 //分库的情况
@@ -232,20 +232,23 @@ namespace AntData.ORM.Dao.sql
                         continue;
                     }
                     var newHints = HintsUtil.CloneHints(hints);
-                    newHints[DALExtStatementConstant.SHARDID] = dic.Key;
-                    var statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, newHints, dic.Key);
-                    statement.StatementText = title + string.Join(",", dic.Value.Item1);
+                    if (shardingStrategy.ShardByDB)
+                    {
+                        newHints[DALExtStatementConstant.SHARDID] = dic.Key;
+                    }
+                    else
+                    {
+                        newHints[DALExtStatementConstant.TABLEID] = dic.Key;
+                    }
+                   
+                    var statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, newHints,shardingStrategy.ShardByDB? dic.Key:null);
+                    statement.StatementText = shardingStrategy.ShardByDB ? (title + string.Join(",", dic.Value.Item1)): GetSql(title + string.Join(",", dic.Value.Item1), dic.Key);
                     statement.Parameters = dic.Value.Item2;
 #if !NETSTANDARD
                     CurrentStackCustomizedLog(statement);
 #endif
                     result.Add(statement);
                 }
-            }
-            else if (shardingStrategy.ShardByTable)
-            {
-                //newHints[DALExtStatementConstant.TABLEID] = item;
-                //分表的情况
             }
 
             return result;
