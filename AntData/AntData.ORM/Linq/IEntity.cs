@@ -6,6 +6,8 @@
 // <summary></summary>
 //-----------------------------------------------------------------------
 
+using System.Linq;
+
 namespace AntData.ORM.Linq
 {
     /// <summary>
@@ -13,7 +15,7 @@ namespace AntData.ORM.Linq
     /// </summary>
     public interface IEntity
     {
-       ITable<T> Get<T>() where T : class;
+       IQueryable<T> Get<T>() where T : class;
     }
 
     public class BaseEntity

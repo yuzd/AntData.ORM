@@ -155,10 +155,27 @@ namespace AntData.ORM
 
 			return table;
 		}
+        [LinqTunnel]
+        public static IQueryable<T> LoadWith<T>(
+            [NotNull]                this IQueryable<T> query,
+            [NotNull, InstantHandle] Expression<Func<T, object>> selector)
+        {
+            if (query == null) throw new ArgumentNullException("query");
 
-		#endregion
+            ITable<T> table = query as ITable<T>;
 
-		#region Scalar Select
+            if (table == null) throw new ArgumentNullException("IQueryable cast to ITable error");
+
+            table.Expression = Expression.Call(
+                null,
+                _loadWithMethodInfo.MakeGenericMethod(new[] { typeof(T) }),
+                new[] { table.Expression, Expression.Quote(selector) });
+
+            return table;
+        }
+        #endregion
+
+        #region Scalar Select
         /// <summary>
         /// 选择
         /// </summary>
@@ -166,7 +183,7 @@ namespace AntData.ORM
         /// <param name="dataContext"></param>
         /// <param name="selector"></param>
         /// <returns></returns>
-		public static T Select<T>(
+        public static T Select<T>(
 			[NotNull]                this IDataContext   dataContext,
 			[NotNull, InstantHandle] Expression<Func<T>> selector)
 		{

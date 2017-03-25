@@ -17,11 +17,11 @@ namespace DbModels.Mysql2
 		/// <summary>
 		/// 订单表
 		/// </summary>
-		public ITable<Order> Orders { get { return this.Get<Order>(); } }
+		public IQueryable<Order> Orders { get { return this.Get<Order>(); } }
 
 		private readonly IDataContext con;
 
-		public ITable<T> Get<T>()
+		public IQueryable<T> Get<T>()
 			 where T : class
 		{
 			return this.con.GetTable<T>();

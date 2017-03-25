@@ -14,11 +14,11 @@ namespace DbModels.Mysql3
 	/// </summary>
 	public partial class Entitys : IEntity
 	{
-		public ITable<Orders> Orders { get { return this.Get<Orders>(); } }
+		public IQueryable<Orders> Orders { get { return this.Get<Orders>(); } }
 
 		private readonly IDataContext con;
 
-		public ITable<T> Get<T>()
+		public IQueryable<T> Get<T>()
 			 where T : class
 		{
 			return this.con.GetTable<T>();

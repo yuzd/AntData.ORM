@@ -216,7 +216,7 @@ namespace AntDataUnitTest
         public void TestMethod2_04()
         {
             var p = DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefault(r => r.Name.Equals("nainaigu"));
-
+            
             Assert.IsNotNull(p);
             Assert.IsNotNull(p.Personsschool);
             Assert.IsNotNull(p.Personsschool.Name);

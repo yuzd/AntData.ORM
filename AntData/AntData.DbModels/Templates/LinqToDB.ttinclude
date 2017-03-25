@@ -106,7 +106,7 @@ void GenerateTypesFromMetadata()
 	        IsReadonly = true
 	    });
 		
-		DataContextObject.Members.Add(new Method(null, "ITable<T> Get<T>", null, new List<string>{"return this.con.GetTable<T>();"}) { AfterSignature = { " where T : class" }  });
+		DataContextObject.Members.Add(new Method(null, "IQueryable<T> Get<T>", null, new List<string>{"return this.con.GetTable<T>();"}) { AfterSignature = { " where T : class" }  });
 		DataContextObject.Members.Add(new Method(null, DataContextObject.Name, new[] { "IDataContext con" }, body) {  });
 		
 	}
@@ -158,7 +158,7 @@ void GenerateTypesFromMetadata()
 	MemberBase dcProp = t.IsProviderSpecific ?
 			GenerateProviderSpecificTable(t) :
 			new Property(
-				string.Format("ITable<{0}>", ToPascalCase(t.TypeName)),
+				string.Format("IQueryable<{0}>", ToPascalCase(t.TypeName)),
 				ShardingTables.ContainsKey(t.TableName)?ToPascalCase(t.TypeName):ToPascalCase(t.DataContextPropertyName),
 				new[] { string.Format((schema == null ? "this" : "_dataContext") + ".Get<{0}>()", ToPascalCase(t.TypeName)) },
 				null);
@@ -174,7 +174,7 @@ void GenerateTypesFromMetadata()
 		if (t.AliasPropertyName != null && t.AliasPropertyName != t.DataContextPropertyName)
 		{
 			aProp = new Property(
-				string.Format("ITable<{0}>", t.TypeName),
+				string.Format("IQueryable<{0}>", t.TypeName),
 				t.AliasPropertyName,
 				new[] { t.DataContextPropertyName },
 				null);
@@ -463,7 +463,7 @@ void GenerateTypesFromMetadata()
 				new Method(
 					t.TypeName,
 					"FindByBk",
-					new[] { (string.Format("this ITable<{0}> table", t.TypeName)) }
+					new[] { (string.Format("this IQueryable<{0}> table", t.TypeName)) }
 						.Union(PKs.Select(c => c.Type + " " + c.MemberName)),
 					new[] { "return table.FirstOrDefault(t =>" }
 						.Union(PKs.Select((c,i) => string.Format("\tt.{0}{1} == {0}{3}{2}",
@@ -476,7 +476,7 @@ void GenerateTypesFromMetadata()
 				new Method(
 					"async Task<" + t.TypeName + ">",
 					"FindByBkAsync",
-					new[] { (string.Format("this ITable<{0}> table", t.TypeName)) }
+					new[] { (string.Format("this IQueryable<{0}> table", t.TypeName)) }
 						.Union(PKs.Select(c => c.Type + " " + c.MemberName)),
 					new[] { "return await table.FirstOrDefaultAsync(t =>" }
 						.Union(PKs.Select((c,i) => string.Format("\tt.{0}{1} == {0}{3}{2}",
@@ -542,7 +542,7 @@ void GenerateTypesFromMetadata()
 
 				p.Attributes.Add(new Attribute("Sql.TableFunction", tableAttrs.ToArray()));
 
-				p.Type = "ITable<" + p.ResultTable.TypeName + ">";
+				p.Type = "IQueryable<" + p.ResultTable.TypeName + ">";
 			}
 			else if (p.IsFunction)
 			{

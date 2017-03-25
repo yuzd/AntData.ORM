@@ -708,7 +708,7 @@ namespace AntData.ORM.Data
         /// <param name="databaseName"></param>
         /// <param name="schemaName"></param>
         /// <returns></returns>
-		public static int Merge<T>(this ITable<T> table, IQueryable<T> source, Expression<Func<T,bool>> predicate,
+		public static int Merge<T>(this IQueryable<T> table, IQueryable<T> source, Expression<Func<T,bool>> predicate,
 			string tableName = null, string databaseName = null, string schemaName = null)
 			where T : class 
 		{
@@ -766,7 +766,7 @@ namespace AntData.ORM.Data
         /// <param name="databaseName"></param>
         /// <param name="schemaName"></param>
         /// <returns></returns>
-		public static int Merge<T>(this ITable<T> table, bool delete, IEnumerable<T> source,
+		public static int Merge<T>(this IQueryable<T> table, bool delete, IEnumerable<T> source,
 			string tableName = null, string databaseName = null, string schemaName = null)
 			where T : class 
 		{
@@ -794,7 +794,7 @@ namespace AntData.ORM.Data
         /// <param name="databaseName"></param>
         /// <param name="schemaName"></param>
         /// <returns></returns>
-		public static int Merge<T>(this ITable<T> table, IEnumerable<T> source,
+		public static int Merge<T>(this IQueryable<T> table, IEnumerable<T> source,
 			string tableName = null, string databaseName = null, string schemaName = null)
 			where T : class 
 		{

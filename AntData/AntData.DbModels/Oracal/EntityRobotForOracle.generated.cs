@@ -19,15 +19,15 @@ namespace DbModels.Oracle
 		/// <summary>
 		/// 用户表
 		/// </summary>
-		public ITable<Person> People  { get { return this.Get<Person>(); } }
+		public IQueryable<Person> People  { get { return this.Get<Person>(); } }
 		/// <summary>
 		/// 学校表
 		/// </summary>
-		public ITable<School> Schools { get { return this.Get<School>(); } }
+		public IQueryable<School> Schools { get { return this.Get<School>(); } }
 
 		private readonly IDataContext con;
 
-		public ITable<T> Get<T>()
+		public IQueryable<T> Get<T>()
 			 where T : class
 		{
 			return this.con.GetTable<T>();
@@ -157,25 +157,25 @@ namespace DbModels.Oracle
 
 	public static partial class TableExtensions
 	{
-		public static Person FindByBk(this ITable<Person> table, long Id)
+		public static Person FindByBk(this IQueryable<Person> table, long Id)
 		{
 			return table.FirstOrDefault(t =>
 				t.Id == Id);
 		}
 
-		public static async Task<Person> FindByBkAsync(this ITable<Person> table, long Id)
+		public static async Task<Person> FindByBkAsync(this IQueryable<Person> table, long Id)
 		{
 			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);
 		}
 
-		public static School FindByBk(this ITable<School> table, long Id)
+		public static School FindByBk(this IQueryable<School> table, long Id)
 		{
 			return table.FirstOrDefault(t =>
 				t.Id == Id);
 		}
 
-		public static async Task<School> FindByBkAsync(this ITable<School> table, long Id)
+		public static async Task<School> FindByBkAsync(this IQueryable<School> table, long Id)
 		{
 			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);
