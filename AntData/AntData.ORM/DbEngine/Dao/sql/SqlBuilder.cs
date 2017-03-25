@@ -140,6 +140,18 @@ namespace AntData.ORM.Dao.sql
             return result;
         }
 
+        /// <summary>
+        /// 批量插入分片规则： 解析sqlstring 按照分片进行分组 在重新组合 如果没有找到分片的默认第一个分片
+        /// </summary>
+        /// <param name="logicDbName"></param>
+        /// <param name="shardingStrategy"></param>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="hints"></param>
+        /// <param name="tupleList"></param>
+        /// <param name="sqlType"></param>
+        /// <param name="operationType"></param>
+        /// <returns></returns>
         private static List<Statement> BulkCopyCase(String logicDbName, IShardingStrategy shardingStrategy,
             String sql, StatementParameterCollection parameters, IDictionary hints, List<Tuple<String, String>> tupleList, SqlStatementType sqlType, OperationType? operationType = null)
         {
