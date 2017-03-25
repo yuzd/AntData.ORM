@@ -64,8 +64,13 @@ namespace AntData.DbEngine.Sharding
         public String ComputeShardId<TColumnType>(TColumnType columnValue) where TColumnType : IComparable
         {
             String shardid = null;
-            Type type = columnValue.GetType();
+            if (columnValue == null)
+            {
+                return null;
+            }
 
+            Type type = columnValue.GetType();
+            
             if (TypeUtils.IsNumericType(type))
             {
                 foreach (SequenceInnerClass s in shards)
@@ -394,10 +399,14 @@ namespace AntData.DbEngine.Sharding
                     if (itemKv.Item1.Equals(name))
                     {
                         shardColumnValue = itemKv.Item2.Value as IComparable;
+                        itemKv.Item2.IsShardingColumn = true;
+                        itemKv.Item2.ShardingValue = ComputeShardId(shardColumnValue);
                     }
                     else if (itemKv.Item1.Equals(item.ToLower()))
                     {
                         shardColumnValue = itemKv.Item2.Value as IComparable;
+                        itemKv.Item2.IsShardingColumn = true;
+                        itemKv.Item2.ShardingValue = ComputeShardId(shardColumnValue);
                     }
 
                     if (shardColumnValue != null)

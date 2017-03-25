@@ -67,6 +67,10 @@ namespace AntData.ORM.DbEngine
         /// 是否是Sharding字段
         /// </summary>
         public Boolean IsShardingColumn { get; set; }
+        /// <summary>
+        /// 对应分片值
+        /// </summary>
+        public string ShardingValue { get; set; }
         public string TableName { get; set; }
         public string ColumnName { get; set; }
 

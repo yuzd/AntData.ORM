@@ -66,7 +66,10 @@ namespace AntData.DbEngine.Sharding
         public String ComputeShardId<TColumnType>(TColumnType columnValue) where TColumnType : IComparable
         {
             Int32 modValue = -1;
-
+            if (columnValue == null)
+            {
+                return null;
+            }
             if (!TypeUtils.IsNumericType(columnValue.GetType()))
             {
                 modValue = Math.Abs(columnValue.GetHashCode()) % MOD;
@@ -407,10 +410,14 @@ namespace AntData.DbEngine.Sharding
                     if (itemKv.Item1.Equals(name))
                     {
                         shardColumnValue = itemKv.Item2.Value as IComparable;
+                        itemKv.Item2.IsShardingColumn = true;
+                        itemKv.Item2.ShardingValue = ComputeShardId(shardColumnValue);
                     }
                     else if (itemKv.Item1.Equals(item.ToLower()))
                     {
                         shardColumnValue = itemKv.Item2.Value as IComparable;
+                        itemKv.Item2.IsShardingColumn = true;
+                        itemKv.Item2.ShardingValue = ComputeShardId(shardColumnValue);
                     }
 
                     if (shardColumnValue != null)

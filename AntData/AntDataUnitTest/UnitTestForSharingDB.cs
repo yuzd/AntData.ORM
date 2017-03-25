@@ -188,7 +188,7 @@ namespace AntDataUnitTest
         }
 
         /// <summary>
-        /// 测试mod分库批量插入到testorm2数据库
+        /// 测试mod分库批量分别插入到testorm1 和 testorm2数据库
         /// </summary>
         [TestMethod]
         public void TestMethod7_02()
@@ -205,8 +205,14 @@ namespace AntDataUnitTest
                 ID = 4,
                 Name = "上海大学"
             });
+            //没有指定 shading column的话是默认分到第一个分片
+            orderList.Add(new Order
+            {
+                ID = null,
+                Name = "上海大学"
+            });
             var rows = DB.BulkCopy(orderList);
-            Assert.AreEqual(rows.RowsCopied, 2);
+            Assert.AreEqual(rows.RowsCopied, 3);
         }
     }
 }

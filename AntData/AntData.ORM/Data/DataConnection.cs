@@ -306,6 +306,11 @@ namespace AntData.ORM.Data
 		    {
                 sqlString = sqlString.Substring(DALExtStatementConstant.BULK_COPY.Length);
                 dic.Add(DALExtStatementConstant.BULK_COPY, true);
+            }else if (sqlString.StartsWith(DALExtStatementConstant.BULK_COPY_ORACLE))
+		    {
+                sqlString = sqlString.Substring(DALExtStatementConstant.BULK_COPY_ORACLE.Length);
+                dic.Add(DALExtStatementConstant.BULK_COPY_ORACLE, true);
+
             }
             if (OnLogTrace != null && IsEnableLogTrace)
             {

@@ -5,7 +5,6 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using AntData.DbEngine.Sharding;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
@@ -19,9 +18,9 @@ namespace AntData.ORM.Dao.sql
 {
     public class SqlBuilder
     {
-      
 
-       
+
+
 
         #region Statement
 
@@ -85,7 +84,7 @@ namespace AntData.ORM.Dao.sql
         public static List<Statement> GetNonQueryStatement(String logicDbName, IShardingStrategy shardingStrategy,
             String sql, StatementParameterCollection parameters, IDictionary extendedParameters, OperationType? operationType = null, SqlStatementType? sqlStatementType = null)
         {
-            return GetDefaultSqlStatement(logicDbName, shardingStrategy, sql, parameters, extendedParameters, sqlStatementType ??SqlStatementType.UNKNOWN, operationType ?? OperationType.Write);
+            return GetDefaultSqlStatement(logicDbName, shardingStrategy, sql, parameters, extendedParameters, sqlStatementType ?? SqlStatementType.UNKNOWN, operationType ?? OperationType.Write);
         }
 
         private static List<Statement> GetDefaultSqlStatement(String logicDbName, IShardingStrategy shardingStrategy,
@@ -97,7 +96,7 @@ namespace AntData.ORM.Dao.sql
                 throw new DalException("Please specify sql.");
 
             var result = new List<Statement>();
-            var tupleList = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters,hints);
+            var tupleList = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
             if (tupleList.Count < 1)
             {
                 //非sharding的场合
@@ -115,12 +114,13 @@ namespace AntData.ORM.Dao.sql
                 var bulkCopy = false;
                 if (hints != null && hints.Contains(DALExtStatementConstant.BULK_COPY))//查看是否是批量插入的case
                 {
-                    bulkCopy = (bool)hints[DALExtStatementConstant.BULK_COPY];
+                    bulkCopy = Convert.ToBoolean(hints[DALExtStatementConstant.BULK_COPY]);
                 }
 
                 if (bulkCopy)
                 {
                     
+                    result.AddRange(BulkCopyCase(logicDbName, shardingStrategy, sql, parameters, hints,  tupleList, sqlType, operationType));
                 }
                 else
                 {
@@ -140,44 +140,112 @@ namespace AntData.ORM.Dao.sql
             return result;
         }
 
-        private static List<Statement> BulkCopyCase(IShardingStrategy shardingStrategy, string sql, StatementParameterCollection parameters,List<Tuple<String, String>> tupleList)
+        private static List<Statement> BulkCopyCase(String logicDbName, IShardingStrategy shardingStrategy,
+            String sql, StatementParameterCollection parameters, IDictionary hints, List<Tuple<String, String>> tupleList, SqlStatementType sqlType, OperationType? operationType = null)
         {
             var result = new List<Statement>();
-            foreach (var tuple in tupleList)
+           
+
+            //var shardingDB = tuple.Item1;
+            //var sharingTable = tuple.Item2;
+            if (shardingStrategy.ShardByDB && shardingStrategy.ShardByTable)
             {
-                var shardingDB = tuple.Item1;
-                var sharingTable = tuple.Item2;
-                if (!string.IsNullOrEmpty(shardingDB) && string.IsNullOrEmpty(sharingTable))
+                //又分表又分库的情况
+
+            }
+            else if (shardingStrategy.ShardByDB)
+            {
+               
+                var dicValues = new Dictionary<string,Tuple<List<string>, StatementParameterCollection>>();
+                foreach (var tuple in tupleList)
                 {
-                    //分库的情况
-                    var arr = Regex.Split(sql, "VALUES", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-                    if (arr.Length!=2)
+                    dicValues.Add(tuple.Item1,Tuple.Create(new List<string>(),new StatementParameterCollection()));
+                }
+                var defaultSharding = dicValues.Keys.First();
+                //分库的情况
+                var arr = sql.Split(new string[] { "VALUES" }, StringSplitOptions.None);
+                if (arr.Length != 2)
+                {
+                    throw new DalException("sharding db for bulkInsert sql string err.");
+                }
+                var title = arr[0] + " VALUES ";
+                var body = arr[1].Replace("\r\n","");
+                var values = body.Split(')').Where(r => !string.IsNullOrEmpty(r)).Select(r=>r.StartsWith(",")?r.Substring(1):r).ToArray();//总共有多少行
+                var first = values.First();
+                var cloumnCount = first.Split(',').Length;//每行总共有多少列
+
+                if (parameters.Count != (cloumnCount * values.Length))
+                {
+                    throw new DalException("sharding db for bulkInsert sql parameters counts err.");
+                }
+                var ii = 0;
+                //将parameters 按 分库进行分组
+                for (int i = 0; i < values.Length; i++)
+                {
+                    var columns = values[i].Split(',');
+                    var haveShardingC = false;
+                    var shardingValue = string.Empty;
+                    List<StatementParameter> newC = new List<StatementParameter>();
+                    for (int j = 0; j < columns.Length; j++)
                     {
-                        throw new DalException("sharding db for bulkInsert sql string err.");
+                        var p = parameters.ElementAt(ii);
+                        if (p.IsShardingColumn)
+                        {
+                            haveShardingC = true;
+                            shardingValue = p.ShardingValue;
+                        }
+                        newC.Add(p);
+                        ii++;
                     }
-                    var title = arr[0] + " VALUES ";
-                    var body = arr[1];
-                    var values = body.Split(',').ToList();
-                    var first = values.First();
-                    var cloumnCount = first.Split(',').Length;
 
-                    if (parameters.Count != (cloumnCount * values.Count))
+                    if (haveShardingC)
                     {
-                        throw new DalException("sharding db for bulkInsert sql parameters counts err.");
+                        if (!string.IsNullOrEmpty(shardingValue))
+                        {
+                            if (dicValues.ContainsKey(shardingValue))
+                            {
+                                dicValues[shardingValue].Item1.Add(values[i] + ")");
+                                foreach (var pp in newC)
+                                {
+                                    dicValues[shardingValue].Item2.Add(pp);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //添加到第一个分片
+                            dicValues[defaultSharding].Item1.Add(values[i] + ")");
+                            foreach (var pp in newC)
+                            {
+                                dicValues[defaultSharding].Item2.Add(pp);
+                            }
+                        }
+                        
                     }
-
-                    //将parameters 按 分库进行分组
-                    
-
                 }
-                else if (string.IsNullOrEmpty(shardingDB) && !string.IsNullOrEmpty(sharingTable))
+                
+                foreach (var dic in dicValues)
                 {
-                    //分表的情况
+                  
+                    if (dic.Value.Item1.Count == 0)
+                    {
+                        continue;
+                    }
+                    var newHints = HintsUtil.CloneHints(hints);
+                    newHints[DALExtStatementConstant.SHARDID] = dic.Key;
+                    var statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, newHints, dic.Key);
+                    statement.StatementText = title + string.Join(",", dic.Value.Item1);
+                    statement.Parameters = dic.Value.Item2;
+#if !NETSTANDARD
+                    CurrentStackCustomizedLog(statement);
+#endif
+                    result.Add(statement);
                 }
-                else
-                {
-                    //又分表又分库的情况
-                }
+            }
+            else if (shardingStrategy.ShardByTable)
+            {
+                //newHints[DALExtStatementConstant.TABLEID] = item;
+                //分表的情况
             }
 
             return result;

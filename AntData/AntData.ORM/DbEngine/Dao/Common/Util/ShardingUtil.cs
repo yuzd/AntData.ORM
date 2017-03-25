@@ -348,8 +348,17 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                         shards = temp;
                 }
 
-               
 
+                var bulkCopy = false;
+                if (hints != null && hints.Contains(DALExtStatementConstant.BULK_COPY))//查看是否是批量插入的case
+                {
+                    bulkCopy = Convert.ToBoolean(hints[DALExtStatementConstant.BULK_COPY]);
+                }
+
+                if (bulkCopy)
+                {
+                    return func.Invoke(hints);
+                }
                 //Get shards from parameters 这里会根据 查询参数得出分配的信息
                 if (shards == null)
                 {

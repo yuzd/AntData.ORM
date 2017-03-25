@@ -112,5 +112,6 @@ namespace AntData.ORM.Dao.Common
         /// 是否是BulkCopy
         /// </summary>
         public const String BULK_COPY = "BulkCopy";
+        public const String BULK_COPY_ORACLE = "OracleBulkCopy";
     }
 }
