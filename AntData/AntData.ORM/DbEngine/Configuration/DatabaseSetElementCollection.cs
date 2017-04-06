@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD
-using System;
+﻿using System;
 using System.Configuration;
 
 namespace AntData.ORM.DbEngine.Configuration
@@ -48,11 +47,16 @@ namespace AntData.ORM.DbEngine.Configuration
                 BaseAdd(index, value);
             }
         }
-
-        protected override ConfigurationPropertyCollection Properties
+#if !NETSTANDARD
+         protected override ConfigurationPropertyCollection Properties
         {
             get { return s_Properties; }
         }
+#else
+        protected internal override ConfigurationPropertyCollection Properties { get { return s_Properties; } }
+
+#endif
+
 
         public void Add(DatabaseSetElement element)
         {
@@ -110,4 +114,3 @@ namespace AntData.ORM.DbEngine.Configuration
 #endregion
     }
 }
-#endif

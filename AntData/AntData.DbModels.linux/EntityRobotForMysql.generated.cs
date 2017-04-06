@@ -19,15 +19,15 @@ namespace DbModels.Mysql
 		/// <summary>
 		/// 人员
 		/// </summary>
-		public ITable<Person> People  { get { return this.Get<Person>(); } }
+		public IQueryable<Person> People  { get { return this.Get<Person>(); } }
 		/// <summary>
 		/// 学校
 		/// </summary>
-		public ITable<School> Schools { get { return this.Get<School>(); } }
+		public IQueryable<School> Schools { get { return this.Get<School>(); } }
 
 		private readonly IDataContext con;
 
-		public ITable<T> Get<T>()
+		public IQueryable<T> Get<T>()
 			 where T : class
 		{
 			return this.con.GetTable<T>();

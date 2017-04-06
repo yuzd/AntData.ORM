@@ -91,7 +91,7 @@ namespace AntData.DbEngine.Sharding
 
                 foreach (SequenceInnerClass s in shards)
                 {
-                    if (strColumnValue.CompareTo(s.SequenceStart) >= 0 && strColumnValue.CompareTo(s.SequenceEnd) <= 0)
+                    if (strColumnValue.CompareTo(s.SequenceStart.ToString()) >= 0 && strColumnValue.CompareTo(s.SequenceEnd.ToString()) <= 0)
                     {
                         shardid = s.Sharding;
                         break;
@@ -130,7 +130,7 @@ namespace AntData.DbEngine.Sharding
 
                 foreach (SequenceInnerClass s in shards)
                 {
-                    if (strStart.CompareTo(s.SequenceEnd) == 0 || strEnd.CompareTo(s.SequenceStart) == 0 || (strStart.CompareTo(s.SequenceEnd) < 0 && strEnd.CompareTo(s.SequenceStart) > 0))
+                    if (strStart.CompareTo(s.SequenceEnd.ToString()) == 0 || strEnd.CompareTo(s.SequenceStart.ToString()) == 0 || (strStart.CompareTo(s.SequenceEnd.ToString()) < 0 && strEnd.CompareTo(s.SequenceStart.ToString()) > 0))
                     {
                         resultShards.Add(s.Sharding);
                     }

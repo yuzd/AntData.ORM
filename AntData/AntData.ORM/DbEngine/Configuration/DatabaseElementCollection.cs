@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD
- 
+﻿ 
 
 using System;
 using System.Configuration;
@@ -50,10 +49,15 @@ namespace AntData.ORM.DbEngine.Configuration
             }
         }
 
-        protected override ConfigurationPropertyCollection Properties
+#if !NETSTANDARD
+         protected override ConfigurationPropertyCollection Properties
         {
             get { return s_Properties; }
         }
+#else
+        protected internal override ConfigurationPropertyCollection Properties { get { return s_Properties; } }
+
+#endif
 
         public void Add(DatabaseElement element)
         {
@@ -113,4 +117,3 @@ namespace AntData.ORM.DbEngine.Configuration
 #endregion
     }
 }
-#endif

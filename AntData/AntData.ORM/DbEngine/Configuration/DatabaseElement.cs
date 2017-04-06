@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD
-using System;
+﻿using System;
 using System.Configuration;
 using AntData.ORM.Enums;
 
@@ -124,4 +123,3 @@ namespace AntData.ORM.DbEngine.Configuration
         #endregion
     }
 }
-#endif

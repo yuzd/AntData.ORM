@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+#if !NETSTANDARD
 using System.Transactions;
+#endif
 using AntData.ORM.Dao;
 
 namespace AntData.DbEngine.Sharding
@@ -18,7 +20,7 @@ namespace AntData.DbEngine.Sharding
                 result.Add(list[0].Invoke());
                 return result;
             }
-
+#if !NETSTANDARD
             if (Transaction.Current != null)
             {
                 if (isSameShard)
@@ -34,7 +36,7 @@ namespace AntData.DbEngine.Sharding
                     throw new DalException("Distributed transaction is not supported.");
                 }
             }
-
+#endif
             var tasks = new Task<T>[count];
 
             for (Int32 i = 0; i < count; i++)

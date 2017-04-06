@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if !NETSTANDARD
 using System.Transactions;
+#endif
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
 using AntData.ORM.DbEngine.RW;
@@ -14,7 +16,7 @@ namespace AntData.ORM.DbEngine.DB
     /// </summary>
     class DatabaseFactory
     {
-        #region private fields
+#region private fields
 
         /// <summary>
         /// 随机发生器,用来动态选择slave数据库
@@ -23,7 +25,7 @@ namespace AntData.ORM.DbEngine.DB
         private static IReadWriteSplitting readWriteSplit;
         private static readonly Object Locker = new Object();
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 自动读写分离时，获取本次操作涉及到的Database

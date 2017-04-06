@@ -170,6 +170,8 @@ namespace AntData.ORM.Data
             }
         }
         #endregion
+#else
+
 #endif
     }
 }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM;
@@ -18,40 +21,14 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTest2
     {
-        private static DbContext<Entitys> DB;
+        private static SqlServerlDbContext<Entitys> DB;
 
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
-            DB = new DbContext<Entitys>("testorm_sqlserver", new SqlServerDataProvider(SqlServerVersion.v2008));
-            DataConnection.DefaultSettings = new DBSettings
-            {
-                DataProviders = new List<DataProviderSettings>
-                {
-                    new DataProviderSettings
-                    {
-                        Name = "sqlProvider",
-                        TypeName = "AntData.ORM.DbEngine.Providers.SqlDatabaseProvider,AntData.ORM"
-                    }
-                },
-                ConnectionStrings = new List<ConnectionStringSettings>
-                {
-                    new ConnectionStringSettings
-                    {
-                        Name = "testorm_sqlserver",
-                        ProviderName = "sqlProvider",
-                        ConnectionItemList  = new List<ConnectionItem>
-                        {
-                            new ConnectionItem
-                            {
-                                Name = "testorm_sqlserver",
-                                ConnectionString = @"server=YUZD\SERVERQ;database=Test;uid=sa;pwd=p@ssw0rd;",
-                                DatabaseType = DatabaseType.Master
-                            }
-                        }
-                    }
-                }
-            };
+           
+           
+            DB = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             //Insert的时候 忽略Null的字段
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
