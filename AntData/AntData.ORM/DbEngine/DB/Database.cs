@@ -162,7 +162,66 @@ namespace AntData.ORM.DbEngine.DB
 
             return new ConnectionWrapper(connection, disposeInnerConnection);
         }
+        bool _closeTransaction;
+        public IDbTransaction Transactions { get; internal set; }
+        public DataConnectionTransaction BeginTransaction()
+        {
+            // If transaction is open, we dispose it, it will rollback all changes.
+            //
+            if (Transactions != null)
+                Transactions.Dispose();
 
+            // Create new transaction object.
+            DbConnection connection = null;
+            try
+            {
+                connection = CreateConnection();
+                connection.Open();
+            }
+            catch
+            {
+                if (connection != null)
+                    connection.Close();
+                throw;
+            }
+
+            Transactions = connection.BeginTransaction();
+
+            _closeTransaction = true;
+
+
+            return new DataConnectionTransaction(new ConnectionWrapper(connection, this));
+        }
+
+        public  void CommitTransaction()
+        {
+            if (Transactions != null)
+            {
+                Transactions.Commit();
+
+                if (_closeTransaction)
+                {
+                    Transactions.Dispose();
+                    Transactions = null;
+
+                }
+            }
+        }
+
+        public  void RollbackTransaction()
+        {
+            if (Transactions != null)
+            {
+                Transactions.Rollback();
+
+                if (_closeTransaction)
+                {
+                    Transactions.Dispose();
+                    Transactions = null;
+
+                }
+            }
+        }
         /// <summary>
         /// 创建数据库链接
         /// </summary>

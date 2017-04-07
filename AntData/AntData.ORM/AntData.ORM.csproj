@@ -89,6 +89,7 @@
     <Compile Include="DbEngine\Configuration\ConnectionStringSettings.cs" />
     <Compile Include="DbEngine\Configuration\DataProviderSettings.cs" />
     <Compile Include="DbEngine\Configuration\DBSettings.cs" />
+    <Compile Include="DbEngine\Connection\DataConnectionTransaction.cs" />
     <Compile Include="DbEngine\Dao\BaseDao.cs" />
     <Compile Include="DbEngine\Dao\BaseDaoFactory.cs" />
     <Compile Include="DbEngine\Dao\Common\DALExtStatementConstant.cs" />
