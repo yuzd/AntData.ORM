@@ -10,15 +10,16 @@
     }
   },
   "dependencies": {
+    "AntData.Core": "1.0.0",
     "AntData.DbModels.linux": "1.0.0-*",
+    "MSTest.TestFramework": "1.0.8-rc2",
+    "MSTest.TestAdapter": "1.1.10-rc2",
+    "dotnet-test-mstest": "1.1.2-preview",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.1"
     },
-    "MySql.Data": "7.0.5-IR21",
-    "MSTest.TestFramework": "1.0.8-rc2",
-    "MSTest.TestAdapter": "1.1.10-rc2",
-    "dotnet-test-mstest": "1.1.2-preview"
+    "AntData.ORM.Mysql": "1.0.0"
   },
 
   "frameworks": {

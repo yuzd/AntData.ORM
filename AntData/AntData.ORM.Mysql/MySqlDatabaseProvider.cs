@@ -46,15 +46,6 @@ namespace AntData.ORM.Mysql
         }
 
         /// <summary>
-        /// 创建数据库适配器
-        /// </summary>
-        /// <returns></returns>
-        public DbDataAdapter CreateDataAdapter()
-        {
-            return new MySqlDataAdapter();
-        }
-
-        /// <summary>
         /// 将名称变为数据库相关的参数名称
         /// </summary>
         /// <param name="name">参数名称</param>
@@ -70,6 +61,17 @@ namespace AntData.ORM.Mysql
             }
             return name;
         }
+
+#if !NETSTANDARD
+        /// <summary>
+        /// 创建数据库适配器
+        /// </summary>
+        /// <returns></returns>
+        public DbDataAdapter CreateDataAdapter()
+        {
+            return new MySqlDataAdapter();
+        }
+
 
         /// <summary>
         /// 是否支持参数导出
@@ -103,10 +105,12 @@ namespace AntData.ORM.Mysql
                 }
             }
         }
+
+#endif
         public string ProviderType
         {
             get { return "MYSQL"; }
         }
-        #endregion
+#endregion
     }
 }

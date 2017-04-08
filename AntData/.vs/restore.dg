@@ -1,2 +1,4 @@
-#:H:\Csharp\yuzd\AntData\AntData\ConsoleApp1\ConsoleApp1.xproj
-H:\Csharp\yuzd\AntData\AntData\ConsoleApp1\ConsoleApp1.xproj|H:\Csharp\yuzd\AntData\AntData\AntData.ORM\AntData.core.xproj
+#:H:\Csharp\yuzd\AntData\AntData\AntData.core.Test\AntData.core.Test.xproj
+H:\Csharp\yuzd\AntData\AntData\AntData.core.Test\AntData.core.Test.xproj|H:\Csharp\yuzd\AntData\AntData\AntData.ORM\AntData.core.xproj
+H:\Csharp\yuzd\AntData\AntData\AntData.core.Test\AntData.core.Test.xproj|H:\Csharp\yuzd\AntData\AntData\AntData.DbModels.linux\AntData.DbModels.linux.xproj
+H:\Csharp\yuzd\AntData\AntData\AntData.DbModels.linux\AntData.DbModels.linux.xproj|H:\Csharp\yuzd\AntData\AntData\AntData.ORM\AntData.core.xproj

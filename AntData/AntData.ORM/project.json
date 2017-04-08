@@ -1,0 +1,55 @@
+{
+  "name": "AntData.Core",
+  "version": "1.0.0",
+  "authors": [ "nainaigu" ],
+  "description": "AntData.Orm For Dotnet Core",
+  "packOptions": {
+    "licenseUrl": "https://github.com/yuzd/AntData.ORM/blob/master/MIT-LICENSE.txt",
+    "projectUrl": "https://github.com/yuzd/AntData.ORM",
+    "tags": [
+      "linq",
+      "ORM",
+      "database",
+      "DB",
+      "SQL",
+      "SqlServer"
+    ]
+  },
+  "buildOptions": {
+    "outputName": "AntData.ORM",
+    "embed": [ "**/*.resx", "**/*.txt" ],
+    "define": [ "NETSTANDARD" ]
+  },
+  "frameworks": {
+    "netstandard1.6": {
+      "buildOptions": {
+        "define": [ "NETSTANDARD" ],
+        "compile": {
+          "exclude": [
+          ]
+        }
+      },
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.1",
+        "Microsoft.Extensions.DependencyModel": "1.0.0",
+        "NETStandard.Library": "1.6.0",
+        "System.ComponentModel.Annotations": "4.1.0",
+        "System.ComponentModel.TypeConverter": "4.1.0",
+        "System.Data.Common": "4.3.0",
+        "System.Data.SqlClient": "4.3.0",
+        "System.Diagnostics.TraceSource": "4.0.0",
+        "System.Dynamic.Runtime": "4.0.11",
+        "System.Linq.Queryable": "4.0.1",
+        "System.Net.NetworkInformation": "4.1.0",
+        "System.Reflection.Emit": "4.0.1",
+        "System.Reflection.Emit.Lightweight": "4.3.0",
+        "System.Reflection.TypeExtensions": "4.3.0",
+        "System.Runtime.Loader": "4.0.0",
+        "System.Runtime.Serialization.Primitives": "4.3.0",
+        "System.Threading.Thread": "4.3.0",
+        "System.Xml.XmlDocument": "4.0.1",
+        "System.Collections.Specialized": "4.0.1"
+      }
+    }
+  }
+}

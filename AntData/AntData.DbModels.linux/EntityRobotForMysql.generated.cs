@@ -157,25 +157,25 @@ namespace DbModels.Mysql
 
 	public static partial class TableExtensions
 	{
-		public static Person FindByBk(this ITable<Person> table, long Id)
+		public static Person FindByBk(this IQueryable<Person> table, long Id)
 		{
 			return table.FirstOrDefault(t =>
 				t.Id == Id);
 		}
 
-		public static async Task<Person> FindByBkAsync(this ITable<Person> table, long Id)
+		public static async Task<Person> FindByBkAsync(this IQueryable<Person> table, long Id)
 		{
 			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);
 		}
 
-		public static School FindByBk(this ITable<School> table, long Id)
+		public static School FindByBk(this IQueryable<School> table, long Id)
 		{
 			return table.FirstOrDefault(t =>
 				t.Id == Id);
 		}
 
-		public static async Task<School> FindByBkAsync(this ITable<School> table, long Id)
+		public static async Task<School> FindByBkAsync(this IQueryable<School> table, long Id)
 		{
 			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);
