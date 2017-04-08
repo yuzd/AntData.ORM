@@ -376,24 +376,24 @@ namespace AntDataUnitTest
             Assert.AreEqual(list > 0, true);
 
         }
-        //[TestMethod]
-        //[ExpectedException(typeof(SqlException))]
-        //public void TestMethod4_01()
-        //{
-        //    AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = false;
-        //    Person p = new Person
-        //    {
-        //        Age = 27
-        //    };
+        [TestMethod]
+        [ExpectedException(typeof(SqlException))]
+        public void TestMethod4_01()
+        {
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = false;
+            Person p = new Person
+            {
+                Age = 27
+            };
 
-        //    DB.UseTransaction(con =>
-        //    {
-        //        con.Tables.Schools.Where(r => r.Name.Equals("上海大学")).Set(r => r.Address, "no update").Update();
-        //        con.Insert(p);
-        //        return true;
-        //    });
+            DB.UseTransaction(con =>
+            {
+                con.Tables.Schools.Where(r => r.Name.Equals("上海大学")).Set(r => r.Address, "no update").Update();
+                con.Insert(p);
+                return true;
+            });
 
-        //}
+        }
 
 
         [TestMethod]
@@ -571,6 +571,25 @@ namespace AntDataUnitTest
 
             DB.Tables.People.Merge(allPerson);
         }
+
+        [TestMethod]
+        public void TestMethod6_02()
+        {
+            Person p = new Person
+            {
+                Age = 27,
+                Name = "test2"
+            };
+
+            DB.UseTransaction(con =>
+            {
+                con.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update").Update();
+                con.Insert(p);
+                return true;
+            });
+
+        }
+
     }
 
 
