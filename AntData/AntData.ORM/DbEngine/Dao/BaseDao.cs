@@ -13,6 +13,7 @@ using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.Dao.sql;
 using AntData.ORM.DbEngine;
+using AntData.ORM.DbEngine.Connection;
 using AntData.ORM.DbEngine.Dao.Common.Util;
 using AntData.ORM.DbEngine.DB;
 using AntData.ORM.Enums;
@@ -60,6 +61,22 @@ namespace AntData.ORM.Dao
 
             LogicDbName = logicDbName;
             shardingStrategyLazy = new Lazy<IShardingStrategy>(() => DALBootstrap.GetShardingStrategy(logicDbName), true);
+        }
+
+        /// <summary>
+        /// 开始事物
+        /// </summary>
+        /// <param name="hints"></param>
+        /// <returns></returns>
+        public DataConnectionTransaction BeginTransaction(IDictionary hints = null)
+        {
+            if (IsShardEnabled)
+            {
+          
+                throw new DalException("Transaction can nou used for sharding ");
+            }
+            Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>BeginTransaction", null, null, OperationType.Write).Single();
+            return DatabaseBridge.Instance.BeginTransaction(statement) ;
         }
 
         #region SelectDataReader VisitDataReader

@@ -10,6 +10,7 @@ using System.Threading;
 using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.Dao;
 using AntData.ORM.Dao.Common;
+using AntData.ORM.DbEngine.Connection;
 using JetBrains.Annotations;
 
 namespace AntData.ORM.Data
@@ -42,6 +43,8 @@ namespace AntData.ORM.Data
             this.CustomerExecuteScalar = DalBridge.CustomerExecuteScalar;
             this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable;
+            this.CustomerBeginTransaction = DalBridge.CustomerBeginTransaction;
+
             #endregion
         }
 
@@ -63,20 +66,22 @@ namespace AntData.ORM.Data
             this.CustomerExecuteScalar = DalBridge.CustomerExecuteScalar;
             this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable; 
+            this.CustomerBeginTransaction = DalBridge.CustomerBeginTransaction; 
             #endregion
         }
 
 
-        /// <summary>
-        /// 可扩展的构造函数 可以自己实现DalBridge的四个方法 然后注入进来
-        /// </summary>
-        /// <param name="dataProvider">设置数据库的信息</param>
-        /// <param name="dbMappingName">逻辑数据库名称</param>
-        /// <param name="CustomerExecuteNonQuery">执行insert update delete 语句(不包括insertWithIdentity)</param>
-        /// <param name="CustomerExecuteScalar">执行查询单个信息(包括insertWithIdentity)</param>
-        /// <param name="CustomerExecuteQuery">执行select 序列化成对象 </param>
-        /// <param name="CustomerExecuteQueryTable">执行select 不走序列化 生成DataTable</param>
-        public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, List<IDataReader>> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable)
+	    /// <summary>
+	    /// 可扩展的构造函数 可以自己实现DalBridge的四个方法 然后注入进来
+	    /// </summary>
+	    /// <param name="dataProvider">设置数据库的信息</param>
+	    /// <param name="dbMappingName">逻辑数据库名称</param>
+	    /// <param name="CustomerExecuteNonQuery">执行insert update delete 语句(不包括insertWithIdentity)</param>
+	    /// <param name="CustomerExecuteScalar">执行查询单个信息(包括insertWithIdentity)</param>
+	    /// <param name="CustomerExecuteQuery">执行select 序列化成对象 </param>
+	    /// <param name="CustomerExecuteQueryTable">执行select 不走序列化 生成DataTable</param>
+	    /// <param name="CustomerBeginTransaction">执行事物</param>
+	    public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, List<IDataReader>> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable, Func<string, IDictionary, DataConnectionTransaction> CustomerBeginTransaction)
         {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
@@ -89,6 +94,7 @@ namespace AntData.ORM.Data
             this.CustomerExecuteScalar = CustomerExecuteScalar;
             this.CustomerExecuteQuery = CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = CustomerExecuteQueryTable;
+            this.CustomerBeginTransaction = CustomerBeginTransaction;
         }
         #endregion
 
@@ -180,6 +186,11 @@ namespace AntData.ORM.Data
         /// 执行select 不走序列化 生成DataTable
         /// </summary>
         private Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable { get; set; }
+
+        /// <summary>
+        /// 事物
+        /// </summary>
+        private Func<string, IDictionary, DataConnectionTransaction> CustomerBeginTransaction { get; set; }
 
 
         #endregion
@@ -320,7 +331,8 @@ namespace AntData.ORM.Data
                     SqlText = sqlString
                 });
             }
-            dic.Add("ParameterSymbol", DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic,  isWrite);
             this.Dispose();
             return result;
@@ -348,7 +360,8 @@ namespace AntData.ORM.Data
                     SqlText = sqlString
                 });
             }
-            dic.Add("ParameterSymbol", DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic,  isWrite);
             this.Dispose();
             return result;
@@ -377,7 +390,8 @@ namespace AntData.ORM.Data
                     SqlText = sqlString
                 });
             }
-            dic.Add("ParameterSymbol", DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic,  isWrite);
             this.Dispose();
 		    return result;
@@ -408,20 +422,37 @@ namespace AntData.ORM.Data
                 });
                 
             }
-            dic.Add("ParameterSymbol", DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic,  isWrite);
             
             this.Dispose();
             return result;
         }
-		
+        internal ConnectionWrapper ConnectionWrapper { get; private set; }
+        internal DataConnectionTransaction ExecuteTransaction()
+        {
+            var dic = new Dictionary<string, object>();
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            var result = CustomerBeginTransaction(ConnectionString, dic);
+            ConnectionWrapper = result.DataConnection;
+            return result;
+        }
+        internal DataConnectionTransaction ExecuteTransaction(IsolationLevel isolationLevel)
+        {
+            var dic = new Dictionary<string, object>();
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.ISOLATION_LEVEL, isolationLevel);
+            var result = CustomerBeginTransaction(ConnectionString, dic);
+            ConnectionWrapper = result.DataConnection;
+            return result;
+        }
+        #endregion
 
-		#endregion
 
+        #region MappingSchema 转sql
 
-		#region MappingSchema 转sql
-
-		private MappingSchema _mappingSchema;
+        private MappingSchema _mappingSchema;
 
 		public  MappingSchema  MappingSchema
 		{
@@ -459,7 +490,16 @@ namespace AntData.ORM.Data
             //注释下面的代码 因为会导致query方法的序列化缓存bug
 		    //this.LastQuery = string.Empty;
 		}
+        //public void Close()
+        //{
+        //    if (ConnectionWrapper != null)
+        //    {
+        //        ConnectionWrapper = null;
+        //    }
+        //}
+        #endregion
 
-		#endregion
-	}
+
+
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using AntData.ORM.DbEngine.Connection;
 using AntData.ORM.DbEngine.HA;
 using AntData.ORM.Properties;
 
@@ -31,6 +32,20 @@ namespace AntData.ORM.DbEngine.DB
             }
         }
 #endif
+
+        public DataConnectionTransaction BeginTransaction(Statement statement)
+        {
+            try
+            {
+
+                var databases = DatabaseFactory.GetDatabasesByStatement(statement);
+                return HAFactory.GetInstance(statement.DatabaseSet).ExecuteWithHa(db => db.BeginTransaction(statement), databases);
+            }
+            finally
+            {
+            }
+        }
+
         /// <summary>
         /// 根据Statement,执行增删改操作
         /// </summary>

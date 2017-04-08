@@ -193,7 +193,6 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod7_02()
         {
-
             var orderList = new List<Order>();
             orderList.Add(new Order
             {

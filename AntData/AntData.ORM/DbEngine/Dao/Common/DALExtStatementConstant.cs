@@ -113,5 +113,14 @@ namespace AntData.ORM.Dao.Common
         /// </summary>
         public const String BULK_COPY = "BulkCopy";
         public const String BULK_COPY_ORACLE = "OracleBulkCopy";
+
+        /// <summary>
+        /// 事物执行期间的数据库连接
+        /// </summary>
+        public const String TRANSACTION_CONNECTION = "ExecuteTransaction_ConnectionWrapper";
+        /// <summary>
+        /// 事物指定等级
+        /// </summary>
+        public const String ISOLATION_LEVEL = "IsolationLevel";
     }
 }

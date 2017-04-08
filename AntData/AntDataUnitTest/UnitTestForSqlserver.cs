@@ -720,5 +720,23 @@ namespace AntDataUnitTest
             var rows = DB.BulkCopy(sList);
             Assert.AreEqual(rows.RowsCopied, 2);
         }
+
+        //[TestMethod]
+        //public void TestMethod6_09()
+        //{
+        //    Person p = new Person
+        //    {
+        //        Age = 27,
+        //        Name = "test1"
+        //    };
+
+        //    DB.UseTransaction1(con =>
+        //    {
+        //        con.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update1").Update();
+        //        con.Insert(p);
+        //    });
+
+
+        //}
     }
 }

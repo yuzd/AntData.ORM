@@ -45,7 +45,7 @@ namespace AntData.ORM.DbEngine.Connection
         {
             m_Connection = connection;
             m_dataBase = database;
-            m_DisposeConnection = true;
+            m_DisposeConnection = false;
             m_Disposed = false;
         }
         /// <summary>
@@ -77,19 +77,22 @@ namespace AntData.ORM.DbEngine.Connection
         /// <summary>
         /// 释放链接
         /// </summary>
-        public void Dispose(Boolean isDisposing)
+        public void Dispose(Boolean isDisposing,Boolean endTranse = false)
         {
-            if (m_Disposed) return;
+            if (m_Disposed && !endTranse) return;
             m_Disposed = true;
 
-            if (isDisposing && m_DisposeConnection)
-                m_Connection.Dispose();
-
-            if (Database !=null && Database.Transactions != null)
+            if (isDisposing && (m_DisposeConnection || endTranse))
             {
-                Database.Transactions.Dispose();
-                Database.Transactions = null;
+                m_Connection.Dispose();
+                if (Database != null && Database.Transactions != null)
+                {
+                    Database.Transactions.Dispose();
+                    Database.Transactions = null;
+                }
             }
+
+            
         }
 
        

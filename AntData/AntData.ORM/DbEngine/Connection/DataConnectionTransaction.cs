@@ -51,6 +51,8 @@ namespace AntData.ORM.DbEngine.Connection
         {
             if (_disposeTransaction)
                 DataConnection.Database.RollbackTransaction();
+
+            DataConnection.Dispose(true,true);
         }
     }
 }

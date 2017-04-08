@@ -63,6 +63,8 @@ namespace AntData.ORM.Data
                 return null;
             });
         }
+
+
 #if !NETSTANDARD
 
         #region New Transaction
@@ -171,7 +173,46 @@ namespace AntData.ORM.Data
         }
         #endregion
 #else
+         public void UseTransaction(System.Action<DbContext<T>> func)
+        {
+            using (var scope = base.ExecuteTransaction())
+            {
+                func(this);
+                scope.Commit();
+            }
+        }
+        public void UseTransaction(System.Action<DbContext<T>> func, System.Data.IsolationLevel isolationLevel)
+        {
+            using (var scope = base.ExecuteTransaction(isolationLevel))
+            {
+                func(this);
+                scope.Commit();
+            }
+        }
 
+        public void UseTransaction(System.Func<DbContext<T>, bool> func)
+        {
+            using (var scope = base.ExecuteTransaction())
+            {
+                if (func(this))
+                {
+                    scope.Commit();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Func<DbContext<T>, bool> func, System.Data.IsolationLevel isolationLevel)
+        {
+            using (var scope = base.ExecuteTransaction(isolationLevel))
+            {
+                if (func(this))
+                {
+                    scope.Commit();
+                }
+            }
+        }
 #endif
+
+
     }
 }
