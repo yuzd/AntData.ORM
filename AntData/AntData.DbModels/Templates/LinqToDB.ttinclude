@@ -20,6 +20,7 @@ bool IsCompactColumnAliases = true;
 bool GenerateDataTypes      = false;
 bool GenerateDbTypes        = false;
 bool GenerateSchemaAsType   = false;
+bool GenerateFkByTableName   = true;
 bool IsOracle   = false;
 
 string SchemaNameSuffix          = "Schema";
@@ -414,7 +415,7 @@ void GenerateTypesFromMetadata()
 				foreach (var key in keys)
 				{
 					key.Comment.Add("/ <summary>");
-					key.Comment.Add("/ " + key.KeyName);
+					key.Comment.Add("/ " + key.KeyName);//定义的外键名称
 					key.Comment.Add("/ </summary>");
 
 					if (key.AssociationType == AssociationType.OneToMany)
@@ -444,7 +445,15 @@ void GenerateTypesFromMetadata()
 
 					SetPropertyValue(key, "IsNotifying", true);
 					SetPropertyValue(key, "IsEditable",  true);
-					key.Name = ToPascalCase(key.Name);
+					if(GenerateFkByTableName)
+					{
+						key.Name = key.AssociationType == AssociationType.OneToMany?ToPascalCase(key.OtherTable.TypeName)+"List":ToPascalCase(key.OtherTable.TypeName);
+                    }
+					else
+					{
+						key.Name = ToPascalCase(key.Name);
+					}
+					
 					associations.Members.Add(key);
 				}
 

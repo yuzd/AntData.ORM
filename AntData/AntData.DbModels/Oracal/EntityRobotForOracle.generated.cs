@@ -95,7 +95,7 @@ namespace DbModels.Oracle
 		/// persons_school
 		/// </summary>
 		[Association(ThisKey="Schoolid", OtherKey="Id", CanBeNull=true, KeyName="persons_school", BackReferenceName="personsschools")]
-		public School Personsschool { get; set; }
+		public School School { get; set; }
 
 		#endregion
 	}
@@ -150,7 +150,7 @@ namespace DbModels.Oracle
 		/// persons_school_BackReference
 		/// </summary>
 		[Association(ThisKey="Id", OtherKey="Schoolid", CanBeNull=true, IsBackReference=true)]
-		public IEnumerable<Person> Personsschools { get; set; }
+		public IEnumerable<Person> PersonList { get; set; }
 
 		#endregion
 	}

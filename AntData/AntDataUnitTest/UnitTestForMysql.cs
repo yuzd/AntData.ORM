@@ -59,12 +59,14 @@ namespace AntDataUnitTest
                     new School
                     {
                         Name = "上海大学",
-                        Address = "上海"
+                        Address = "上海",
+                        Id = 1
                     },
                     new School
                     {
                         Name = "北京大学",
-                        Address = "北京"
+                        Address = "北京",
+                        Id = 2
                     }
                 };
 
@@ -77,13 +79,15 @@ namespace AntDataUnitTest
                 {
                     Name = "yuzd",
                     Age = 27,
-                    SchoolId = 1
+                    SchoolId = 1,
+                    Id = 1
                 },
                 new Person
                 {
                     Name = "nainaigu",
                     Age = 18,
-                    SchoolId = 2
+                    SchoolId = 2,
+                    Id = 2
                 }
             };
 
@@ -215,21 +219,21 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_04()
         {
-            var p = DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefault(r => r.Name.Equals("nainaigu"));
+            var p = DB.Tables.People.LoadWith(r => r.School).FirstOrDefault(r => r.Name.Equals("nainaigu"));
             
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschool);
-            Assert.IsNotNull(p.Personsschool.Name);
+            Assert.IsNotNull(p.School);
+            Assert.IsNotNull(p.School.Name);
         }
 
         [TestMethod]
         public void TestMethod2_05()
         {
-            var p = DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefault(r => r.Name.Equals("北京大学"));
+            var p = DB.Tables.Schools.LoadWith(r => r.PersonList).FirstOrDefault(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Persons);
-            Assert.IsTrue(p.Persons.Any());
+            Assert.IsNotNull(p.PersonList);
+            Assert.IsTrue(p.PersonList.Any());
         }
 
         [TestMethod]
@@ -415,7 +419,7 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod4_02()
         {
-            var p = DB.Tables.People.FindByBk(69);
+            var p = DB.Tables.People.FindByBk(2);
             Assert.IsNotNull(p);
             var s = DB.Tables.Schools.FindByBk(1);
             Assert.IsNotNull(s);
@@ -658,22 +662,22 @@ namespace AntDataUnitTest
         public async Task TestMethod6_02()
         {
             var p =
-                await DB.Tables.People.LoadWith(r => r.Personsschool)
+                await DB.Tables.People.LoadWith(r => r.School)
                     .FirstOrDefaultAsync(r => r.Name.Equals("nainaigu"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschool);
-            Assert.IsNotNull(p.Personsschool.Name);
+            Assert.IsNotNull(p.School);
+            Assert.IsNotNull(p.School.Name);
         }
 
         [TestMethod]
         public async Task TestMethod6_03()
         {
-            var p = await DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefaultAsync(r => r.Name.Equals("北京大学"));
+            var p = await DB.Tables.Schools.LoadWith(r => r.PersonList).FirstOrDefaultAsync(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Persons);
-            Assert.IsTrue(p.Persons.Any());
+            Assert.IsNotNull(p.PersonList);
+            Assert.IsTrue(p.PersonList.Any());
         }
 
         [TestMethod]

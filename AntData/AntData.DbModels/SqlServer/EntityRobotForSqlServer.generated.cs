@@ -83,7 +83,7 @@ namespace DbModels.SqlServer
 		/// FK_persons_school
 		/// </summary>
 		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, KeyName="FK_persons_school", BackReferenceName="persons")]
-		public School Personsschool { get; set; }
+		public School School { get; set; }
 
 		#endregion
 	}
@@ -138,7 +138,7 @@ namespace DbModels.SqlServer
 		/// FK_persons_school_BackReference
 		/// </summary>
 		[Association(ThisKey="Id", OtherKey="SchoolId", CanBeNull=true, IsBackReference=true)]
-		public IEnumerable<Person> Persons { get; set; }
+		public IEnumerable<Person> PersonList { get; set; }
 
 		#endregion
 	}

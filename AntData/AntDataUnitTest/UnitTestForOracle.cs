@@ -210,20 +210,20 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_04()
         {
-            var p = DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefault(r => r.Name.Equals("nainaigu"));
+            var p = DB.Tables.People.LoadWith(r => r.School).FirstOrDefault(r => r.Name.Equals("nainaigu"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschool);
-            Assert.IsNotNull(p.Personsschool.Name);
+            Assert.IsNotNull(p.School);
+            Assert.IsNotNull(p.School.Name);
         }
 
         [TestMethod]
         public void TestMethod2_05()
         {
-            var p = DB.Tables.Schools.LoadWith(r => r.Personsschools).FirstOrDefault(r => r.Name.Equals("北京大学"));
+            var p = DB.Tables.Schools.LoadWith(r => r.PersonList).FirstOrDefault(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschools);
+            Assert.IsNotNull(p.PersonList);
             //Assert.IsTrue(p.Personsschools.Any());
         }
 
