@@ -69,109 +69,107 @@ namespace AntData.ORM.Metadata
 			}
 		}
 
-		public XmlAttributeReader([NotNull] Stream xmlDocStream)
-		{
-			if (xmlDocStream == null) throw new ArgumentNullException("xmlDocStream");
+        public XmlAttributeReader([NotNull] Stream xmlDocStream)
+        {
+            if (xmlDocStream == null) throw new ArgumentNullException("xmlDocStream");
 
-			_types = LoadStream(xmlDocStream, "");
-		}
+            _types = LoadStream(xmlDocStream, "");
+        }
 
-		static AttributeInfo[] GetAttrs(string fileName, XElement el, string exclude, string typeName, string memberName)
-		{
-			var attrs = el.Elements().Where(e => e.Name.LocalName != exclude).Select(a =>
-			{
-				var aname  = a.Name.LocalName;
-				var values = a.Elements().Select(e =>
-				{
-					var name  = e.Name.LocalName;
-					var value = e.Attribute("Value");
-					var type  = e.Attribute("Type");
+        static AttributeInfo[] GetAttrs(string fileName, XElement el, string exclude, string typeName, string memberName)
+        {
+            var attrs = el.Elements().Where(e => e.Name.LocalName != exclude).Select(a =>
+            {
+                var aname = a.Name.LocalName;
+                var values = a.Elements().Select(e =>
+                {
+                    var name = e.Name.LocalName;
+                    var value = e.Attribute("Value");
+                    var type = e.Attribute("Type");
 
-					if (value == null)
-						throw new MetadataException(
-							memberName != null ?
-								string.Format(
-									"'{0}': Element <Type Name='{1}'><Member Name='{2}'><'{3}'><{4} /> has to have 'Value' attribute.",
-									fileName, typeName, memberName, aname, name) :
-								string.Format(
-									"'{0}': Element <Type Name='{1}'><'{2}'><{3} /> has to have 'Value' attribute.",
-									fileName, typeName, aname, name));
+                    if (value == null)
+                        throw new MetadataException(
+                            memberName != null ?
+                                string.Format(
+                                    "'{0}': Element <Type Name='{1}'><Member Name='{2}'><'{3}'><{4} /> has to have 'Value' attribute.",
+                                    fileName, typeName, memberName, aname, name) :
+                                string.Format(
+                                    "'{0}': Element <Type Name='{1}'><'{2}'><{3} /> has to have 'Value' attribute.",
+                                    fileName, typeName, aname, name));
 
-					var val =
-						type != null ?
-							Converter.ChangeType(value.Value, Type.GetType(type.Value, true)) :
-							value.Value;
+                    var val =
+                        type != null ?
+                            Converter.ChangeType(value.Value, Type.GetType(type.Value, true)) :
+                            value.Value;
 
-					return Tuple.Create(name, val);
-				});
+                    return Tuple.Create(name, val);
+                });
 
-				return new AttributeInfo(aname, values.ToDictionary(v => v.Item1, v => v.Item2));
-			});
+                return new AttributeInfo(aname, values.ToDictionary(v => v.Item1, v => v.Item2));
+            });
 
-			return attrs.ToArray();
-		}
+            return attrs.ToArray();
+        }
 
-		static Dictionary<string,MetaTypeInfo> LoadStream(Stream xmlDocStream, string fileName)
-		{
-			var doc = XDocument.Load(new StreamReader(xmlDocStream));
+        static Dictionary<string, MetaTypeInfo> LoadStream(Stream xmlDocStream, string fileName)
+        {
+            var doc = XDocument.Load(new StreamReader(xmlDocStream));
 
-			return doc.Root.Elements().Where(e => e.Name.LocalName == "Type").Select(t =>
-			{
-				var aname = t.Attribute("Name");
+            return doc.Root.Elements().Where(e => e.Name.LocalName == "Type").Select(t =>
+            {
+                var aname = t.Attribute("Name");
 
-				if (aname == null)
-					throw new MetadataException("'{0}': Element 'Type' has to have 'Name' attribute.".Args(fileName));
+                if (aname == null)
+                    throw new MetadataException("'{0}': Element 'Type' has to have 'Name' attribute.".Args(fileName));
 
-				var tname = aname.Value;
+                var tname = aname.Value;
 
-				var members = t.Elements().Where(e => e.Name.LocalName == "Member").Select(m =>
-				{
-					var maname = m.Attribute("Name");
+                var members = t.Elements().Where(e => e.Name.LocalName == "Member").Select(m =>
+                {
+                    var maname = m.Attribute("Name");
 
-					if (maname == null)
-						throw new MetadataException(string.Format(
-							"'{0}': Element <Type Name='{1}'><Member /> has to have 'Name' attribute.",
-							fileName, tname));
+                    if (maname == null)
+                        throw new MetadataException(string.Format(
+                            "'{0}': Element <Type Name='{1}'><Member /> has to have 'Name' attribute.",
+                            fileName, tname));
 
-					var mname = maname.Value;
+                    var mname = maname.Value;
 
-					return new MetaMemberInfo(mname, GetAttrs(fileName, m, null, tname, mname));
-				});
+                    return new MetaMemberInfo(mname, GetAttrs(fileName, m, null, tname, mname));
+                });
 
-				return new MetaTypeInfo(tname, members.ToDictionary(m => m.Name), GetAttrs(fileName, t, "Member", tname, null));
-			})
-			.ToDictionary(t => t.Name);
-		}
+                return new MetaTypeInfo(tname, members.ToDictionary(m => m.Name), GetAttrs(fileName, t, "Member", tname, null));
+            })
+            .ToDictionary(t => t.Name);
+        }
 
-		public T[] GetAttributes<T>(Type type, bool inherit = true)
-			where T : Attribute
-		{
-			MetaTypeInfo t;
+        public T[] GetAttributes<T>(Type type, bool inherit = true)
+            where T : Attribute
+        {
+            MetaTypeInfo t;
 
-			if (_types.TryGetValue(type.FullName, out t) || _types.TryGetValue(type.Name, out t))
-				return t.GetAttribute(typeof(T)).Select(a => (T) a.MakeAttribute(typeof(T))).ToArray();
+            if (_types.TryGetValue(type.FullName, out t) || _types.TryGetValue(type.Name, out t))
+                return t.GetAttribute(typeof(T)).Select(a => (T)a.MakeAttribute(typeof(T))).ToArray();
 
-			return Array<T>.Empty;
-		}
+            return Array<T>.Empty;
+        }
 
-		public T[] GetAttributes<T>(MemberInfo memberInfo, bool inherit = true)
-			where T : Attribute
-		{
-			var type = memberInfo.DeclaringType;
+        public T[] GetAttributes<T>(Type type, MemberInfo memberInfo, bool inherit = true)
+            where T : Attribute
+        {
+            MetaTypeInfo t;
 
-			MetaTypeInfo t;
+            if (_types.TryGetValue(type.FullName, out t) || _types.TryGetValue(type.Name, out t))
+            {
+                MetaMemberInfo m;
 
-			if (_types.TryGetValue(type.FullName, out t) || _types.TryGetValue(type.Name, out t))
-			{
-				MetaMemberInfo m;
+                if (t.Members.TryGetValue(memberInfo.Name, out m))
+                {
+                    return m.GetAttribute(typeof(T)).Select(a => (T)a.MakeAttribute(typeof(T))).ToArray();
+                }
+            }
 
-				if (t.Members.TryGetValue(memberInfo.Name, out m))
-				{
-					return m.GetAttribute(typeof(T)).Select(a => (T)a.MakeAttribute(typeof(T))).ToArray();
-				}
-			}
-
-			return Array<T>.Empty;
-		}
-	}
+            return Array<T>.Empty;
+        }
+    }
 }

@@ -17,7 +17,9 @@ namespace AntData.ORM.Mapping
 
 			_builder      = builder;
 			Configuration = configuration;
-		}
+
+            _builder.MappingSchema.ResetEntityDescriptor(typeof(T));
+        }
 
 		readonly FluentMappingBuilder _builder;
 
@@ -42,7 +44,7 @@ namespace AntData.ORM.Mapping
 		public TA[] GetAttributes<TA>(MemberInfo memberInfo)
 			where TA : Attribute
 		{
-			return _builder.GetAttributes<TA>(memberInfo);
+			return _builder.GetAttributes<TA>(typeof(TA),memberInfo);
 		}
 
 		public TA[] GetAttributes<TA>(Func<TA,string> configGetter)
@@ -245,7 +247,7 @@ namespace AntData.ORM.Mapping
 					e is MethodCallExpression ? ((MethodCallExpression)e).Method : null;
 
 				if (e is MemberExpression && memberInfo.ReflectedTypeEx() != typeof(T))
-					memberInfo = typeof(T).GetPropertyEx(memberInfo.Name);
+					memberInfo = typeof(T).GetMemberEx(memberInfo);
 
 				if (memberInfo == null)
 					throw new ArgumentException(string.Format("'{0}' cant be converted to a class member.", e));

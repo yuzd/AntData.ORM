@@ -194,7 +194,27 @@ namespace AntData.ORM.Extensions
 			return type.IsInterface;
 #endif
         }
+        /// <summary>
+		/// Returns <see cref="MemberInfo"/> of <paramref name="type"/> described by <paramref name="memberInfo"/>
+		/// It us useful when member's declared and reflected types are not the same
+		/// </summary>
+		/// <remarks>This method searches only properties, fields and methods</remarks>
+		/// <param name="type"><see cref="Type"/> to find member info</param>
+		/// <param name="memberInfo"><see cref="MemberInfo"/> </param>
+		/// <returns><see cref="MemberInfo"/> or null</returns>
+		public static MemberInfo GetMemberEx(this Type type, MemberInfo memberInfo)
+        {
+            if (memberInfo.IsPropertyEx())
+                return type.GetPropertyEx(memberInfo.Name);
 
+            if (memberInfo.IsFieldEx())
+                return type.GetFieldEx(memberInfo.Name);
+
+            if (memberInfo.IsMethodEx())
+                return type.GetMethodEx(memberInfo.Name, ((MethodInfo)memberInfo).GetParameters().Select(_ => _.ParameterType).ToArray());
+
+            return null;
+        }
         public static Type BaseTypeEx(this Type type)
         {
 #if NETFX_CORE || NETSTANDARD

@@ -597,7 +597,7 @@ namespace AntData.ORM.Mapping
 		{
 			var q =
 				from mr in MetadataReaders
-				from a in mr.GetAttributes<T>(memberInfo, inherit)
+				from a in mr.GetAttributes<T>(typeof(T),memberInfo, inherit)
 				select a;
 
 			return q.ToArray();
@@ -1013,13 +1013,18 @@ namespace AntData.ORM.Mapping
 			return ed;
 		}
 
-		//public EntityDescriptor GetEntityDescriptor(Type type)
-		//{
-		//    if (_entityDescriptors == null)
-		//        _entityDescriptors = new ConcurrentDictionary<Type, EntityDescriptor>();
-		//    return _entityDescriptors.GetOrAdd(type, t => new EntityDescriptor(this, t));
-		//}
-
-		#endregion
-	}
+        //public EntityDescriptor GetEntityDescriptor(Type type)
+        //{
+        //    if (_entityDescriptors == null)
+        //        _entityDescriptors = new ConcurrentDictionary<Type, EntityDescriptor>();
+        //    return _entityDescriptors.GetOrAdd(type, t => new EntityDescriptor(this, t));
+        //}
+        internal void ResetEntityDescriptor(Type type)
+        {
+            EntityDescriptor ed;
+            if (_entityDescriptors != null)
+                _entityDescriptors.TryRemove(type, out ed);
+        }
+        #endregion
+    }
 }

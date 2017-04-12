@@ -61,43 +61,43 @@ namespace AntData.ORM.Metadata
 			return Array<T>.Empty;
 		}
 
-		public T[] GetAttributes<T>(MemberInfo memberInfo, bool inherit)
-			where T : Attribute
-		{
-			if (typeof(T) == typeof(ColumnAttribute))
-			{
-				var attrs = _reader.GetAttributes<System.Data.Linq.Mapping.ColumnAttribute>(memberInfo, inherit);
+        public T[] GetAttributes<T>(Type type, MemberInfo memberInfo, bool inherit)
+            where T : Attribute
+        {
+            if (typeof(T) == typeof(ColumnAttribute))
+            {
+                var attrs = _reader.GetAttributes<System.Data.Linq.Mapping.ColumnAttribute>(type, memberInfo, inherit);
 
-				if (attrs.Length == 1)
-				{
-					var c = attrs[0];
+                if (attrs.Length == 1)
+                {
+                    var c = attrs[0];
 
-					var attr = new ColumnAttribute
-					{
-						Name      = c.Name,
-						DbType    = c.DbType,
-						CanBeNull = c.CanBeNull,
-						Storage   = c.Storage,
-					};
+                    var attr = new ColumnAttribute
+                    {
+                        Name = c.Name,
+                        DbType = c.DbType,
+                        CanBeNull = c.CanBeNull,
+                        Storage = c.Storage,
+                    };
 
-					return new[] { (T)(Attribute)attr };
-				}
-			}
-			else if (typeof(T) == typeof(AssociationAttribute))
-			{
-				var ta = _reader.GetAttributes<System.Data.Linq.Mapping.TableAttribute>(memberInfo.DeclaringType, inherit);
+                    return new[] { (T)(Attribute)attr };
+                }
+            }
+            else if (typeof(T) == typeof(AssociationAttribute))
+            {
+                var ta = _reader.GetAttributes<System.Data.Linq.Mapping.TableAttribute>(type, memberInfo.DeclaringType, inherit);
 
-				if (ta.Length == 1)
-				{
-					return _reader
-						.GetAttributes<System.Data.Linq.Mapping.AssociationAttribute>(memberInfo, inherit)
-						.Select(a => (T)(Attribute)new AssociationAttribute { ThisKey = a.ThisKey, OtherKey = a.OtherKey, Storage = a.Storage })
-						.ToArray();
-				}
-			}
+                if (ta.Length == 1)
+                {
+                    return _reader
+                        .GetAttributes<System.Data.Linq.Mapping.AssociationAttribute>(type, memberInfo, inherit)
+                        .Select(a => (T)(Attribute)new AssociationAttribute { ThisKey = a.ThisKey, OtherKey = a.OtherKey, Storage = a.Storage })
+                        .ToArray();
+                }
+            }
 
-			return Array<T>.Empty;
-		}
-	}
+            return Array<T>.Empty;
+        }
+    }
 }
 #endif

@@ -757,7 +757,33 @@ namespace AntDataUnitTest
         //        con.Insert(p);
         //    });
 
-         
+
         //}
+
+        [TestMethod]
+        public void TestMethod7_01()
+        {
+            DB.MappingSchema.GetFluentMappingBuilder().Entity<Person>().HasTableName("table1");
+            try
+            {
+                var aa = DB.GetTable<Person>().ToList();
+                //var aa = DB.GetTable<Person>().TableName("table1").ToList();
+            }
+            catch (Exception)
+            {
+
+            }
+
+            DB.MappingSchema.GetFluentMappingBuilder().Entity<Person>().HasTableName("table2");
+
+            try
+            {
+                var aaa = DB.GetTable<Person>().Select(r => r.Age).ToList();
+            }
+            catch (Exception)
+            {
+
+            }
+        }
     }
 }

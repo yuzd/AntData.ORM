@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using AntData.ORM.Extensions;
 
 namespace AntData.ORM.Mapping
 {
@@ -20,7 +21,12 @@ namespace AntData.ORM.Mapping
 			_entity       = entity;
 			_memberGetter = memberGetter;
 			_memberInfo   = MemberHelper.MemberOf(memberGetter);
-		}
+		    if (_memberInfo.ReflectedTypeEx() != typeof(T))
+		    {
+                _memberInfo = typeof(T).GetMemberEx(_memberInfo) ?? _memberInfo;
+            }
+
+        }
 
 		readonly Expression<Func<T,object>> _memberGetter;
 		readonly MemberInfo                 _memberInfo;
