@@ -67,6 +67,7 @@ void GenerateTypesFromMetadata()
 	Model.Usings.Add("AntData.ORM");
 	Model.Usings.Add("AntData.ORM.Mapping");
 	Model.Usings.Add("AntData.ORM.Linq");
+	Model.Usings.Add("System.Collections.Generic");
 	if (NamespaceName == null)
 		NamespaceName = "DataModel";
 
@@ -524,7 +525,6 @@ void GenerateTypesFromMetadata()
     //´æ´¢¹ý³Ì
 	if (Procedures.Count > 0)
 	{
-		Model.Usings.Add("System.Collections.Generic");
 		Model.Usings.Add("System.Data");
 		Model.Usings.Add("System.Threading.Tasks");
 		Model.Usings.Add("AntData.ORM.Data");

@@ -468,6 +468,7 @@ public void SetIdentity(string tableName,string columnName,string sequenceName,s
 	WriteLine("#error SetIdentity '" + tableName + "'.'" + columnName +  "' not found.");
 }
 
+//辅助分表
 public void SetTableSharding(string tableNameFormat,params string[] tables)
 {
 	if(string.IsNullOrEmpty(tableNameFormat))
@@ -518,6 +519,33 @@ public void SetTableSharding(string tableNameFormat,params string[] tables)
 
 
 }
+
+
+//辅助手动设置外键
+public void SetFk(string tableAName,string columnAName,string tableBName,string columnBName,AssociationType type)
+{
+	if(string.IsNullOrEmpty(tableAName) || string.IsNullOrEmpty(columnAName)|| string.IsNullOrEmpty(tableBName)|| string.IsNullOrEmpty(columnBName))
+    {
+		WriteLine("#error SetFk tableName or columnName is IsNullOrEmpty");
+		return;
+    }
+
+	var tableA = GetTable(tableAName);
+	var columnA = GetColumn(tableAName,columnAName);
+	var tableB = GetTable(tableBName);
+	var columnB = GetColumn(tableBName,columnBName);
+	var fksA = tableA.ForeignKeys;
+	var foreignKey = new ForeignKey();
+	var KeyName = string.Concat(tableAName,"_",columnAName,"_",tableBName,"_",columnBName);
+	foreignKey.KeyName = KeyName;
+	foreignKey.OtherTable = tableB;
+	foreignKey.CanBeNull = true;
+	foreignKey.AssociationType = type;
+	foreignKey.ThisColumns = new List<Column>{columnA};
+	foreignKey.OtherColumns = new List<Column>{columnB};
+	fksA.Add(KeyName,foreignKey);
+}
+
 public class TableContext
 {
 	public GeneratedTextTransformation Transformation;

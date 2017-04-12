@@ -92,9 +92,9 @@ namespace DbModels.Mysql
 		#region Associations
 
 		/// <summary>
-		/// fk_one_to_many
+		/// person_SchoolId_school_Id
 		/// </summary>
-		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, KeyName="fk_one_to_many", BackReferenceName="fkonetomanies")]
+		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, IsBackReference=true)]
 		public School School { get; set; }
 
 		#endregion
@@ -147,7 +147,7 @@ namespace DbModels.Mysql
 		#region Associations
 
 		/// <summary>
-		/// fk_one_to_many_BackReference
+		/// school_Id_person_SchoolId
 		/// </summary>
 		[Association(ThisKey="Id", OtherKey="SchoolId", CanBeNull=true, IsBackReference=true)]
 		public IEnumerable<Person> PersonList { get; set; }
