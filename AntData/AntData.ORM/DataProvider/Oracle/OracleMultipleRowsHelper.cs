@@ -51,7 +51,7 @@ namespace AntData.ORM.DataProvider.Oracle
                     StringBuilder.Append(" ,");
                     continue;
                 }
-                var value = column.GetValue(item);
+                var value = column.GetValue(DataConnection.MappingSchema, item);
 
                 if (!skipConvert(column) /*|| !ValueConverter.TryConvert(StringBuilder, ColumnTypes[i], value)*/)
                 {

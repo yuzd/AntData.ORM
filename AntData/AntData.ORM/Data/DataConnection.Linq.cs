@@ -102,7 +102,7 @@ namespace AntData.ORM.Data
 
             
 
-            var sql    = query.SelectQuery.ProcessParameters();
+            var sql    = query.SelectQuery.ProcessParameters(MappingSchema);
 			var newSql = ProcessQuery(sql);
 
 			if (!object.ReferenceEquals(sql, newSql))

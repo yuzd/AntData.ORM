@@ -995,24 +995,29 @@ namespace AntData.ORM.Mapping
 
 		#region EntityDescriptor
 
-		ConcurrentDictionary<Type,EntityDescriptor> _entityDescriptors;
+		//ConcurrentDictionary<Type,EntityDescriptor> _entityDescriptors;
 
 		public EntityDescriptor GetEntityDescriptor(Type type)
 		{
-			if (_entityDescriptors == null)
-				_entityDescriptors = new ConcurrentDictionary<Type, EntityDescriptor>();
+			//if (_entityDescriptors == null)
+			//	_entityDescriptors = new ConcurrentDictionary<Type, EntityDescriptor>();
 
-			EntityDescriptor ed;
+			//EntityDescriptor ed;
 
-			if (!_entityDescriptors.TryGetValue(type, out ed))
-			{
-				_entityDescriptors[type] = ed = new EntityDescriptor(this, type);
-				ed.InitInheritanceMapping();
-			}
+			//if (!_entityDescriptors.TryGetValue(type, out ed))
+			//{
+			//	_entityDescriptors[type] = ed = new EntityDescriptor(this, type);
+			//	ed.InitInheritanceMapping();
+			//}
+           
+   //         return ed;
 
-			return ed;
-		}
-
+            return Schemas[0].GetEntityDescriptor(this, type);
+        }
+        public Type[] GetEntites()
+        {
+            return Schemas[0].GetEntites();
+        }
         //public EntityDescriptor GetEntityDescriptor(Type type)
         //{
         //    if (_entityDescriptors == null)
@@ -1021,9 +1026,11 @@ namespace AntData.ORM.Mapping
         //}
         internal void ResetEntityDescriptor(Type type)
         {
-            EntityDescriptor ed;
-            if (_entityDescriptors != null)
-                _entityDescriptors.TryRemove(type, out ed);
+            //EntityDescriptor ed;
+            //if (_entityDescriptors != null)
+            //    _entityDescriptors.TryRemove(type, out ed);
+
+            Schemas[0].ResetEntityDescriptor(type);
         }
         #endregion
     }

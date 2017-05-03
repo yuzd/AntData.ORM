@@ -305,9 +305,9 @@ namespace AntData.ORM.DataProvider
 				for (var i = 0; i < table.Columns.Count; i++)
 				{
 					var column = table.Columns[i];
-					var value  = column.GetValue(item);
-
-					if (!valueConverter.TryConvert(StringBuilder, columnTypes[i], value))
+					//var value  = column.GetValue(item);
+                    var value = column.GetValue(dataConnection.MappingSchema, item);
+                    if (!valueConverter.TryConvert(StringBuilder, columnTypes[i], value))
 					{
 						var name = pname == "?" ? pname : pname + ++pidx;
 
@@ -381,7 +381,7 @@ namespace AntData.ORM.DataProvider
 				for (var i = 0; i < Columns.Count; i++)
 				{
 					var column = Columns[i];
-					var value  = column.Column.GetValue(item);
+					var value  = column.Column.GetValue(dataConnection.MappingSchema, item);
 
 					if (!valueConverter.TryConvert(StringBuilder, columnTypes[i], value))
 					{

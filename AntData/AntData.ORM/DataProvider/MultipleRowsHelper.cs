@@ -60,7 +60,7 @@ namespace AntData.ORM.DataProvider
             for (var i = 0; i < Columns.Length; i++)
             {
                 var column = Columns[i];
-                var value = column.GetValue(item);
+                var value = column.GetValue(DataConnection.MappingSchema, item);
 
                 if (!skipConvert(column) /*|| !ValueConverter.TryConvert(StringBuilder, ColumnTypes[i], value)*/)
                 {

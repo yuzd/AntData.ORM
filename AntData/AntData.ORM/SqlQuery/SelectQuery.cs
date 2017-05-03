@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using AntData.ORM.Mapping;
 
 namespace AntData.ORM.SqlQuery
 {
@@ -3274,7 +3275,7 @@ namespace AntData.ORM.SqlQuery
 
 		#region ProcessParameters
 
-		public SelectQuery ProcessParameters()
+		public SelectQuery ProcessParameters(MappingSchema mappingSchema)
 		{
 			if (IsParameterDependent)
 			{
@@ -3327,8 +3328,8 @@ namespace AntData.ORM.SqlQuery
 							break;
 
 						case QueryElementType.InListPredicate :
-							return ConvertInListPredicate((Predicate.InList)e);
-					}
+                            return ConvertInListPredicate(mappingSchema, (Predicate.InList)e);
+                    }
 
 					return null;
 				});
@@ -3359,7 +3360,7 @@ namespace AntData.ORM.SqlQuery
 			return this;
 		}
 
-		static Predicate ConvertInListPredicate(Predicate.InList p)
+		static Predicate ConvertInListPredicate(MappingSchema mappingSchema, Predicate.InList p)
 		{
 			if (p.Values == null || p.Values.Count == 0)
 				return new Predicate.Expr(new SqlValue(p.IsNot));
@@ -3392,8 +3393,9 @@ namespace AntData.ORM.SqlQuery
 							foreach (var item in items)
 							{
 								var value = cd.MemberAccessor.GetValue(item);
-								values.Add(cd.MappingSchema.GetSqlValue(cd.MemberType, value));
-							}
+								//values.Add(cd.MappingSchema.GetSqlValue(cd.MemberType, value));
+                                values.Add(mappingSchema.GetSqlValue(cd.MemberType, value));
+                            }
 
 							if (values.Count == 0)
 								return new Predicate.Expr(new SqlValue(p.IsNot));
@@ -3415,9 +3417,10 @@ namespace AntData.ORM.SqlQuery
 									var value = cd.MemberAccessor.GetValue(item);
 									var cond  = value == null ?
 										new Condition(false, new Predicate.IsNull  (field, false)) :
-										new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, cd.MappingSchema.GetSqlValue(value)));
+										//new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, cd.MappingSchema.GetSqlValue(value)));
+                                    new Condition(false, new Predicate.ExprExpr(field, Predicate.Operator.Equal, mappingSchema.GetSqlValue(value)));
 
-									itemCond.Conditions.Add(cond);
+                                    itemCond.Conditions.Add(cond);
 								}
 
 								sc.Conditions.Add(new Condition(false, new Predicate.Expr(itemCond), true));

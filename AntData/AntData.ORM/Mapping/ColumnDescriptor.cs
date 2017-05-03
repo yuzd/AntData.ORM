@@ -16,7 +16,7 @@ namespace AntData.ORM.Mapping
 	{
 		public ColumnDescriptor(MappingSchema mappingSchema, ColumnAttribute columnAttribute, MemberAccessor memberAccessor)
 		{
-			MappingSchema  = mappingSchema;
+			//MappingSchema  = mappingSchema;
 			MemberAccessor = memberAccessor;
 			MemberInfo     = memberAccessor.MemberInfo;
 
@@ -106,7 +106,7 @@ namespace AntData.ORM.Mapping
 			}
 		}
 
-		public MappingSchema  MappingSchema   { get; private set; }
+		//public MappingSchema  MappingSchema   { get; private set; }
 		public MemberAccessor MemberAccessor  { get; private set; }
 		public MemberInfo     MemberInfo      { get; private set; }
 		public Type           MemberType      { get; private set; }
@@ -129,14 +129,14 @@ namespace AntData.ORM.Mapping
 
 		Func<object,object> _getter;
 
-		public virtual object GetValue(object obj)
+		public virtual object GetValue(MappingSchema mappingSchema, object obj)
 		{
 			if (_getter == null)
 			{
 				var objParam   = Expression.Parameter(typeof(object), "obj");
 				var getterExpr = MemberAccessor.GetterExpression.GetBody(Expression.Convert(objParam, MemberAccessor.TypeAccessor.Type));
 
-				var expr = MappingSchema.GetConvertExpression(MemberType, typeof(DataParameter), createDefault : false);
+				var expr = mappingSchema.GetConvertExpression(MemberType, typeof(DataParameter), createDefault : false);
 
 				if (expr != null)
 				{
@@ -144,11 +144,11 @@ namespace AntData.ORM.Mapping
 				}
 				else
 				{
-					var type = Converter.GetDefaultMappingFromEnumType(MappingSchema, MemberType);
+					var type = Converter.GetDefaultMappingFromEnumType(mappingSchema, MemberType);
 
 					if (type != null)
 					{
-						expr = MappingSchema.GetConvertExpression(MemberType, type);
+						expr = mappingSchema.GetConvertExpression(MemberType, type);
 						getterExpr = expr.GetBody(getterExpr);
 					}
 				}
