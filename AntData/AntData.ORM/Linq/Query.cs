@@ -1315,13 +1315,13 @@ namespace AntData.ORM.Linq
 					mapInfo.Mapper = mapInfo.Expression.Compile();
 					result         = mapInfo.Mapper(queryContext, dataContextInfo.DataContext, dr, expr, ps);
 				}
-				//finally
-				//{
-				//	if (closeQueryContext)
-				//		queryContext.Close();
-				//}
+                finally
+                {
+                    if (closeQueryContext)
+                        queryContext.Close();
+                }
 
-				yield return result;
+                yield return result;
 			}
 		}
 

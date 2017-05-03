@@ -481,7 +481,7 @@ namespace AntData.ORM.Data
 
 		#endregion
 
-		
+	  
 
 		#region System.IDisposable Members
 
@@ -490,13 +490,13 @@ namespace AntData.ORM.Data
             //注释下面的代码 因为会导致query方法的序列化缓存bug
 		    //this.LastQuery = string.Empty;
 		}
-        //public void Close()
-        //{
-        //    if (ConnectionWrapper != null)
-        //    {
-        //        ConnectionWrapper = null;
-        //    }
-        //}
+        public void Close()
+        {
+            if (ConnectionWrapper != null)
+            {
+                ConnectionWrapper = null;
+            }
+        }
         #endregion
 
 

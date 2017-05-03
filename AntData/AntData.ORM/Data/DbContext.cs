@@ -177,16 +177,30 @@ namespace AntData.ORM.Data
         {
             using (var scope = base.ExecuteTransaction())
             {
-                func(this);
-                scope.Commit();
+                try
+                {
+                    func(this);
+                    scope.Commit();
+                }
+                finally
+                {
+                    Close();
+                }
             }
         }
         public void UseTransaction(System.Action<DbContext<T>> func, System.Data.IsolationLevel isolationLevel)
         {
             using (var scope = base.ExecuteTransaction(isolationLevel))
             {
-                func(this);
-                scope.Commit();
+                try
+                {
+                    func(this);
+                    scope.Commit();
+                }
+                finally
+                {
+                    Close();
+                }
             }
         }
 
@@ -194,9 +208,16 @@ namespace AntData.ORM.Data
         {
             using (var scope = base.ExecuteTransaction())
             {
-                if (func(this))
+                try
                 {
-                    scope.Commit();
+                    if (func(this))
+                    {
+                        scope.Commit();
+                    }
+                }
+                finally
+                {
+                    Close();
                 }
             }
         }
@@ -205,9 +226,16 @@ namespace AntData.ORM.Data
         {
             using (var scope = base.ExecuteTransaction(isolationLevel))
             {
-                if (func(this))
+                try
                 {
-                    scope.Commit();
+                    if (func(this))
+                    {
+                        scope.Commit();
+                    }
+                }
+                finally
+                {
+                    Close();
                 }
             }
         }

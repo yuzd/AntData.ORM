@@ -1,6 +1,6 @@
 ﻿{
   "name": "AntData.Core.Mysql",
-  "version": "1.0.0",
+  "version": "1.2.5",
   "authors": [ "nainaigu" ],
   "description": "AntData.Orm mysql For Dotnet Core",
   "packOptions": {
@@ -13,9 +13,10 @@
     ]
   },
   "dependencies": {
-    "AntData.Core": "1.0.0",
+    "AntData.Core": "1.2.6",
     "NETStandard.Library": "1.6.0",
     "MySql.Data": "7.0.7-m61"
+
   },
   "buildOptions": {
     "outputName": "AntData.ORM.Mysql",
@@ -33,7 +34,7 @@
         }
       },
       "dependencies": {
-
+       
       }
     }
   }
