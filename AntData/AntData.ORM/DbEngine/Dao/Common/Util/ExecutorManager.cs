@@ -21,20 +21,15 @@ namespace AntData.ORM.Common.Util
                         {
                             try
                             {
-                                executor = new DefaultExecutor();
-                                //Type executorType = DALBootstrap.GetExecutorType();
-                                //if (executorType == null)
-                                //{
-                                //    Type type = AssemblyUtil.GetTypeFromAssembly(Constants.ArchCtrip, Constants.CtripExecutor);
-                                //    if (type != null)
-                                //        executor = Activator.CreateInstance(type) as IExecutor;
-                                //    else
-                                //        executor = new DefaultExecutor();
-                                //}
-                                //else
-                                //{
-                                //    executor = Activator.CreateInstance(executorType) as IExecutor;
-                                //}
+                                Type executorType = DALBootstrap.GetExecutorType();
+                                if (executorType == null)
+                                {
+                                   executor = new DefaultExecutor();
+                                }
+                                else
+                                {
+                                    executor = Activator.CreateInstance(executorType) as IExecutor;
+                                }
                             }
                             catch
                             {

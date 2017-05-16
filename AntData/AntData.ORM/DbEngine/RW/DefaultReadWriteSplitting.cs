@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AntData.ORM.Dao;
+using AntData.ORM.DbEngine.Dao.Common.Util;
 using AntData.ORM.DbEngine.DB;
 using AntData.ORM.Enums;
 
@@ -33,9 +34,8 @@ namespace AntData.ORM.DbEngine.RW
                 if (statement.OperationType == OperationType.Read && count > 0)
                 {
                     
-                    Random random = new Random();
                     //如果多于1个Slave，随机选择一个
-                    int index = random.Next(0, count);
+                    int index = ThreadLocalRandom.Current.Next(0, count);
                     for (Int32 i = 0; i < count; i++)
                     {
                         if (i == index)

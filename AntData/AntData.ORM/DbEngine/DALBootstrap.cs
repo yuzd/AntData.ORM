@@ -271,5 +271,25 @@ namespace AntData.ORM.DbEngine
                 return null;
             return ConfigurationSection.ConnectionLocator.Path;
         }
+
+        public static Type GetRWSplittingType()
+        {
+            if (ConfigurationSection == null || ConfigurationSection.RWSplitting == null)
+                return null;
+            return ConfigurationSection.RWSplitting.Type;
+        }
+        public static Type GetExecutorType()
+        {
+            if (ConfigurationSection == null || ConfigurationSection.Executor == null)
+                return null;
+            return ConfigurationSection.Executor.Type;
+        }
+
+        public static Type GetConnectionLocatorType()
+        {
+            if (ConfigurationSection == null || ConfigurationSection.ConnectionLocator == null)
+                return null;
+            return ConfigurationSection.ConnectionLocator.Type;
+        }
     }
 }

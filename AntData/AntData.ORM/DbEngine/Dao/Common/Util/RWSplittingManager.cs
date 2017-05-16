@@ -22,20 +22,16 @@ namespace AntData.ORM.Common.Util
                         {
                             try
                             {
-                                instance = new DefaultReadWriteSplitting();
-                                //Type rwType = DALBootstrap.GetRWSplittingType();
-                                //if (rwType == null)
-                                //{
-                                //    Type type = AssemblyUtil.GetTypeFromAssembly(Constants.ArchCtrip, Constants.RWSplitting);
-                                //    if (type != null)
-                                //        instance = Activator.CreateInstance(type) as IReadWriteSplitting;
-                                //    else
-                                //        instance = new DefaultReadWriteSplitting();
-                                //}
-                                //else
-                                //{
-                                //    instance = Activator.CreateInstance(rwType) as IReadWriteSplitting;
-                                //}
+                               
+                                Type rwType = DALBootstrap.GetRWSplittingType();
+                                if (rwType == null)
+                                {
+                                    instance = new DefaultReadWriteSplitting();
+                                }
+                                else
+                                {
+                                    instance = Activator.CreateInstance(rwType) as IReadWriteSplitting;
+                                }
                             }
                             catch
                             {

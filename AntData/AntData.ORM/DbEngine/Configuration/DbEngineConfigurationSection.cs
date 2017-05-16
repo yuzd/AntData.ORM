@@ -16,6 +16,9 @@ namespace AntData.ORM.DbEngine.Configuration
 
         private readonly ConfigurationProperty connectionLocator;
 
+        private readonly ConfigurationProperty rw;
+
+        private readonly ConfigurationProperty executor;
         #endregion
 
         #region construction
@@ -29,6 +32,10 @@ namespace AntData.ORM.DbEngine.Configuration
             databaseProviders = new ConfigurationProperty("databaseProviders", typeof(DatabaseProviderElementCollection), null, ConfigurationPropertyOptions.None);
 
             connectionLocator = new ConfigurationProperty("connectionLocator", typeof(ConnectionLocatorElement), null, ConfigurationPropertyOptions.None);
+
+            rw = new ConfigurationProperty("rw", typeof(RWSplittingElement), null, ConfigurationPropertyOptions.None);
+
+            executor = new ConfigurationProperty("executor", typeof(ExecutorElement), null, ConfigurationPropertyOptions.None);
         }
 
         #endregion
@@ -101,6 +108,19 @@ namespace AntData.ORM.DbEngine.Configuration
 #endif
         }
 
+        [ConfigurationProperty("rw")]
+        public RWSplittingElement RWSplitting
+        {
+            get { return (RWSplittingElement)base[rw]; }
+#if NETSTANDARD
+            set { RWSplitting = value; }
+#endif
+        }
+
+        public ExecutorElement Executor
+        {
+            get { return (ExecutorElement)base[executor]; }
+        }
         #endregion
     }
 }

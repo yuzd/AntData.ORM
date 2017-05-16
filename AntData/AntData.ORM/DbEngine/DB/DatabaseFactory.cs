@@ -6,6 +6,7 @@ using System.Transactions;
 #endif
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
+using AntData.ORM.DbEngine.Dao.Common.Util;
 using AntData.ORM.DbEngine.RW;
 using AntData.ORM.Enums;
 
@@ -18,10 +19,7 @@ namespace AntData.ORM.DbEngine.DB
     {
 #region private fields
 
-        /// <summary>
-        /// 随机发生器,用来动态选择slave数据库
-        /// </summary>
-        private static readonly Random Random = new Random();
+        
         private static IReadWriteSplitting readWriteSplit;
         private static readonly Object Locker = new Object();
 
@@ -75,16 +73,17 @@ namespace AntData.ORM.DbEngine.DB
                 if (databaseSetWrapper.EnableReadWriteSpliding && statement.OperationType == OperationType.Read)
                 {
                     //首先选出所有Slave
-                    var slaves = databaseSetWrapper.DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave && item.Sharding == shard);
-                    Int32 count = slaves.Count();
+                    var slaves = databaseSetWrapper.DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave && item.Sharding == shard).ToList();
+                    var count = slaves.Count();
 
                     //如果多于1个Slave，随机选择一个
                     if (count > 0)
                     {
-                        Int32 index = Random.Next(0, count);
+                        //用来动态选择slave数据库
+                        var index = ThreadLocalRandom.Current.Next(0, count);
                         result.OtherCandidates = new List<Database>();
 
-                        for (Int32 i = 0; i < count; i++)
+                        for (var i = 0; i < count; i++)
                         {
                             if (i == index)
                             {

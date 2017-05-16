@@ -18,30 +18,22 @@ namespace AntData.ORM.DbEngine.ConnectionString
                     {
                         if (instance == null)
                         {
-#if !NETSTANDARD
-                            instance = new DefaultConnectionString();
-#endif
-                            //try
-                            //{
-                            //    Type locatorType = null;//DALBootstrap.GetConnectionLocatorType();
-                            //    if (locatorType == null)
-                            //    {
-                            //        //Type type = AssemblyUtil.GetTypeFromAssembly(Constants.ArchCtrip, Constants.CtripConnectionString);
-                            //        //if (type != null)
-                            //        //    instance = Activator.CreateInstance(type) as IConnectionString;
-                            //        //else
-                            //        //    instance = new DefaultConnectionString();
-                            //        instance = new DefaultConnectionString();
-                            //    }
-                            //    else
-                            //    {
-                            //        instance = Activator.CreateInstance(locatorType) as IConnectionString;
-                            //    }
-                            //}
-                            //catch
-                            //{
-                            //    instance = new DefaultConnectionString();
-                            //}
+                            try
+                            {
+                                Type locatorType = DALBootstrap.GetConnectionLocatorType();
+                                if (locatorType == null)
+                                {
+                                    instance = new DefaultConnectionString();
+                                }
+                                else
+                                {
+                                    instance = Activator.CreateInstance(locatorType) as IConnectionString;
+                                }
+                            }
+                            catch
+                            {
+                                instance = new DefaultConnectionString();
+                            }
                         }
                     }
                 }

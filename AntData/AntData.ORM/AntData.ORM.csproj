@@ -89,6 +89,7 @@
     <Compile Include="DbEngine\Configuration\ConnectionStringSettings.cs" />
     <Compile Include="DbEngine\Configuration\DataProviderSettings.cs" />
     <Compile Include="DbEngine\Configuration\DBSettings.cs" />
+    <Compile Include="DbEngine\Configuration\ExecutorElement.cs" />
     <Compile Include="DbEngine\Connection\DataConnectionTransaction.cs" />
     <Compile Include="DbEngine\Dao\BaseDao.cs" />
     <Compile Include="DbEngine\Dao\BaseDaoFactory.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="DbEngine\Dao\Common\Util\HintsUtil.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\ShardingUtil.cs" />
+    <Compile Include="DbEngine\Dao\Common\Util\ThreadLocalRandom.cs" />
     <Compile Include="DbEngine\Dao\Common\Util\TypeUtils.cs" />
     <Compile Include="DbEngine\Dao\DalBridge.cs" />
     <Compile Include="DbEngine\Dao\DalException.cs" />
