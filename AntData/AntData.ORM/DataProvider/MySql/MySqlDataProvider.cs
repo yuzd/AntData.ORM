@@ -77,7 +77,8 @@ namespace AntData.ORM.DataProvider.MySql
         }
         public override void SetParameter(IDbDataParameter parameter, string name, DataType dataType, object value)
 		{
-			switch (dataType)
+           
+            switch (dataType)
 			{
 				case DataType.Decimal    :
 				case DataType.VarNumeric :
@@ -89,7 +90,29 @@ namespace AntData.ORM.DataProvider.MySql
 				case DataType.DateTime2  :
 					if (value != null && value.GetType() == _mySqlDateTimeType)
 						value = _mySqlDateTimeValueGetter(value);
-					break;
+                    //else if (value is DateTime)
+                    //{
+                    //    var dt = (DateTime)value;
+                    //    value = dt.ToString(
+                    //        dt.Millisecond == 0
+                    //            ? dt.Hour == 0 && dt.Minute == 0 && dt.Second == 0
+                    //                ? "yyyy-MM-dd"
+                    //                : "yyyy-MM-dd HH:mm:ss"
+                    //            : "yyyy-MM-dd HH:mm:ss.fff");
+                    //}
+                    //else if (value is TimeSpan)
+                    //{
+                    //    var ts = (TimeSpan)value;
+                    //    value = ts.ToString(
+                    //        ts.Days > 0
+                    //            ? ts.Milliseconds > 0
+                    //                ? "d\\.hh\\:mm\\:ss\\.fff"
+                    //                : "d\\.hh\\:mm\\:ss"
+                    //            : ts.Milliseconds > 0
+                    //                ? "hh\\:mm\\:ss\\.fff"
+                    //                : "hh\\:mm\\:ss");
+                    //}
+                    break;
 				case DataType.Char       :
 				case DataType.NChar      :
 					if (value is char)
@@ -114,6 +137,28 @@ namespace AntData.ORM.DataProvider.MySql
                 case DataType.DateTime2:
                     if (value != null && value.GetType() == _mySqlDateTimeType)
                         value = _mySqlDateTimeValueGetter(value);
+                    //else if (value is DateTime)
+                    //{
+                    //    var dt = (DateTime)value;
+                    //    value = dt.ToString(
+                    //        dt.Millisecond == 0
+                    //            ? dt.Hour == 0 && dt.Minute == 0 && dt.Second == 0
+                    //                ? "yyyy-MM-dd"
+                    //                : "yyyy-MM-dd HH:mm:ss"
+                    //            : "yyyy-MM-dd HH:mm:ss.fff");
+                    //}
+                    //else if (value is TimeSpan)
+                    //{
+                    //    var ts = (TimeSpan)value;
+                    //    value = ts.ToString(
+                    //        ts.Days > 0
+                    //            ? ts.Milliseconds > 0
+                    //                ? "d\\.hh\\:mm\\:ss\\.fff"
+                    //                : "d\\.hh\\:mm\\:ss"
+                    //            : ts.Milliseconds > 0
+                    //                ? "hh\\:mm\\:ss\\.fff"
+                    //                : "hh\\:mm\\:ss");
+                    //}
                     break;
                 case DataType.Char:
                 case DataType.NChar:

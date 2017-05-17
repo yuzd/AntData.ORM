@@ -99,7 +99,8 @@ namespace AntDataUnitTest
             Person p = new Person
             {
                 Name = "yuzd",
-                Age = 27
+                Age = 27,
+                DataChangeLastTime = DateTime.Now
             };
 
             var insertResult = DB.Insert(p) > 0;

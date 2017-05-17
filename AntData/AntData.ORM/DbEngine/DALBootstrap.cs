@@ -43,7 +43,13 @@ namespace AntData.ORM.DbEngine
         /// </summary>
         private static void LoadConfig()
         {
-
+            //CultureInfo standardizedCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            //standardizedCulture.DateTimeFormat.DateSeparator = "-";
+            //standardizedCulture.DateTimeFormat.LongDatePattern = "yyyy-MM-dd hh:mm:ss";
+            //standardizedCulture.DateTimeFormat.FullDateTimePattern = "yyyy-MM-dd hh:mm:ss.fff";
+            //standardizedCulture.DateTimeFormat.ShortDatePattern = "yyyy-MM-dd";
+            //Thread.CurrentThread.CurrentCulture = standardizedCulture;
+            //Thread.CurrentThread.CurrentUICulture = standardizedCulture;
 
             try
             {
