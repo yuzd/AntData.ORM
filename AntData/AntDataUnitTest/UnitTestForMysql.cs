@@ -786,5 +786,16 @@ namespace AntDataUnitTest
 
             }
         }
+
+        [TestMethod]
+        public void TestMethod7_02()
+        {
+            school_name s = new school_name();
+            s.Name = true;
+            DB.Insert(s);
+
+            var l = DB.Tables.school_name.ToList();
+           
+        }
     }
 }

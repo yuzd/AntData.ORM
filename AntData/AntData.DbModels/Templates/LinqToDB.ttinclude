@@ -30,6 +30,8 @@ string SchemaDataContextTypeName = "DataContext";
 Dictionary<string,string> ShardingTables = new Dictionary<string,string>();
 
 Dictionary<string,string> SchemaNameMapping = new Dictionary<string,string>();
+
+Dictionary<string,string> ToPascalCaseTableDic = new Dictionary<string,string>();
 string ToPascalCase(string the_string)
 {
 	//如果是sharing table的话 约定好是 带有 { 和 } 符号的
@@ -133,13 +135,23 @@ void GenerateTypesFromMetadata()
 	foreach (var t in Tables.Values.OrderBy(tbl => tbl.IsProviderSpecific).ThenBy(tbl=> tbl.TypeName))
 	{
 		if(t.Columns.Values.Count == 0) continue;
+		var tName = t.TypeName;
+		var UseNormalName = false;
 		if(ShardingTables.ContainsKey(t.TableName))
 		{
 			 t.TypeName = ToPascalCase(ShardingTables[t.TableName]);//按照约定 sharding table的情况 必须是 _{?}的格式
         }else{
 			 t.TypeName = ToPascalCase(t.TypeName);
         }
-	   
+	   	
+		if(ToPascalCaseTableDic.ContainsKey(t.TypeName))
+		{
+			t.TypeName = tName;
+			UseNormalName = true;
+		}else{
+			ToPascalCaseTableDic.Add(t.TypeName,"");
+		}
+
 		Action<Class> addType = tp => Model.Types.Add(tp);
 		var props             = defProps;
 		var aliases           = defAliases;
@@ -160,9 +172,9 @@ void GenerateTypesFromMetadata()
 	MemberBase dcProp = t.IsProviderSpecific ?
 			GenerateProviderSpecificTable(t) :
 			new Property(
-				string.Format("IQueryable<{0}>", ToPascalCase(t.TypeName)),
-				ShardingTables.ContainsKey(t.TableName)?ToPascalCase(t.TypeName):ToPascalCase(t.DataContextPropertyName),
-				new[] { string.Format((schema == null ? "this" : "_dataContext") + ".Get<{0}>()", ToPascalCase(t.TypeName)) },
+				string.Format("IQueryable<{0}>", UseNormalName?tName:ToPascalCase(t.TypeName)),
+				UseNormalName?tName:ShardingTables.ContainsKey(t.TableName)?ToPascalCase(t.TypeName):ToPascalCase(t.DataContextPropertyName),
+				new[] { string.Format((schema == null ? "this" : "_dataContext") + ".Get<{0}>()", UseNormalName?tName:ToPascalCase(t.TypeName)) },
 				null);
 
 		if (dcProp == null) continue;
@@ -191,7 +203,7 @@ void GenerateTypesFromMetadata()
 
 		if (DatabaseName != null) tableAttrs.Add("Database=" + '"' + DatabaseName + '"');
 		if (t.Schema     != null) tableAttrs.Add("Schema="   + '"' + t.Schema     + '"');
-		if (!string.IsNullOrEmpty(t.Description )) tableAttrs.Add("Comment="   + '"' + t.Description  + '"');
+		if (!string.IsNullOrEmpty(t.Description )) tableAttrs.Add("Comment="   + '"' + t.Description.Replace("\r","").Replace("\n","").Replace("\r\n","").Trim()  + '"');
 
 		tableAttrs.Add((tableAttrs.Count == 0 ? "" : "Name=") + '"' + t.TableName + '"');
 
@@ -266,7 +278,7 @@ void GenerateTypesFromMetadata()
 			{
 				var space = new string(' ', dataTypeMaxLen - c.DataType.Length);
 
-				ca.Parameters.Add("DataType=" + c.DataType + space);
+				ca.Parameters.Add("DataType=AntData.ORM." + c.DataType + space);
 
 				if (c.Length    != null) ca.Parameters.Add("Length="    + (c.Length == int.MaxValue ? "int.MaxValue" : c.Length.ToString()));
 				if (c.Precision != null) ca.Parameters.Add("Precision=" + c.Precision);
@@ -288,7 +300,7 @@ void GenerateTypesFromMetadata()
 			}
 			if (!string.IsNullOrEmpty(c.Description))
 			{
-				ca.Parameters.Add("Comment=\"" + c.Description + '"');
+				ca.Parameters.Add("Comment=\"" + c.Description.Replace("\r","").Replace("\n","").Replace("\r\n","").Trim() + '"');
 			}
 			c.Attributes.Add(ca);
 
