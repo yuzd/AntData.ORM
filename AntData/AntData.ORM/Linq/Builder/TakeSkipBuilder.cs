@@ -19,8 +19,10 @@ namespace AntData.ORM.Linq.Builder
 		protected override IBuildContext BuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			var sequence = builder.BuildSequence(new BuildInfo(buildInfo, methodCall.Arguments[0]));
+		    if (sequence.SelectQuery.Select.IsDistinct)
+		        sequence = new SubQueryContext(sequence);
 
-			var arg = methodCall.Arguments[1].Unwrap();
+            var arg = methodCall.Arguments[1].Unwrap();
 
 			if (arg.NodeType == ExpressionType.Lambda)
 				arg = ((LambdaExpression)arg).Body.Unwrap();

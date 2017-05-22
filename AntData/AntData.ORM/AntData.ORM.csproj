@@ -113,6 +113,7 @@
     <Compile Include="DbEngine\Sharding\SequenceShardingStrategy.cs" />
     <Compile Include="DbEngine\Sharding\ShardingExecutor.cs" />
     <Compile Include="DbEngine\Sharding\ShardingStrategyFactory.cs" />
+    <Compile Include="Expressions\BinaryAggregateExpression.cs" />
     <Compile Include="Expressions\Dynamic.cs" />
     <Compile Include="Mapping\SQL.cs" />
     <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />

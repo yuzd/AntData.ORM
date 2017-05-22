@@ -548,6 +548,16 @@ namespace AntData.ORM.SqlQuery
                 {
                     var sc = (SelectQuery.SearchCondition)cond.Predicate;
                     OptimizeSearchCondition(sc);
+                    if (sc.Conditions.Count == 0)
+                    {
+                        if (cond.IsOr)
+                        {
+                            searchCondition.Conditions.Clear();
+                            break;
+                        }
+                        searchCondition.Conditions.RemoveAt(i);
+                        --i;
+                    }
                 }
             }
         }
@@ -596,13 +606,13 @@ namespace AntData.ORM.SqlQuery
                         {
                             areTablesCollected = true;
 
-                            Action<IQueryElement,string> tableCollector = (expr, tt) =>
-                            {
-                                var field = expr as SqlField;
+                            Action<IQueryElement, string> tableCollector = (expr, tt) =>
+                             {
+                                 var field = expr as SqlField;
 
-                                if (field != null && !tables.Contains(field.Table))
-                                    tables.Add(field.Table);
-                            };
+                                 if (field != null && !tables.Contains(field.Table))
+                                     tables.Add(field.Table);
+                             };
 
                             var visitor = new QueryVisitor();
 
@@ -762,7 +772,7 @@ namespace AntData.ORM.SqlQuery
                 return map.TryGetValue(expr, out fld) ? fld : expr;
             });
 
-            new QueryVisitor().Visit(top, (expr, tt)  =>
+            new QueryVisitor().Visit(top, (expr, tt) =>
             {
                 if (expr.ElementType == QueryElementType.InListPredicate)
                 {

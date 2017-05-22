@@ -1722,8 +1722,11 @@ namespace AntData.ORM.SqlProvider
 					// start building next bucked
 					firstValue = true;
 					StringBuilder.Remove(StringBuilder.Length - 2, 2).Append(')');
-					StringBuilder.Append(" OR ");
-				}
+				    if (predicate.IsNot)
+				        StringBuilder.Append(" AND ");
+				    else
+				        StringBuilder.Append(" OR ");
+                }
 
 				var val = value;
 

@@ -802,5 +802,12 @@ namespace AntDataUnitTest
             var l = DB.Tables.school_name.ToList();
            
         }
+
+        [TestMethod]
+        public void TestMethod7_03()
+        {
+            var dd = DB.Tables.People.Where(r => r.Name.Length > 2).ToList();
+
+        }
     }
 }

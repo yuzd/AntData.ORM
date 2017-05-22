@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -331,6 +332,10 @@ namespace AntData.ORM.SqlQuery
                 case DataType.Time: return DbTime;
                 case DataType.DateTime2: return DbDateTime2;
                 case DataType.DateTimeOffset: return DbDateTimeOffset;
+                case DataType.UInt16: return DbUInt16;
+                case DataType.UInt32: return DbUInt32;
+                case DataType.UInt64: return DbUInt64;
+                case DataType.Dictionary: return DbDictionary;
             }
 
             throw new InvalidOperationException();
@@ -371,6 +376,12 @@ namespace AntData.ORM.SqlQuery
             : this(dbType, type, length, precision(dbType), scale)
         {
         }
+        public static readonly SqlDataType DbDictionary = new SqlDataType(DataType.Dictionary, typeof(Dictionary<string, string>), 0, 0, 0);
+
+
+        public static readonly SqlDataType DbUInt64 = new SqlDataType(DataType.UInt64, typeof(UInt64), 0, 0, 0);
+        public static readonly SqlDataType DbUInt32 = new SqlDataType(DataType.UInt32, typeof(UInt32), 0, 0, 0);
+        public static readonly SqlDataType DbUInt16 = new SqlDataType(DataType.UInt16, typeof(UInt16), 0, 0, 0);
 
         public static readonly SqlDataType DbInt64 = new SqlDataType(DataType.Int64, typeof(Int64), 0, 0, 0);
         public static readonly SqlDataType DbInt32 = new SqlDataType(DataType.Int32, typeof(Int32), 0, 0, 0);
