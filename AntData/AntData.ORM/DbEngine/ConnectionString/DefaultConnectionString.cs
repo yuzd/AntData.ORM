@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD
- 
+﻿
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -139,4 +138,4 @@ namespace AntData.ORM.DbEngine.ConnectionString
         }
     }
 }
-#endif
+

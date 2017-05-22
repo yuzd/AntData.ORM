@@ -3,6 +3,36 @@
   "version": 2,
   "targets": {
     ".NETCoreApp,Version=v1.0": {
+      "AntData.Core/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.CSharp": "4.0.1",
+          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "NETStandard.Library": "1.6.0",
+          "System.Collections.Specialized": "4.0.1",
+          "System.ComponentModel.Annotations": "4.1.0",
+          "System.ComponentModel.TypeConverter": "4.1.0",
+          "System.Data.Common": "4.3.0",
+          "System.Data.SqlClient": "4.3.0",
+          "System.Diagnostics.TraceSource": "4.0.0",
+          "System.Dynamic.Runtime": "4.0.11",
+          "System.Linq.Queryable": "4.0.1",
+          "System.Net.NetworkInformation": "4.1.0",
+          "System.Reflection.Emit": "4.0.1",
+          "System.Reflection.Emit.Lightweight": "4.3.0",
+          "System.Reflection.TypeExtensions": "4.3.0",
+          "System.Runtime.Loader": "4.0.0",
+          "System.Runtime.Serialization.Primitives": "4.3.0",
+          "System.Threading.Thread": "4.3.0",
+          "System.Xml.XmlDocument": "4.0.1"
+        },
+        "compile": {
+          "lib/netstandard1.6/AntData.ORM.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.6/AntData.ORM.dll": {}
+        }
+      },
       "dotnet-test-mstest/1.1.2-preview": {
         "type": "package",
         "dependencies": {
@@ -3050,37 +3080,6 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "AntData.Core/1.0.0": {
-        "type": "project",
-        "framework": ".NETStandard,Version=v1.6",
-        "dependencies": {
-          "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
-          "NETStandard.Library": "1.6.0",
-          "System.Collections.Specialized": "4.0.1",
-          "System.ComponentModel.Annotations": "4.1.0",
-          "System.ComponentModel.TypeConverter": "4.1.0",
-          "System.Data.Common": "4.3.0",
-          "System.Data.SqlClient": "4.3.0",
-          "System.Diagnostics.TraceSource": "4.0.0",
-          "System.Dynamic.Runtime": "4.0.11",
-          "System.Linq.Queryable": "4.0.1",
-          "System.Net.NetworkInformation": "4.1.0",
-          "System.Reflection.Emit": "4.0.1",
-          "System.Reflection.Emit.Lightweight": "4.3.0",
-          "System.Reflection.TypeExtensions": "4.3.0",
-          "System.Runtime.Loader": "4.0.0",
-          "System.Runtime.Serialization.Primitives": "4.3.0",
-          "System.Threading.Thread": "4.3.0",
-          "System.Xml.XmlDocument": "4.0.1"
-        },
-        "compile": {
-          "netstandard1.6/AntData.core.dll": {}
-        },
-        "runtime": {
-          "netstandard1.6/AntData.core.dll": {}
-        }
-      },
       "AntData.DbModels.linux/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
@@ -3094,11 +3093,11 @@
           "netstandard1.6/AntData.DbModels.linux.dll": {}
         }
       },
-      "AntData.ORM.Mysql/1.0.0": {
+      "AntData.ORM.Mysql/1.2.5": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
-          "AntData.Core": "1.0.0",
+          "AntData.Core": "1.2.6",
           "MySql.Data": "7.0.7-m61",
           "NETStandard.Library": "1.6.0"
         }
@@ -3106,6 +3105,16 @@
     }
   },
   "libraries": {
+    "AntData.Core/1.0.0": {
+      "sha512": "vF643W53ygz5+QU+4Aj92KFJDznm47ipOkKPMQb0KGAbWNWqPTeASLcXug/WPR87KJ3jAZSy+9T5y/JQL37DNQ==",
+      "type": "package",
+      "path": "AntData.Core/1.0.0",
+      "files": [
+        "AntData.Core.1.0.0.nupkg.sha512",
+        "AntData.Core.nuspec",
+        "lib/netstandard1.6/AntData.ORM.dll"
+      ]
+    },
     "dotnet-test-mstest/1.1.2-preview": {
       "sha512": "YzzunZLKa3kSjVv8MwT09GNtfz4sYm9yQRDsmo1xVfrkHnMXvqt88GarBlVtKDKt9SDwfX1nCOnAxc/Wk3Esfg==",
       "type": "package",
@@ -8976,17 +8985,12 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "AntData.Core/1.0.0": {
-      "type": "project",
-      "path": "../AntData.ORM/project.json",
-      "msbuildProject": "../AntData.ORM/AntData.core.xproj"
-    },
     "AntData.DbModels.linux/1.0.0": {
       "type": "project",
       "path": "../AntData.DbModels.linux/project.json",
       "msbuildProject": "../AntData.DbModels.linux/AntData.DbModels.linux.xproj"
     },
-    "AntData.ORM.Mysql/1.0.0": {
+    "AntData.ORM.Mysql/1.2.5": {
       "type": "project",
       "path": "../AntData.ORM.Mysql/project.json"
     }
