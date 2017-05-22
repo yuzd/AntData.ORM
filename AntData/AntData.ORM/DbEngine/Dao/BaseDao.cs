@@ -12,6 +12,7 @@ using AntData.DbEngine.Sharding;
 using AntData.ORM.Common.Util;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.Dao.sql;
+using AntData.ORM.Data;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.Connection;
 using AntData.ORM.DbEngine.Dao.Common.Util;
@@ -138,13 +139,33 @@ namespace AntData.ORM.Dao
                 {
                     Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
-                    return new List<IDataReader> { DatabaseBridge.Instance.ExecuteReader(statement) };
-
+                    var reader = DatabaseBridge.Instance.ExecuteReader(statement);
+                    RunTimeDetail runTimeDetail = new RunTimeDetail
+                    {
+                        DbName = statement.DbName,
+                        Duration = statement.Duration,
+                        Server = statement.HostName
+                    };
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail>{ runTimeDetail });
+                    return new List<IDataReader> { reader };
                 }
                 else
                 {
                     var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
-                    return ShardingExecutor.GetShardingDataReaderList(statements);
+                    var reader = ShardingExecutor.GetShardingDataReaderList(statements);
+                    var runTimeList = new List<RunTimeDetail> ();
+                    foreach (var statement in statements)
+                    {
+                        RunTimeDetail runTimeDetail = new RunTimeDetail
+                        {
+                            DbName = statement.DbName,
+                            Duration = statement.Duration,
+                            Server = statement.HostName
+                        };
+                        runTimeList.Add(runTimeDetail);
+                    }
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
+                    return reader;
                 }
             }
             catch (Exception ex)
@@ -279,12 +300,30 @@ namespace AntData.ORM.Dao
                         hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
-
+                    RunTimeDetail runTimeDetail = new RunTimeDetail
+                    {
+                        DbName = statement.DbName,
+                        Duration = statement.Duration,
+                        Server = statement.HostName
+                    };
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
                 }
                 else
                 {
                     var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType),SqlStatementType.SELECT);
                     dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
+                    var runTimeList = new List<RunTimeDetail>();
+                    foreach (var statement in statements)
+                    {
+                        RunTimeDetail runTimeDetail = new RunTimeDetail
+                        {
+                            DbName = statement.DbName,
+                            Duration = statement.Duration,
+                            Server = statement.HostName
+                        };
+                        runTimeList.Add(runTimeDetail);
+                    }
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
                 }
                 return dataSet;
             }
@@ -363,7 +402,13 @@ namespace AntData.ORM.Dao
                     Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     result = DatabaseBridge.Instance.ExecuteScalar(statement);
-
+                    RunTimeDetail runTimeDetail = new RunTimeDetail
+                    {
+                        DbName = statement.DbName,
+                        Duration = statement.Duration,
+                        Server = statement.HostName
+                    };
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
                 }
                 else
                 {
@@ -371,7 +416,18 @@ namespace AntData.ORM.Dao
                         newHints => SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType),SqlStatementType.SELECT);
 
                     var temp = ShardingExecutor.ExecuteShardingScalar(statements);
-
+                    var runTimeList = new List<RunTimeDetail>();
+                    foreach (var statement in statements)
+                    {
+                        RunTimeDetail runTimeDetail = new RunTimeDetail
+                        {
+                            DbName = statement.DbName,
+                            Duration = statement.Duration,
+                            Server = statement.HostName
+                        };
+                        runTimeList.Add(runTimeDetail);
+                    }
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
                     if (temp.Count > 0)
                     {
                         if (temp.Count == 1)
@@ -458,6 +514,13 @@ namespace AntData.ORM.Dao
                     Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
                     AddSqlToExtendParams(statement, hints);
                     result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
+                    RunTimeDetail runTimeDetail = new RunTimeDetail
+                    {
+                        DbName = statement.DbName,
+                        Duration = statement.Duration,
+                        Server = statement.HostName
+                    };
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
                 }
                 else
                 {
@@ -466,8 +529,20 @@ namespace AntData.ORM.Dao
                         newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType, SqlStatementType.UNKNOWN), SqlStatementType.UNKNOWN);
 
                     result = ShardingExecutor.ExecuteShardingNonQuery(statements).Sum();
+                    var runTimeList = new List<RunTimeDetail>();
+                    foreach (var statement in statements)
+                    {
+                        RunTimeDetail runTimeDetail = new RunTimeDetail
+                        {
+                            DbName = statement.DbName,
+                            Duration = statement.Duration,
+                            Server = statement.HostName
+                        };
+                        runTimeList.Add(runTimeDetail);
+                    }
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
                 }
-
+                
                 return result;
             }
             catch (Exception ex)

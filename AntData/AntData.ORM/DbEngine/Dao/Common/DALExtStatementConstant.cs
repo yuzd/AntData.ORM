@@ -122,5 +122,10 @@ namespace AntData.ORM.Dao.Common
         /// 事物指定等级
         /// </summary>
         public const String ISOLATION_LEVEL = "IsolationLevel";
+
+        /// <summary>
+        /// sql执行时间
+        /// </summary>
+        public const String EXCUTE_TIME = "EXCUTE_TIME";
     }
 }

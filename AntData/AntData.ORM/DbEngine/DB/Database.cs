@@ -141,9 +141,9 @@ namespace AntData.ORM.DbEngine.DB
             var connection = TransactionConnectionManager.GetConnection(this);
             if (connection != null)
             {
-#if DEBUG
-                Debug.WriteLine(connection.ConnectionString);
-#endif
+//#if DEBUG
+//                Debug.WriteLine(connection.ConnectionString);
+//#endif
                 return new ConnectionWrapper(connection, false);
             }
 
@@ -244,9 +244,9 @@ namespace AntData.ORM.DbEngine.DB
         {
             if (String.IsNullOrEmpty(ConnectionString))
                 throw new DalException(String.Format("ConnectionString:{0} can't be found!", AllInOneKey));
-#if DEBUG
-            Debug.WriteLine(ConnectionString);
-#endif
+//#if DEBUG
+//            Debug.WriteLine(ConnectionString);
+//#endif
             var connection = m_DatabaseProvider.CreateConnection();
             connection.ConnectionString = ConnectionString;
             return connection;
@@ -395,7 +395,7 @@ namespace AntData.ORM.DbEngine.DB
         public DataSet ExecuteDataSet(Statement statement)
         {
             var watch = new Stopwatch();
-
+            watch.Start();
             try
             {
                 DataSet dataSet = new DataSet { Locale = CultureInfo.InvariantCulture };
@@ -412,6 +412,7 @@ namespace AntData.ORM.DbEngine.DB
                         }
                         LoadDataSet(statement, (DbCommand)command, dataSet);
                         UpdateStatementParamenters(statement, (DbCommand)command);
+                        SetRuntimeDetail(statement, wrapper);
                     }
                 }
 
@@ -440,7 +441,7 @@ namespace AntData.ORM.DbEngine.DB
         public Int32 ExecuteNonQuery(Statement statement)
         {
             var watch = new Stopwatch();
-
+            watch.Start();
             try
             {
                 Int32 result;
@@ -457,6 +458,7 @@ namespace AntData.ORM.DbEngine.DB
                         }
                         result = command.ExecuteNonQuery();
                         UpdateStatementParamenters(statement, (DbCommand)command);
+                        SetRuntimeDetail(statement, wrapper);
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -482,7 +484,7 @@ namespace AntData.ORM.DbEngine.DB
         public IDataReader ExecuteReader(Statement statement)
         {
             var watch = new Stopwatch();
-
+            watch.Start();
             try
             {
                 IDataReader reader;
@@ -503,9 +505,11 @@ namespace AntData.ORM.DbEngine.DB
                         reader = command.ExecuteReader(trans_wrapper!=null ?CommandBehavior.Default :CommandBehavior.CloseConnection);
 #endif
                         UpdateStatementParamenters(statement, (DbCommand)command);
+                        SetRuntimeDetail(statement, wrapper);
                     }
                 }
                 statement.ExecStatus = DALState.Success;
+                
                 return reader;
             }
             catch (Exception ex)
@@ -543,7 +547,7 @@ namespace AntData.ORM.DbEngine.DB
         public Object ExecuteScalar(Statement statement)
         {
             var watch = new Stopwatch();
-
+            watch.Start();
             try
             {
                 Object result;
@@ -560,6 +564,7 @@ namespace AntData.ORM.DbEngine.DB
                         }
                         result = command.ExecuteScalar();
                         UpdateStatementParamenters(statement, (DbCommand)command);
+                        SetRuntimeDetail(statement, wrapper);
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -585,7 +590,7 @@ namespace AntData.ORM.DbEngine.DB
         public IDataReader InnnerExecuteReader(Statement statement)
         {
             var watch = new Stopwatch();
-
+            watch.Start();
             try
             {
                 IDataReader reader;
@@ -613,6 +618,7 @@ namespace AntData.ORM.DbEngine.DB
 #endif
 
                         UpdateStatementParamenters(statement, (DbCommand)command);
+                        SetRuntimeDetail(statement, wrapper);
                     }
                 }
 
@@ -639,7 +645,7 @@ namespace AntData.ORM.DbEngine.DB
         public Object InnnerExecuteScalar(Statement statement)
         {
             var watch = new Stopwatch();
-
+            watch.Start();
             try
             {
                 statement.SQLHash = CommonUtil.GetHashCodeOfSQL(statement.StatementText);
@@ -660,6 +666,7 @@ namespace AntData.ORM.DbEngine.DB
                         command.Connection = wrapper.Connection;
                         result = command.ExecuteScalar();
                         UpdateStatementParamenters(statement, (DbCommand)command);
+                        SetRuntimeDetail(statement, wrapper);
                     }
                 }
 
@@ -679,5 +686,28 @@ namespace AntData.ORM.DbEngine.DB
             }
         }
 
+
+        private void SetRuntimeDetail(Statement statement, ConnectionWrapper wrapper)
+        {
+            String providerName = m_DatabaseProvider.GetType().Name;
+            if (providerName.Equals("OracleDatabaseProvider"))
+            {
+                if (!string.IsNullOrEmpty(wrapper.DataSource) && string.IsNullOrEmpty(wrapper.DBName) && wrapper.DataSource.Contains("/"))
+                {
+                    statement.DbName = wrapper.DataSource.Split('/')[1];
+                    statement.HostName = wrapper.DataSource.Split('/')[0];
+                }
+                else
+                {
+                    statement.DbName = wrapper.DBName;
+                    statement.HostName = wrapper.DataSource;
+                }
+            }
+            else
+            {
+                statement.DbName = wrapper.DBName;//真正物理的db名称
+                statement.HostName = wrapper.DataSource;
+            }
+        }
     }
 }

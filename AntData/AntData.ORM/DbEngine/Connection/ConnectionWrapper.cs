@@ -31,6 +31,11 @@ namespace AntData.ORM.DbEngine.Connection
         #endregion
 
         /// <summary>
+        /// 真正物理的DB名称
+        /// </summary>
+        public string DBName { get; set; }
+        public string DataSource { get; set; }
+        /// <summary>
         /// 构造方法
         /// </summary>
         /// <param name="connection">数据库链接</param>
@@ -40,6 +45,8 @@ namespace AntData.ORM.DbEngine.Connection
             m_Connection = connection;
             m_DisposeConnection = disposeConnection;
             m_Disposed = false;
+            DBName = connection.Database;
+            DataSource = connection.DataSource;
         }
         public ConnectionWrapper(DbConnection connection, Database database)
         {
@@ -47,6 +54,8 @@ namespace AntData.ORM.DbEngine.Connection
             m_dataBase = database;
             m_DisposeConnection = false;
             m_Disposed = false;
+            DBName = connection.Database;
+            DataSource = connection.DataSource;
         }
         /// <summary>
         /// 数据库链接

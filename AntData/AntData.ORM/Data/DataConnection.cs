@@ -323,17 +323,19 @@ namespace AntData.ORM.Data
                 dic.Add(DALExtStatementConstant.BULK_COPY_ORACLE, true);
 
             }
-            if (OnLogTrace != null && IsEnableLogTrace)
-            {
-                OnLogTrace(new CustomerTraceInfo
-                {
-                    CustomerParams = Params,
-                    SqlText = sqlString
-                });
-            }
+            
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result = CustomerExecuteNonQuery(ConnectionString, sqlString, Params, dic,  isWrite);
+		    if (OnLogTrace != null && IsEnableLogTrace)
+		    {
+		        OnLogTrace(new CustomerTraceInfo
+		        {
+		            CustomerParams = Params,
+		            SqlText = sqlString,
+		            RunTimeList = dic.ContainsKey(DALExtStatementConstant.EXCUTE_TIME) ? dic[DALExtStatementConstant.EXCUTE_TIME] as List<RunTimeDetail> : null
+                });
+		    }
             this.Dispose();
             return result;
 		}
@@ -352,17 +354,19 @@ namespace AntData.ORM.Data
             {
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
-            if (OnLogTrace != null && IsEnableLogTrace)
-            {
-                OnLogTrace(new CustomerTraceInfo
-                {
-                    CustomerParams = Params,
-                    SqlText = sqlString
-                });
-            }
+            
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic,  isWrite);
+		    if (OnLogTrace != null && IsEnableLogTrace)
+		    {
+		        OnLogTrace(new CustomerTraceInfo
+		        {
+		            CustomerParams = Params,
+		            SqlText = sqlString,
+		            RunTimeList = dic.ContainsKey(DALExtStatementConstant.EXCUTE_TIME) ? dic[DALExtStatementConstant.EXCUTE_TIME] as List<RunTimeDetail> : null
+                });
+		    }
             this.Dispose();
             return result;
 		}
@@ -382,17 +386,18 @@ namespace AntData.ORM.Data
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
 
-            if (OnLogTrace != null && IsEnableLogTrace)
-            {
-                OnLogTrace(new CustomerTraceInfo
-                {
-                    CustomerParams = Params,
-                    SqlText = sqlString
-                });
-            }
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
             var result =  CustomerExecuteQuery(ConnectionString,sqlString, Params,dic,  isWrite);
+		    if (OnLogTrace != null && IsEnableLogTrace)
+		    {
+		        OnLogTrace(new CustomerTraceInfo
+		        {
+		            CustomerParams = Params,
+		            SqlText = sqlString,
+		            RunTimeList = dic.ContainsKey(DALExtStatementConstant.EXCUTE_TIME) ? dic[DALExtStatementConstant.EXCUTE_TIME] as List<RunTimeDetail> : null
+                });
+		    }
             this.Dispose();
 		    return result;
 		}
@@ -413,19 +418,18 @@ namespace AntData.ORM.Data
                 dic.Add("TIMEOUT", this.CommandTimeout);
             }
 
+            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+            dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
+            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic,  isWrite);
             if (OnLogTrace != null && IsEnableLogTrace)
             {
                 OnLogTrace(new CustomerTraceInfo
                 {
                     CustomerParams = Params,
-                    SqlText = sqlString
+                    SqlText = sqlString,
+                    RunTimeList = dic.ContainsKey(DALExtStatementConstant.EXCUTE_TIME) ? dic[DALExtStatementConstant.EXCUTE_TIME] as List<RunTimeDetail> : null
                 });
-                
             }
-            dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
-            dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
-            var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic,  isWrite);
-            
             this.Dispose();
             return result;
         }

@@ -96,6 +96,16 @@ namespace AntData.ORM.DbEngine
         /// </summary>
         public String DatabaseSet { get; set; }
 
+        /// <summary>
+        /// 真正物理的db名称
+        /// </summary>
+        public String DbName { get; set; }
+
+        /// <summary>
+        /// DB所在的Host
+        /// </summary>
+        public String HostName { get; set; }
+
 
         /// <summary>
         /// All in one的Key名称

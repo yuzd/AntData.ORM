@@ -93,8 +93,8 @@ namespace AntData.DbEngine.Sharding
                 Statement statement = statements[i];
                 dataReaders.Add(() => DatabaseBridge.Instance.ExecuteReader(statement));
             }
-
-            return ExecuteParallelHelper.ParallelExcuter(dataReaders, CheckSameShard(statements));
+            var result = ExecuteParallelHelper.ParallelExcuter(dataReaders, CheckSameShard(statements));
+            return result;
         }
 
 #endregion

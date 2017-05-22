@@ -62,8 +62,45 @@ namespace AntData.ORM.Data
 
     public class CustomerTraceInfo
     {
+        public CustomerTraceInfo()
+        {
+            RunTimeList = new List<RunTimeDetail>();
+        }
+
+        /// <summary>
+        /// 执行的sql文本
+        /// </summary>
         public string SqlText { get; set; }
 
+        /// <summary>
+        /// 执行sql的具体信息列表 如果是分表分库的情况会有多个
+        /// </summary>
+        public List<RunTimeDetail> RunTimeList { get; set; }
+
+        /// <summary>
+        /// 执行参数
+        /// </summary>
         public Dictionary<string, CustomerParam> CustomerParams { get; set; }
+    }
+
+    /// <summary>
+    /// 执行sql的具体信息
+    /// </summary>
+    public class RunTimeDetail
+    {
+        /// <summary>
+        /// 执行sql耗费的时间
+        /// </summary>
+        public TimeSpan Duration { get; set; }
+
+        /// <summary>
+        /// DB所在的IP
+        /// </summary>
+        public string Server { get; set; }
+
+        /// <summary>
+        /// DB名称
+        /// </summary>
+        public string DbName { get; set; }
     }
 }

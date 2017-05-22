@@ -37,6 +37,11 @@ namespace AntDataUnitTest
                 string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
                        (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
                 Debug.Write(sql + Environment.NewLine);
+                foreach (var detail in customerTraceInfo.RunTimeList)
+                {
+                    Debug.Write($"Server：{detail.Server},DB名称：{detail.DbName}, 执行时间：{detail.Duration.TotalSeconds}秒");
+                    Debug.Write(Environment.NewLine);
+                }
             }
             catch (Exception)
             {
