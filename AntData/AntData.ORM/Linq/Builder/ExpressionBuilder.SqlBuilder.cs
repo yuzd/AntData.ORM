@@ -2047,9 +2047,11 @@ namespace AntData.ORM.Linq.Builder
 			if (a is SqlParameter)
 			{
 				var p  = (SqlParameter)a;
-				var ep = (from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
+			    var indexItem = CurrentSqlParameters.Select((item, index)=>item.SqlParameter == p ? new {Index = index, Pm = item} : null).First(r => r !=null);
+			    var ep = indexItem.Pm;//(from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
 
-				ep = new ParameterAccessor
+
+                ep = new ParameterAccessor
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
@@ -2061,8 +2063,8 @@ namespace AntData.ORM.Linq.Builder
 						IsQueryParameter = !DataContextInfo.DataContext.InlineParameters
 					},
 				};
-
-				CurrentSqlParameters.Add(ep);
+			    CurrentSqlParameters.RemoveAt(indexItem.Index);
+                CurrentSqlParameters.Add(ep);
 
 				return new SelectQuery.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
 			}

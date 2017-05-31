@@ -179,14 +179,20 @@ namespace DbModels.Mysql
 		/// <summary>
 		/// Ö÷¼ü
 		/// </summary>
-		[Column("Id",   DataType=AntData.ORM.DataType.Int64,   Comment="Ö÷¼ü"), PrimaryKey, Identity]
+		[Column("Id",      DataType=AntData.ORM.DataType.Int64,   Comment="Ö÷¼ü"), PrimaryKey, NotNull]
 		public long Id { get; set; } // bigint(20)
 
 		/// <summary>
 		/// ²âÊÔ
 		/// </summary>
-		[Column("Name", DataType=AntData.ORM.DataType.Boolean, Comment="²âÊÔ"), NotNull]
+		[Column("Name",    DataType=AntData.ORM.DataType.Boolean, Comment="²âÊÔ"), NotNull]
 		public bool Name { get; set; } // bit(1)
+
+		/// <summary>
+		/// ¶©µ¥ºÅ
+		/// </summary>
+		[Column("OrderID", DataType=AntData.ORM.DataType.Int64,   Comment="¶©µ¥ºÅ"), NotNull]
+		public long OrderID { get; set; } // bigint(20)
 
 		#endregion
 	}

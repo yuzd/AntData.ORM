@@ -809,5 +809,46 @@ namespace AntDataUnitTest
             var dd = DB.Tables.People.Where(r => r.Name.Length > 2).ToList();
 
         }
+
+        [TestMethod]
+        public void TestMethod7_04()
+        {
+            var p = new school_name()
+            {
+                OrderID = 2,
+                Name = false
+            };
+
+            var re = DB.InsertOrReplace(p);
+
+        }
+
+        [TestMethod]
+        public void TestMethod7_05()
+        {
+            //var p = new school_name()
+            //{
+            //    OrderID = 2,
+            //    Name = false
+            //};
+            ////https://stackoverflow.com/questions/30014921/how-do-i-tell-linq2db-how-to-translate-a-given-expression-ie-splitchar-into-s
+            //var re = DB.Tables.People.Where(r=>Sql.Like());
+            var name = "yuzd";
+            var p = DB.Tables.Schools.Where(r => r.Name.Contains(name));
+            var c = p.Count();
+
+            var p1 = DB.Tables.Schools.Where(r => r.Name.Contains("yuzd"));
+            var c2 = p1.Count();
+
+            //配置查询条数sql为count(*)
+            AntData.ORM.Common.Configuration.Linq.UseAsteriskForCountSql = true;
+            var p3 = DB.Tables.Schools.Where(r => r.Name.StartsWith("yuzd"));
+            var c3 = p3.Count();
+
+            var p4 = DB.Tables.Schools.Where(r => r.Name.EndsWith("yuzd"));
+            var c4 = p4.Count();
+        }
+
+       
     }
 }

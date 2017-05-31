@@ -744,5 +744,22 @@ namespace AntDataUnitTest
 
 
         //}
+
+        [TestMethod]
+        public void TestMethod6_09()
+        {
+            var name = "yuzd";
+            var p = DB.Tables.Schools.Where(r => r.Name.Contains(name));
+            var c = p.Count();
+
+            var p1 = DB.Tables.Schools.Where(r => r.Name.Contains("yuzd"));
+            var c2 = p1.Count();
+
+            var p3 = DB.Tables.Schools.Where(r => r.Name.StartsWith("yuzd"));
+            var c3 = p3.Count();
+
+            var p4 = DB.Tables.Schools.Where(r => r.Name.EndsWith("yuzd"));
+            var c4 = p4.Count();
+        }
     }
 }

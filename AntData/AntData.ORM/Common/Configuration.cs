@@ -44,7 +44,12 @@ namespace AntData.ORM.Common
             /// 设置全局 mapping 序列化的时候 是否忽略字段大小写 默认忽略
             /// </summary>
             public static StringComparison? ColumnComparisonOption = StringComparison.OrdinalIgnoreCase;
-        }
+
+            /// <summary>
+            /// 如果设置为true 查询条数的为count(1) 否则为count(*) 默认是 count(1)
+            /// </summary>
+		    public static bool UseAsteriskForCountSql = false;
+		}
 
 		public static class LinqService
 		{

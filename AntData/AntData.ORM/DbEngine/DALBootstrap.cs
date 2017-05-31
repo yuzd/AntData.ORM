@@ -267,6 +267,18 @@ namespace AntData.ORM.DbEngine
             return DatabaseSets[logicDbName].ProviderType;
         }
 
+
+        /// <summary>
+        /// 读取ConnectionString的方式
+        /// </summary>
+        /// <returns></returns>
+        public static Type GetConnectionLocatorType()
+        {
+            if (ConfigurationSection == null || ConfigurationSection.ConnectionLocator == null)
+                return null;
+            return ConfigurationSection.ConnectionLocator.Type;
+        }
+
         /// <summary>
         /// 获取读取真实数据库字符串的文本地址
         /// </summary>
@@ -278,12 +290,18 @@ namespace AntData.ORM.DbEngine
             return ConfigurationSection.ConnectionLocator.Path;
         }
 
+        /// <summary>
+        /// 获取读写分离的配置
+        /// </summary>
+        /// <returns></returns>
         public static Type GetRWSplittingType()
         {
             if (ConfigurationSection == null || ConfigurationSection.RWSplitting == null)
                 return null;
             return ConfigurationSection.RWSplitting.Type;
         }
+
+
         public static Type GetExecutorType()
         {
             if (ConfigurationSection == null || ConfigurationSection.Executor == null)
@@ -291,11 +309,6 @@ namespace AntData.ORM.DbEngine
             return ConfigurationSection.Executor.Type;
         }
 
-        public static Type GetConnectionLocatorType()
-        {
-            if (ConfigurationSection == null || ConfigurationSection.ConnectionLocator == null)
-                return null;
-            return ConfigurationSection.ConnectionLocator.Type;
-        }
+
     }
 }

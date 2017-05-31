@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AntData.ORM.Common;
 
 namespace AntData.ORM.SqlQuery
 {
@@ -32,7 +33,7 @@ namespace AntData.ORM.SqlQuery
 		public int              Precedence { get; private set; }
 		public ISqlExpression[] Parameters { get; private set; }
 
-		public static SqlFunction CreateCount (Type type, ISqlTableSource table) { return new SqlFunction(type, "Count",  new SqlExpression("*")); }
+		public static SqlFunction CreateCount (Type type, ISqlTableSource table) { return new SqlFunction(type, "Count", Configuration.Linq.UseAsteriskForCountSql ? new SqlExpression("*"): new SqlExpression("1")); }
 
 		public static SqlFunction CreateAll   (SelectQuery subQuery) { return new SqlFunction(typeof(bool), "ALL",    SqlQuery.Precedence.Comparison, subQuery); }
 		public static SqlFunction CreateSome  (SelectQuery subQuery) { return new SqlFunction(typeof(bool), "SOME",   SqlQuery.Precedence.Comparison, subQuery); }
