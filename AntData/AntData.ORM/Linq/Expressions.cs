@@ -27,7 +27,7 @@ namespace AntData.ORM.Linq
 	using Extensions;
 	using AntData.ORM.Expressions;
 	using Mapping;
-
+#pragma warning disable CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute
     [PublicAPI]
     public static class Expressions
     {
@@ -1595,3 +1595,4 @@ namespace AntData.ORM.Linq
         #endregion
     }
 }
+#pragma warning restore CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute

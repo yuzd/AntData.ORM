@@ -384,6 +384,7 @@
     <Compile Include="SqlQuery\Precedence.cs" />
     <Compile Include="SqlQuery\QueryElementType.cs" />
     <Compile Include="SqlQuery\QueryType.cs" />
+    <Compile Include="SqlQuery\QueryHelper.cs" />
     <Compile Include="SqlQuery\QueryVisitor.cs" />
     <Compile Include="SqlQuery\SelectQuery.cs" />
     <Compile Include="SqlQuery\SelectQueryOptimizer.cs" />

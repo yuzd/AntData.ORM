@@ -17,7 +17,6 @@ namespace AntData.ORM.SqlQuery
         public const int Unknown = 0;
     }
 
-    [Obsolete]
     public class Precedence : PrecedenceLevel
     {
     }

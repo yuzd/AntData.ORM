@@ -262,7 +262,7 @@ namespace AntData.ORM.DataProvider.Oracle
 			StringBuilder.AppendLine();
 		}
 
-		SqlField _identityField;
+		SqlField _identityField = null;
 
 		public override int CommandCount(SelectQuery selectQuery)
 		{

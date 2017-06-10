@@ -13,7 +13,6 @@ namespace AntData.ORM.Expressions
     using System.Text;
     using System.Threading.Tasks;
 
-    using System;
     using System.Linq.Expressions;
 
     public class BinaryAggregateExpression : Expression

@@ -17,7 +17,7 @@ namespace AntData.ORM
 	using Extensions;
 	using Linq;
 	using SqlQuery;
-
+#pragma warning disable CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute
     [PublicAPI]
     public static partial class Sql
     {
@@ -38,7 +38,9 @@ namespace AntData.ORM
 
         [CLSCompliant(false)]
         [Sql.Expression("{0}", 0, ServerSideOnly = true, InlineParameters = true)]
+
         public static T ToSql<T>(T obj)
+
         {
             return obj;
         }
@@ -1137,3 +1139,4 @@ namespace AntData.ORM
     }
 
 }
+#pragma warning restore CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute

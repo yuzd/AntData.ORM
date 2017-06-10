@@ -1107,73 +1107,73 @@ namespace AntData.ORM.Linq.Builder
 			return false;
 		}
 
-		#endregion
+        #endregion
 
-		#region CanBeConstant
+        #region CanBeConstant
 
-		Expression _lastExpr1;
-		bool       _lastResult1;
+        //Expression _lastExpr1;
+        //bool _lastResult1;
 
-		bool CanBeConstant(Expression expr)
+        bool CanBeConstant(Expression expr)
 		{
             return false;
-			if (_lastExpr1 == expr)
-				return _lastResult1;
+			//if (_lastExpr1 == expr)
+			//	return _lastResult1;
 
-			var result = null == expr.Find(ex =>
-			{
-				if (ex is BinaryExpression || ex is UnaryExpression /*|| ex.NodeType == ExpressionType.Convert*/)
-					return false;
+			//var result = null == expr.Find(ex =>
+			//{
+			//	if (ex is BinaryExpression || ex is UnaryExpression /*|| ex.NodeType == ExpressionType.Convert*/)
+			//		return false;
 
-				switch (ex.NodeType)
-				{
-					case ExpressionType.Constant     :
-						{
-							var c = (ConstantExpression)ex;
+			//	switch (ex.NodeType)
+			//	{
+			//		case ExpressionType.Constant     :
+			//			{
+			//				var c = (ConstantExpression)ex;
 
-							if (c.Value == null || ex.Type.IsConstantable())
-								return false;
+			//				if (c.Value == null || ex.Type.IsConstantable())
+			//					return false;
 
-							break;
-						}
+			//				break;
+			//			}
 
-					case ExpressionType.MemberAccess :
-						{
-							var ma = (MemberExpression)ex;
+			//		case ExpressionType.MemberAccess :
+			//			{
+			//				var ma = (MemberExpression)ex;
 
-							var l = Expressions.ConvertMember(MappingSchema, ma.Expression == null ? null : ma.Expression.Type, ma.Member);
+			//				var l = Expressions.ConvertMember(MappingSchema, ma.Expression == null ? null : ma.Expression.Type, ma.Member);
 
-							if (l != null)
-								return l.Body.Unwrap().Find(CanBeConstant) == null;
+			//				if (l != null)
+			//					return l.Body.Unwrap().Find(CanBeConstant) == null;
 
-							if (ma.Member.DeclaringType.IsConstantable() || ma.Member.IsNullableValueMember())
-								return false;
+			//				if (ma.Member.DeclaringType.IsConstantable() || ma.Member.IsNullableValueMember())
+			//					return false;
 
-							break;
-						}
+			//				break;
+			//			}
 
-					case ExpressionType.Call         :
-						{
-							var mc = (MethodCallExpression)ex;
+			//		case ExpressionType.Call         :
+			//			{
+			//				var mc = (MethodCallExpression)ex;
 
-							if (mc.Method.DeclaringType.IsConstantable() || mc.Method.DeclaringType == typeof(object))
-								return false;
+			//				if (mc.Method.DeclaringType.IsConstantable() || mc.Method.DeclaringType == typeof(object))
+			//					return false;
 
-							var attr = GetExpressionAttribute(mc.Method);
+			//				var attr = GetExpressionAttribute(mc.Method);
 
-							if (attr != null && !attr.ServerSideOnly)
-								return false;
+			//				if (attr != null && !attr.ServerSideOnly)
+			//					return false;
 
-							break;
-						}
-				}
+			//				break;
+			//			}
+			//	}
 
-				return true;
-			});
+			//	return true;
+			//});
 
 
-			_lastExpr1 = expr;
-			return _lastResult1 = result;
+			//_lastExpr1 = expr;
+			//return _lastResult1 = result;
 		}
 
 		#endregion

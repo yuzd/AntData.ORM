@@ -168,8 +168,10 @@ namespace AntData.ORM
 			return DataProvider.IsDBNullAllowed(reader, idx);
 		}
 
-		object IDataContext.SetQuery(IQueryContext queryContext, ArrayList arrList = null)
-		{
+#pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+        object IDataContext.SetQuery(IQueryContext queryContext, ArrayList arrList = null)
+#pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+        {
 			var ctx = GetDataConnection() as IDataContext;
 			return ctx.SetQuery(queryContext);
 		}

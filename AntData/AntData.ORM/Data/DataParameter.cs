@@ -9,8 +9,8 @@ using System.Collections.Generic;
 namespace AntData.ORM.Data
 {
 	using Mapping;
-
-	[ScalarType]
+#pragma warning disable CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute
+    [ScalarType]
 	public class DataParameter
 	{
 		public DataParameter()
@@ -191,3 +191,4 @@ namespace AntData.ORM.Data
 		public static DataParameter Create        (string name, Dictionary<string,string> value) { return new DataParameter { DataType = DataType.Dictionary,     Name = name, Value = value, }; }
 	}
 }
+#pragma warning restore CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute

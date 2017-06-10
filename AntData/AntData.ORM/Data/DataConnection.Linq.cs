@@ -112,7 +112,6 @@ namespace AntData.ORM.Data
 			}
 
 			var sqlProvider = DataProvider.CreateSqlBuilder();
-		    sqlProvider.IsNoLock = this.IsNoLock;
             var cc = sqlProvider.CommandCount(sql);//获取自增的时候 才会是2
 			var sb = new StringBuilder();
             var commands = new string[cc];
@@ -369,8 +368,10 @@ namespace AntData.ORM.Data
 			return DataProvider.IsDBNullAllowed(reader, idx);
 		}
 
-		object IDataContext.SetQuery(IQueryContext queryContext, ArrayList arrList = null)
-		{
+#pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+        object IDataContext.SetQuery(IQueryContext queryContext, ArrayList arrList = null)
+#pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
+        {
             var reverseCount = 0;
 			var query = GetCommand(queryContext, arrList);
 		    if (query.Params == null)

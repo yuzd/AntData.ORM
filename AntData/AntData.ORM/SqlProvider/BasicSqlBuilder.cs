@@ -976,7 +976,7 @@ namespace AntData.ORM.SqlProvider
 			}
 		}
 
-		protected void BuildTableName(SelectQuery.TableSource ts, bool buildName, bool buildAlias)
+		protected void BuildTableName(SelectQuery.TableSource ts, bool buildName, bool buildAlias,bool isJoin = false)
 		{
 			if (buildName)
 			{
@@ -984,7 +984,7 @@ namespace AntData.ORM.SqlProvider
 				BuildPhysicalTable(ts.Source, alias);
 			}
             //是否加nolock
-		    if (IsNoLockSwich && this.IsNoLock)
+		    if (Common.Configuration.Linq.UseNoLock && !isJoin)
 		    {
 		        StringBuilder.Append(" (NOLOCK) ");
 		    }
@@ -1015,7 +1015,7 @@ namespace AntData.ORM.SqlProvider
 			if (IsNestedJoinParenthesisRequired && join.Table.Joins.Count != 0)
 				StringBuilder.Append('(');
 
-			BuildTableName(join.Table, true, true);
+			BuildTableName(join.Table, true, true,join.JoinType.Equals(SelectQuery.JoinType.OuterApply) || join.JoinType.Equals(SelectQuery.JoinType.CrossApply));
 
 			if (IsNestedJoinSupported && join.Table.Joins.Count != 0)
 			{
@@ -2874,11 +2874,7 @@ namespace AntData.ORM.SqlProvider
 			get { return _name ?? (_name = GetType().Name.Replace("SqlBuilder", "")); }
 		}
 
-        /// <summary>
-        /// sqlserver专用
-        /// </summary>
-	    public bool IsNoLock { get; set; }
-        public bool IsNoLockSwich { get; set; }
+        
         #endregion
     }
 }

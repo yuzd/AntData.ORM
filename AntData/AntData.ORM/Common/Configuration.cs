@@ -49,6 +49,11 @@ namespace AntData.ORM.Common
             /// 如果设置为true 查询条数的为count(1) 否则为count(*) 默认是 count(1)
             /// </summary>
 		    public static bool UseAsteriskForCountSql = false;
+
+            /// <summary>
+            /// 针对sqlserver使用的开关 是否在table名称后面增加[NOLOCK]
+            /// </summary>
+		    public static bool UseNoLock = false;
 		}
 
 		public static class LinqService

@@ -464,7 +464,7 @@ namespace AntData.ORM.Linq.Builder
 		internal class GroupJoinSubQueryContext : SubQueryContext
 		{
 			public SelectQuery.JoinedTable Join;
-			public SelectQuery             CounterSelect;
+			//public SelectQuery             CounterSelect;
 			public GroupJoinContext        GroupJoin;
 			public Func<IBuildContext>     GetSubQueryContext;
 

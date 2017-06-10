@@ -410,9 +410,16 @@ namespace AntData.ORM.DbEngine.DB
                         {
                             command.Transaction = trans_wrapper.Database.Transactions;
                         }
-                        LoadDataSet(statement, (DbCommand)command, dataSet);
-                        UpdateStatementParamenters(statement, (DbCommand)command);
-                        SetRuntimeDetail(statement, wrapper);
+                        try
+                        {
+                            LoadDataSet(statement, (DbCommand) command, dataSet);
+                        }
+                        finally
+                        {
+                            UpdateStatementParamenters(statement, (DbCommand)command);
+                            SetRuntimeDetail(statement, wrapper);
+                        }
+                        
                     }
                 }
 
@@ -456,9 +463,17 @@ namespace AntData.ORM.DbEngine.DB
                         {
                             command.Transaction = trans_wrapper.Database.Transactions;
                         }
-                        result = command.ExecuteNonQuery();
-                        UpdateStatementParamenters(statement, (DbCommand)command);
-                        SetRuntimeDetail(statement, wrapper);
+
+                        try
+                        {
+                            result = command.ExecuteNonQuery();
+                        }
+                        finally
+                        {
+                            UpdateStatementParamenters(statement, (DbCommand)command);
+                            SetRuntimeDetail(statement, wrapper);
+                        }
+                       
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -499,13 +514,23 @@ namespace AntData.ORM.DbEngine.DB
                         {
                             command.Transaction = trans_wrapper.Database.Transactions;
                         }
+                        try
+                        {
+
 #if !NETSTANDARD
-                        reader = command.ExecuteReader(Transaction.Current != null ? CommandBehavior.Default : CommandBehavior.CloseConnection);
+                            reader = command.ExecuteReader(Transaction.Current != null
+                                ? CommandBehavior.Default
+                                : CommandBehavior.CloseConnection);
 #else
                         reader = command.ExecuteReader(trans_wrapper!=null ?CommandBehavior.Default :CommandBehavior.CloseConnection);
 #endif
-                        UpdateStatementParamenters(statement, (DbCommand)command);
-                        SetRuntimeDetail(statement, wrapper);
+                        }
+                        finally
+                        {
+                            UpdateStatementParamenters(statement, (DbCommand)command);
+                            SetRuntimeDetail(statement, wrapper);
+                        }
+                      
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -562,9 +587,16 @@ namespace AntData.ORM.DbEngine.DB
                         {
                             command.Transaction = trans_wrapper.Database.Transactions;
                         }
-                        result = command.ExecuteScalar();
-                        UpdateStatementParamenters(statement, (DbCommand)command);
-                        SetRuntimeDetail(statement, wrapper);
+                        try
+                        {
+                            result = command.ExecuteScalar();
+                        }
+                        finally
+                        {
+                            UpdateStatementParamenters(statement, (DbCommand)command);
+                            SetRuntimeDetail(statement, wrapper);
+                        }
+                      
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -608,17 +640,25 @@ namespace AntData.ORM.DbEngine.DB
                         {
                             command.Transaction = trans_wrapper.Database.Transactions;
                         }
+                        try
+                        {
+
 #if !NETSTANDARD
-                        reader =
-                               command.ExecuteReader(Transaction.Current != null
-                                   ? CommandBehavior.Default
-                                   : CommandBehavior.CloseConnection);
+                            reader =
+                                command.ExecuteReader(Transaction.Current != null
+                                    ? CommandBehavior.Default
+                                    : CommandBehavior.CloseConnection);
 #else
-                        reader =command.ExecuteReader(trans_wrapper !=null ?CommandBehavior.Default : CommandBehavior.CloseConnection);
+                        reader = command.ExecuteReader(trans_wrapper !=null ?CommandBehavior.Default : CommandBehavior.CloseConnection);
 #endif
 
-                        UpdateStatementParamenters(statement, (DbCommand)command);
-                        SetRuntimeDetail(statement, wrapper);
+                        }
+                        finally
+                        {
+                            UpdateStatementParamenters(statement, (DbCommand)command);
+                            SetRuntimeDetail(statement, wrapper);
+                        }
+                       
                     }
                 }
 
@@ -664,9 +704,16 @@ namespace AntData.ORM.DbEngine.DB
                             command.Transaction = trans_wrapper.Database.Transactions;
                         }
                         command.Connection = wrapper.Connection;
-                        result = command.ExecuteScalar();
-                        UpdateStatementParamenters(statement, (DbCommand)command);
-                        SetRuntimeDetail(statement, wrapper);
+                        try
+                        {
+                            result = command.ExecuteScalar();
+                        }
+                        finally
+                        {
+                            UpdateStatementParamenters(statement, (DbCommand)command);
+                            SetRuntimeDetail(statement, wrapper);
+                        }
+                      
                     }
                 }
 

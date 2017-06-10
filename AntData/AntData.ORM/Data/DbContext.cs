@@ -55,7 +55,7 @@ namespace AntData.ORM.Data
                         return (T)ctor[0].Invoke(new object[] { this });
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                     throw;

@@ -407,7 +407,7 @@ namespace AntData.ORM.DataProvider.Oracle
 
 		#region BulkCopy
 
-		OracleBulkCopy _bulkCopy;
+		//OracleBulkCopy _bulkCopy;
 
 		public override BulkCopyRowsCopied BulkCopy<T>(DataConnection dataConnection, BulkCopyOptions options, IEnumerable<T> source)
 		{

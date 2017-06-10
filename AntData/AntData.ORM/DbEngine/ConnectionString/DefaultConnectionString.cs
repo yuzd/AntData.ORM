@@ -13,8 +13,8 @@ namespace AntData.ORM.DbEngine.ConnectionString
     /// </summary>
     class DefaultConnectionString : IConnectionString
     {
-        private static ConnectionStringSettingsCollection connectionStringCollection;
-        private static ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
+        private static readonly ConnectionStringSettingsCollection connectionStringCollection;
+        private static readonly ReaderWriterLockSlim rwLock = new ReaderWriterLockSlim();
 
         static DefaultConnectionString()
         {
@@ -22,17 +22,17 @@ namespace AntData.ORM.DbEngine.ConnectionString
             {
 
                 //这里原来的意思是从一个固定的地址去根据逻辑数据库名(key)去读真实的连接字符串
-                //String path = DALBootstrap.GetConnectionLocatorPath();
-                //if (String.IsNullOrEmpty(path))
-                //    throw new Exception("ConnectionString file doesn't exist.");
-                //rwLock.EnterWriteLock();
-                //var collection = DALBootstrap.ConnectionStringKeys;
-                //if (collection != null && collection.Count > 0)
-                //    connectionStringCollection = getConnectionStrings(collection.AllKeys, path);
+                String path = DALBootstrap.GetConnectionLocatorPath();
+                if (String.IsNullOrEmpty(path))
+                    throw new Exception("ConnectionString file doesn't exist.");
+                rwLock.EnterWriteLock();
+                var collection = DALBootstrap.ConnectionStringKeys;
+                if (collection != null && collection.Count > 0)
+                    connectionStringCollection = getConnectionStrings(collection.AllKeys, path);
 
-                //if (connectionStringCollection == null)
-                //    connectionStringCollection = new ConnectionStringSettingsCollection();
-                //rwLock.ExitWriteLock();
+                if (connectionStringCollection == null)
+                    connectionStringCollection = new ConnectionStringSettingsCollection();
+                rwLock.ExitWriteLock();
             }
             catch
             {
@@ -43,7 +43,7 @@ namespace AntData.ORM.DbEngine.ConnectionString
         public ConnectionStringSettings GetConnectionString(String key)
         {
             if (String.IsNullOrEmpty(key))
-                throw new ArgumentException("The value can not be null or an empty string.", "key");
+                throw new ArgumentException("GetConnectionString：The value can not be null or an empty string.", "key");
 
             try
             {

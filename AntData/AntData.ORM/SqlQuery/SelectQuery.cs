@@ -186,19 +186,96 @@ namespace AntData.ORM.SqlQuery
                 set { _alias = value; }
             }
 
-            public bool Equals(Column other)
+            private bool _underlyingColumnSet = false;
+            private Column _underlyingColumn;
+            public Column UnderlyingColumn
             {
-                return Expression.Equals(other.Expression) && object.Equals(Parent, other.Parent);
+                get
+                {
+                    if (_underlyingColumnSet)
+                        return _underlyingColumn;
+
+                    var columns = new List<Column>(10);
+
+                    var column = Expression as Column;
+
+                    while (column != null)
+                    {
+                        if (column._underlyingColumn != null)
+                        {
+                            columns.Add(column._underlyingColumn);
+                            break;
+                        }
+
+                        columns.Add(column);
+                        column = column.Expression as Column;
+                    }
+
+                    _underlyingColumnSet = true;
+                    if (columns.Count == 0)
+                        return null;
+
+                    _underlyingColumn = columns[columns.Count - 1];
+
+                    for (var i = 0; i < columns.Count - 1; i++)
+                    {
+                        var c = columns[i];
+                        c._underlyingColumn = _underlyingColumn;
+                        c._underlyingColumnSet = true;
+                    }
+
+                    return _underlyingColumn;
+                }
             }
 
+            public bool Equals(Column other)
+            {
+                if (other == null)
+                    return false;
+
+                if (!object.Equals(Parent, other.Parent))
+                    return false;
+
+                if (Expression.Equals(other.Expression))
+                    return true;
+
+                //return false;
+                return UnderlyingColumn != null && UnderlyingColumn.Equals(other.UnderlyingColumn);
+
+                //var found =
+                //	
+                //	|| new QueryVisitor().Find(other, e =>
+                //		{
+                //			switch(e.ElementType)
+                //			{
+                //				case QueryElementType.Column: return ((Column)e).Expression.Equals(Expression);
+                //			}
+                //			return false;
+                //		}) != null
+                //	|| new QueryVisitor().Find(Expression, e =>
+                //		{
+                //			switch (e.ElementType)
+                //			{
+                //				case QueryElementType.Column: return ((Column)e).Expression.Equals(other.Expression);
+                //			}
+                //			return false;
+                //		}) != null;
+
+                //return found;
+                //return Expression.Equals(other.Expression) && object.Equals(Parent, other.Parent);
+            }
+
+            public override string ToString()
+            {
 #if OVERRIDETOSTRING
-
-			public override string ToString()
-			{
 				return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement,IQueryElement>()).ToString();
-			}
+#else
+                if (Expression is SqlField)
+                    return ((IQueryElement)this).ToString(new StringBuilder(), new Dictionary<IQueryElement, IQueryElement>()).ToString();
 
+                return base.ToString();
 #endif
+            }
 
             #region ISqlExpression Members
 

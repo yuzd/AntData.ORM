@@ -24,7 +24,6 @@ namespace AntDataUnitTest
                 var db = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
-                db.IsNoLock = true;
                 return db;
             }
         }
@@ -33,6 +32,8 @@ namespace AntDataUnitTest
         public static void MyClassInitialize(TestContext testContext)
         {
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
+            AntData.ORM.Common.Configuration.Linq.UseNoLock = true;
+            
             //Insert的时候 忽略Null的字段
             //AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
         }
@@ -760,6 +761,17 @@ namespace AntDataUnitTest
 
             var p4 = DB.Tables.Schools.Where(r => r.Name.EndsWith("yuzd"));
             var c4 = p4.Count();
+        }
+
+        [TestMethod]
+        public void TestMethod7_01()
+        {
+            var jj3 = from o in DB.Tables.Schools
+                from c in DB.Tables.People.Where(x => x.SchoolId == o.Id).DefaultIfEmpty().Take(1)
+                select new { o, c };
+
+            var res3 = jj3.ToList();
+
         }
     }
 }

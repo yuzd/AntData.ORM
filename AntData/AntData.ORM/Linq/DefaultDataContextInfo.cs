@@ -9,8 +9,8 @@ namespace AntData.ORM.Linq
 
 	class DefaultDataContextInfo : IDataContextInfo
 	{
-		private IDataContext    _dataContext;
-		public  IDataContext     DataContext      { get { return _dataContext ; } }
+		//private IDataContext    _dataContext;
+		public  IDataContext     DataContext { get; set; }
 
 		public MappingSchema     MappingSchema    { get { return MappingSchema.Default; } }
 		public bool              DisposeContext   { get { return true;                  } }

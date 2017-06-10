@@ -169,41 +169,41 @@ namespace AntData.ORM.DataProvider.Oracle
             return converter(data);
         }
 
-        private static MethodInfo OracleXmlTableIEnumerableT;
-        private static MethodInfo OracleXmlTableString;
-        private static MethodInfo OracleXmlTableFuncString;
+        //private static MethodInfo OracleXmlTableIEnumerableT;
+        //private static MethodInfo OracleXmlTableString;
+        //private static MethodInfo OracleXmlTableFuncString;
 
-        [OracleXmlTable]
-        public static ITable<T> OracleXmlTable<T>(this IDataContext dataContext, IEnumerable<T> data)
-            where T : class
-        {
-            return dataContext.GetTable<T>(
-                null,
-                OracleXmlTableIEnumerableT.MakeGenericMethod(typeof(T)),
-                dataContext,
-                data);
-        }
+        //[OracleXmlTable]
+        //public static ITable<T> OracleXmlTable<T>(this IDataContext dataContext, IEnumerable<T> data)
+        //    where T : class
+        //{
+        //    return dataContext.GetTable<T>(
+        //        null,
+        //        OracleXmlTableIEnumerableT.MakeGenericMethod(typeof(T)),
+        //        dataContext,
+        //        data);
+        //}
 
-        [OracleXmlTable]
-        public static ITable<T> OracleXmlTable<T>(this IDataContext dataContext, string xmlData)
-            where T : class
-        {
-            return dataContext.GetTable<T>(
-                null,
-                OracleXmlTableString.MakeGenericMethod(typeof(T)),
-                dataContext,
-                xmlData);
-        }
+        //[OracleXmlTable]
+        //public static ITable<T> OracleXmlTable<T>(this IDataContext dataContext, string xmlData)
+        //    where T : class
+        //{
+        //    return dataContext.GetTable<T>(
+        //        null,
+        //        OracleXmlTableString.MakeGenericMethod(typeof(T)),
+        //        dataContext,
+        //        xmlData);
+        //}
 
-        [OracleXmlTable]
-        public static ITable<T> OracleXmlTable<T>(this IDataContext dataContext, Func<string> xmlData)
-            where T : class
-        {
-            return dataContext.GetTable<T>(
-                null,
-                OracleXmlTableFuncString.MakeGenericMethod(typeof(T)),
-                dataContext,
-                xmlData);
-        }
+        //[OracleXmlTable]
+        //public static ITable<T> OracleXmlTable<T>(this IDataContext dataContext, Func<string> xmlData)
+        //    where T : class
+        //{
+        //    return dataContext.GetTable<T>(
+        //        null,
+        //        OracleXmlTableFuncString.MakeGenericMethod(typeof(T)),
+        //        dataContext,
+        //        xmlData);
+        //}
     }
 }

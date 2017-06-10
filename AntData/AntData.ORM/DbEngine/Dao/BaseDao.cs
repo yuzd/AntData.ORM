@@ -73,11 +73,11 @@ namespace AntData.ORM.Dao
         {
             if (IsShardEnabled)
             {
-          
+
                 throw new DalException("Transaction can nou used for sharding ");
             }
             Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>BeginTransaction", null, null, OperationType.Write).Single();
-            return DatabaseBridge.Instance.BeginTransaction(statement) ;
+            return DatabaseBridge.Instance.BeginTransaction(statement);
         }
 
         #region SelectDataReader VisitDataReader
@@ -133,27 +133,39 @@ namespace AntData.ORM.Dao
         /// <exception cref="DalException">数据访问框架异常</exception>
         public IList<IDataReader> SelectDataReader(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
         {
-            try
+            if (!IsShardEnabled)
             {
-                if (!IsShardEnabled)
+                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
+                AddSqlToExtendParams(statement, hints);
+                try
                 {
-                    Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
-                    AddSqlToExtendParams(statement, hints);
                     var reader = DatabaseBridge.Instance.ExecuteReader(statement);
+                    return new List<IDataReader> { reader };
+                }
+                finally
+                {
                     RunTimeDetail runTimeDetail = new RunTimeDetail
                     {
                         DbName = statement.DbName,
                         Duration = statement.Duration,
                         Server = statement.HostName
                     };
-                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail>{ runTimeDetail });
-                    return new List<IDataReader> { reader };
+                    if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
                 }
-                else
+
+            }
+            else
+            {
+                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
+
+                try
                 {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
                     var reader = ShardingExecutor.GetShardingDataReaderList(statements);
-                    var runTimeList = new List<RunTimeDetail> ();
+                    return reader;
+                }
+                finally
+                {
+                    var runTimeList = new List<RunTimeDetail>();
                     foreach (var statement in statements)
                     {
                         RunTimeDetail runTimeDetail = new RunTimeDetail
@@ -165,15 +177,7 @@ namespace AntData.ORM.Dao
                         runTimeList.Add(runTimeDetail);
                     }
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
-                    return reader;
                 }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
             }
         }
 
@@ -291,15 +295,19 @@ namespace AntData.ORM.Dao
         /// <exception cref="DalException">数据访问框架异常</exception>
         public DataSet SelectDataSet(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
         {
-            try
+            if (!IsShardEnabled)
             {
-                DataSet dataSet;
-                if (!IsShardEnabled)
+                Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters,
+                    hints, operationType).Single();
+                AddSqlToExtendParams(statement, hints);
+                try
                 {
-                    Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters,
-                        hints, operationType).Single();
-                    AddSqlToExtendParams(statement, hints);
-                    dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
+                    var dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
+                    return dataSet;
+
+                }
+                finally
+                {
                     RunTimeDetail runTimeDetail = new RunTimeDetail
                     {
                         DbName = statement.DbName,
@@ -308,10 +316,18 @@ namespace AntData.ORM.Dao
                     };
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
                 }
-                else
+
+            }
+            else
+            {
+                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
+                try
                 {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType),SqlStatementType.SELECT);
-                    dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
+                    var dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
+                    return dataSet;
+                }
+                finally
+                {
                     var runTimeList = new List<RunTimeDetail>();
                     foreach (var statement in statements)
                     {
@@ -324,16 +340,11 @@ namespace AntData.ORM.Dao
                         runTimeList.Add(runTimeDetail);
                     }
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
+
                 }
-                return dataSet;
+
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-            }
+
         }
 
 
@@ -393,15 +404,19 @@ namespace AntData.ORM.Dao
         /// <exception cref="DalException">数据访问框架异常</exception>
         public Object ExecScalar(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
         {
-            try
-            {
-                Object result = null;
+            Object result = null;
 
-                if (!IsShardEnabled)
+            if (!IsShardEnabled)
+            {
+                Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
+                AddSqlToExtendParams(statement, hints);
+                try
                 {
-                    Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
-                    AddSqlToExtendParams(statement, hints);
                     result = DatabaseBridge.Instance.ExecuteScalar(statement);
+                    return result;
+                }
+                finally
+                {
                     RunTimeDetail runTimeDetail = new RunTimeDetail
                     {
                         DbName = statement.DbName,
@@ -409,13 +424,29 @@ namespace AntData.ORM.Dao
                         Server = statement.HostName
                     };
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
-                }
-                else
-                {
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                        newHints => SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType),SqlStatementType.SELECT);
 
+                }
+
+            }
+            else
+            {
+                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
+                    newHints => SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType), SqlStatementType.SELECT);
+                try
+                {
                     var temp = ShardingExecutor.ExecuteShardingScalar(statements);
+                    if (temp.Count == 1)
+                    {
+                        result = temp[0];
+                        return result;
+                    }
+                    else
+                    {
+                        throw new DalException("ExecScalar exception:more than one shard.");
+                    }
+                }
+                finally
+                {
                     var runTimeList = new List<RunTimeDetail>();
                     foreach (var statement in statements)
                     {
@@ -428,26 +459,7 @@ namespace AntData.ORM.Dao
                         runTimeList.Add(runTimeDetail);
                     }
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
-                    if (temp.Count > 0)
-                    {
-                        if (temp.Count == 1)
-                        {
-                            result = temp[0];
-                        }
-                        else
-                        {
-                            throw new DalException("ExecScalar exception:more than one shard.");
-                        }
-                    }
                 }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
             }
         }
 
@@ -505,15 +517,18 @@ namespace AntData.ORM.Dao
         /// <exception cref="DalException">数据访问框架异常</exception>
         public Int32 ExecNonQuery(String sql, StatementParameterCollection parameters, IDictionary hints, OperationType operationType)
         {
-            try
-            {
-                Int32 result;
 
-                if (!IsShardEnabled)
+            if (!IsShardEnabled)
+            {
+                Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
+                AddSqlToExtendParams(statement, hints);
+                try
                 {
-                    Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
-                    AddSqlToExtendParams(statement, hints);
-                    result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
+                    var result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
+                    return result;
+                }
+                finally
+                {
                     RunTimeDetail runTimeDetail = new RunTimeDetail
                     {
                         DbName = statement.DbName,
@@ -522,13 +537,20 @@ namespace AntData.ORM.Dao
                     };
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, new List<RunTimeDetail> { runTimeDetail });
                 }
-                else
-                {
-                   
-                    var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                        newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType, SqlStatementType.UNKNOWN), SqlStatementType.UNKNOWN);
+            }
+            else
+            {
 
-                    result = ShardingExecutor.ExecuteShardingNonQuery(statements).Sum();
+                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
+                    newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType, SqlStatementType.UNKNOWN), SqlStatementType.UNKNOWN);
+
+                try
+                {
+                    var result = ShardingExecutor.ExecuteShardingNonQuery(statements).Sum();
+                    return result;
+                }
+                finally
+                {
                     var runTimeList = new List<RunTimeDetail>();
                     foreach (var statement in statements)
                     {
@@ -541,17 +563,12 @@ namespace AntData.ORM.Dao
                         runTimeList.Add(runTimeDetail);
                     }
                     if (hints != null) hints.Add(DALExtStatementConstant.EXCUTE_TIME, runTimeList);
+
                 }
-                
-                return result;
+
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-            }
+
+
         }
 
         #endregion
