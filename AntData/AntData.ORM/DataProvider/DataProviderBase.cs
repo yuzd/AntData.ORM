@@ -208,7 +208,8 @@ namespace AntData.ORM.DataProvider
         {
 #if !NETSTANDARD
 			var st = ((DbDataReader)reader).GetSchemaTable();
-			return st == null || (bool)st.Rows[idx]["AllowDBNull"];
+            return st == null || st.Rows[idx].IsNull("AllowDBNull") || (bool)st.Rows[idx]["AllowDBNull"];
+            //return st == null || (bool)st.Rows[idx]["AllowDBNull"];
 #else
             return true;
 #endif
