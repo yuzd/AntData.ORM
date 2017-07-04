@@ -11,7 +11,7 @@ namespace AntData.ORM.DbEngine.Configuration
         /// <summary>
         /// Gets or sets an assembly qualified type name of this data provider.
         /// </summary>
-        public Type Type
+        internal Type Type
         {
             get
             {

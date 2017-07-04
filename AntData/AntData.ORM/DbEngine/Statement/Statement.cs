@@ -121,7 +121,7 @@ namespace AntData.ORM.DbEngine
                 if (String.IsNullOrEmpty(DatabaseSet))
                     throw new InvalidOperationException("You must set DatabaseSet first before you can get the database provider type!");
 
-                return DALBootstrap.GetProviderType(DatabaseSet);
+                return DALBootstrap.Instance.GetProviderType(DatabaseSet);
             }
         }
 

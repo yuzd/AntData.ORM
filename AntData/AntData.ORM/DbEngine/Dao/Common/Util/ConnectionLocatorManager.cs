@@ -20,7 +20,7 @@ namespace AntData.ORM.DbEngine.ConnectionString
                         {
                             try
                             {
-                                Type locatorType = DALBootstrap.GetConnectionLocatorType();
+                                Type locatorType = DALBootstrap.Instance.GetConnectionLocatorType();
                                 if (locatorType == null)
                                 {
                                     instance = new DefaultConnectionString();

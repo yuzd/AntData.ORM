@@ -74,6 +74,9 @@ namespace AntData.ORM.DbEngine.DB
         /// </summary>
         public DatabaseType DatabaseRWType { get; set; }
 
+        /// <summary>
+        /// 一个DataBaseSet可以是由多个db构成 给这个组起的名称 万一出错了可以打印这个名称来排错
+        /// </summary>
         public String DatabaseSetName { get; private set; }
 
         /// <summary>

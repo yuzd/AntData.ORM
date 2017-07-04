@@ -12,7 +12,7 @@ namespace AntData.ORM.DbEngine.HA
         /// <returns></returns>
         public static IHA GetInstance(String logicDbName)
         {
-            var providerType = DALBootstrap.GetProviderType(logicDbName);
+            var providerType = DALBootstrap.Instance.GetProviderType(logicDbName);
 
             switch (providerType)
             {

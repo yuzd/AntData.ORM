@@ -6,6 +6,7 @@ using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.DbEngine.Dao.Common.Util;
+using AntData.ORM.DbEngine.Sharding;
 
 namespace AntData.DbEngine.Sharding
 {
@@ -166,7 +167,7 @@ namespace AntData.DbEngine.Sharding
             public String Sharding { get; set; }
         }
 
-        public void SetShardConfig(IDictionary<String, String> config, DatabaseSetElement databaseSet)
+        public void SetShardConfig(IDictionary<String, String> config, List<ShardingConfig> ShardingConfig)
         {
             String tempColumn = null;
 
@@ -191,7 +192,7 @@ namespace AntData.DbEngine.Sharding
                 }
             }
 
-            foreach (DatabaseElement db in databaseSet.Databases)
+            foreach (var db in ShardingConfig)
             {
                 shards.Add(new SequenceInnerClass() { Sharding = db.Sharding, SequenceStart = db.Start, SequenceEnd = db.End });
                 allShards.Add(db.Sharding);

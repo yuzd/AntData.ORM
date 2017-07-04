@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.Configuration;
+using AntData.ORM.DbEngine.Sharding;
 
 //设计原则：切换到DAS后，直连阶段的代码无需任何修改，可以照常工作
 
@@ -64,8 +65,8 @@ namespace AntData.DbEngine.Sharding
         /// 初始化Sharding策略
         /// </summary>
         /// <param name="config"></param>
-        /// <param name="databaseSet"></param>
-        void SetShardConfig(IDictionary<String, String> config, DatabaseSetElement databaseSet);
+        /// <param name="ShardingConfig"></param>
+        void SetShardConfig(IDictionary<String, String> config, List<ShardingConfig> ShardingConfig);
 
         /// <summary>
         /// 将数据按照当前的策略进行分组，返回ShardID：T的键值对，主要用于增删改

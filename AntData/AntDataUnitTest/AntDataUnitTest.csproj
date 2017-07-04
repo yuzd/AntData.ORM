@@ -66,6 +66,7 @@
     <Compile Include="Model\EntityRobotForMysql2.generated.cs" />
     <Compile Include="Model\EntityRobotForMysql3.generated.cs" />
     <Compile Include="StaticMethod.cs" />
+    <Compile Include="UnitTestForDBSetting.cs" />
     <Compile Include="UnitTestForRW.cs" />
     <Compile Include="UnitTestForSharingTable.cs" />
     <Compile Include="UnitTestForSharingDB.cs" />

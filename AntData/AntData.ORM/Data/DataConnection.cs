@@ -100,7 +100,7 @@ namespace AntData.ORM.Data
 
         #region Public Properties
 
-        public static DBSettings DefaultSettings { get; set; }
+      
         /// <summary>
         /// 逻辑数据库名称
         /// </summary>

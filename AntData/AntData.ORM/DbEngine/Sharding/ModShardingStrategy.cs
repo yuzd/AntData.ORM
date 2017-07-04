@@ -7,6 +7,7 @@ using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine;
 using AntData.ORM.DbEngine.Configuration;
 using AntData.ORM.DbEngine.Dao.Common.Util;
+using AntData.ORM.DbEngine.Sharding;
 
 namespace AntData.DbEngine.Sharding
 {
@@ -167,7 +168,7 @@ namespace AntData.DbEngine.Sharding
             return resultShards.Count > 0 ? resultShards.ToList() : allShards.ToList();
         }
 
-        public void SetShardConfig(IDictionary<String, String> config, DatabaseSetElement databaseSet)
+        public void SetShardConfig(IDictionary<String, String> config, List<ShardingConfig> allShardList)
         {
             String tempMod;
             if (!config.TryGetValue("mod", out tempMod))
@@ -206,13 +207,14 @@ namespace AntData.DbEngine.Sharding
             if (!Int32.TryParse(tempMod, out MOD))
                 throw new ArgumentException("Mod settings invalid.");
 
-            foreach (DatabaseElement db in databaseSet.Databases)
+            if (allShardList != null && allShardList.Count > 0)
             {
-                if (!string.IsNullOrWhiteSpace(db.Sharding))
+                foreach (var s in allShardList)
                 {
-                    allShards.Add(db.Sharding);
+                   if(!string.IsNullOrWhiteSpace(s.Sharding)) allShards.Add(s.Sharding);
                 }
             }
+           
 
             String shardByDb;
             String tmpShardByTable;

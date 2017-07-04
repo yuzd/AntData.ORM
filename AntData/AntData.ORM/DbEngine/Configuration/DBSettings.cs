@@ -7,7 +7,7 @@ namespace AntData.ORM.DbEngine.Configuration
 {
     public class DBSettings
     {
-        public IEnumerable<DataProviderSettings> DataProviders { get; set; }
-        public IEnumerable<ConnectionStringSettings> ConnectionStrings { get; set; }
+        public IEnumerable<DataProviderSettings> DataProviders { get;  set; }
+        public IEnumerable<DatabaseSettings> DatabaseSettings { get; set; }
     }
 }

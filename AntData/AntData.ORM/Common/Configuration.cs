@@ -1,4 +1,5 @@
 using System;
+using AntData.ORM.DbEngine.Configuration;
 
 namespace AntData.ORM.Common
 {
@@ -6,9 +7,13 @@ namespace AntData.ORM.Common
 	{
 		public static bool IsStructIsScalarType = true;
 		public static bool AvoidSpecificDataProviderAPI;
-		
 
-		public static class Linq
+	    /// <summary>
+	    /// DB配置 如果配置了这个就不从Config文件里面读取了
+	    /// </summary>
+	    public static DBSettings DBSettings { get; set; }   
+
+        public static class Linq
 		{
 			public static bool PreloadGroups;
 			public static bool IgnoreEmptyUpdate;
@@ -54,7 +59,9 @@ namespace AntData.ORM.Common
             /// 针对sqlserver使用的开关 是否在table名称后面增加[NOLOCK]
             /// </summary>
 		    public static bool UseNoLock = false;
-		}
+
+           
+        }
 
 		public static class LinqService
 		{
