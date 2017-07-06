@@ -21,7 +21,7 @@ namespace AntData.ORM.Common.Util
                         {
                             try
                             {
-                                Type executorType = DALBootstrap.Instance.GetExecutorType();
+                                Type executorType = DALBootstrap.Instance().GetExecutorType();
                                 if (executorType == null)
                                 {
                                    executor = new DefaultExecutor();

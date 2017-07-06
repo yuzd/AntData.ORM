@@ -3,6 +3,7 @@ using AntData.ORM.DbEngine.DB;
 using AntData.ORM.DbEngine.Providers;
 using AntData.ORM.Properties;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
@@ -16,18 +17,48 @@ namespace AntData.ORM.DbEngine
 {
     internal class DALBootstrap
     {
-        public static DALBootstrap Instance { get; }
+        private static readonly ConcurrentDictionary<string, DALBootstrap> Dictionary = new ConcurrentDictionary<string, DALBootstrap>();
+        private static readonly Lazy<DALBootstrap> _accessInstance;
+        private static readonly string _accessKey = "instance";
 
 
         static DALBootstrap()
         {
-            Instance = new DALBootstrap();
-
+            _accessInstance = new Lazy<DALBootstrap>(() => new DALBootstrap());
         }
+
+
+        public static DALBootstrap Instance()
+        {
+            return Dictionary.AddOrUpdate(_accessKey, key => _accessInstance.Value, (k, model) =>
+            {
+                //如果是配置了不从config获取的情况 过30分钟重新加载
+                if (model == null || model.IsExpired())
+                    return new DALBootstrap();
+                return model;
+            });
+        }
+
+        /// <summary>
+        /// 是否过期
+        /// </summary>
+        /// <returns></returns>
+        private bool IsExpired()
+        {
+            if (Common.Configuration.DBSettings == null)
+            {
+                return false;
+            }
+            return CreateTime.AddMinutes(30) <= DateTime.Now;
+        }
+
+        public DateTime CreateTime { get; private set; }
+       
 
         public DALBootstrap()
         {
-            if (AntData.ORM.Common.Configuration.DBSettings == null)
+            CreateTime = DateTime.Now;
+            if (Common.Configuration.DBSettings == null)
             {
                 LoadConfig(); //读取配置文件
                 LoadDatabaseProviders(); //配置文件中解析providers
@@ -36,11 +67,18 @@ namespace AntData.ORM.DbEngine
             }
             else
             {
-                LoadDatabaseProvidersExtend();
-                LoadAllInOneKeysExtend();
-                LoadDatabaseSetsExtend();
+                LoadDatabaseProvidersExtend(Common.Configuration.DBSettings);
+                LoadAllInOneKeysExtend(Common.Configuration.DBSettings);
+                LoadDatabaseSetsExtend(Common.Configuration.DBSettings);
             }
-          
+        }
+
+        public DALBootstrap(DBSettings dbSettings)
+        {
+            CreateTime = DateTime.Now;
+            LoadDatabaseProvidersExtend(dbSettings);
+            LoadAllInOneKeysExtend(dbSettings);
+            LoadDatabaseSetsExtend(dbSettings);
         }
 
         /// <summary>
@@ -53,8 +91,14 @@ namespace AntData.ORM.DbEngine
         /// </summary>
         private  Dictionary<String, IDatabaseProvider> DatabaseProviders { get; set; }
 
+        /// <summary>
+        /// 配置所有的DataBaseSet
+        /// </summary>
         public  Dictionary<String, DatabaseSetWrapper> DatabaseSets { get; set; }
 
+        /// <summary>
+        /// 配置所有的连接字符串
+        /// </summary>
         public  NameValueCollection ConnectionStringKeys { get; set; }
 
         /// <summary>
@@ -115,13 +159,13 @@ namespace AntData.ORM.DbEngine
         /// <summary>
         /// 从配置
         /// </summary>
-        private void LoadDatabaseProvidersExtend()
+        private void LoadDatabaseProvidersExtend(DBSettings dbSettings)
         {
-            if (AntData.ORM.Common.Configuration.DBSettings == null || AntData.ORM.Common.Configuration.DBSettings.DataProviders == null || !AntData.ORM.Common.Configuration.DBSettings.DataProviders.Any())
+            if (dbSettings == null || dbSettings.DataProviders == null || !dbSettings.DataProviders.Any())
             {
                 throw new DalException("Missing DataConnection.DefaultSettings.");
             }
-            var databaseProviders = AntData.ORM.Common.Configuration.DBSettings.DataProviders;
+            var databaseProviders = dbSettings.DataProviders;
             DatabaseProviders = new Dictionary<String, IDatabaseProvider>();
             foreach (var provider in databaseProviders)
             {
@@ -155,14 +199,14 @@ namespace AntData.ORM.DbEngine
             }
         }
 
-        private void LoadAllInOneKeysExtend()
+        private void LoadAllInOneKeysExtend(DBSettings dbSettings)
         {
-            if (AntData.ORM.Common.Configuration.DBSettings == null || AntData.ORM.Common.Configuration.DBSettings.DatabaseSettings == null || !AntData.ORM.Common.Configuration.DBSettings.DatabaseSettings.Any())
+            if (dbSettings == null || dbSettings.DatabaseSettings == null || !dbSettings.DatabaseSettings.Any())
             {
                 throw new DalException("Missing DataConnection.ConnectionStrings.");
             }
             ConnectionStringKeys = new NameValueCollection();
-            foreach (var database in AntData.ORM.Common.Configuration.DBSettings.DatabaseSettings)
+            foreach (var database in dbSettings.DatabaseSettings)
             {
                 foreach (var item in database.ConnectionItemList)
                 {
@@ -243,21 +287,21 @@ namespace AntData.ORM.DbEngine
         }
 
 
-        private void LoadDatabaseSetsExtend()
+        private void LoadDatabaseSetsExtend(DBSettings dbSettings)
         {
-            if (AntData.ORM.Common.Configuration.DBSettings == null || AntData.ORM.Common.Configuration.DBSettings.DatabaseSettings == null || !AntData.ORM.Common.Configuration.DBSettings.DatabaseSettings.Any())
+            if (dbSettings == null || dbSettings.DatabaseSettings == null || !dbSettings.DatabaseSettings.Any())
             {
                 throw new DalException("Missing DataConnection.ConnectionStrings.");
             }
             //一个DataBaseSet可以配置多个 例如主从 或者 分片
             DatabaseSets = new Dictionary<String, DatabaseSetWrapper>();
-            foreach (var databaseSet in AntData.ORM.Common.Configuration.DBSettings.DatabaseSettings)
+            foreach (var databaseSet in dbSettings.DatabaseSettings)
             {
-                if (string.IsNullOrEmpty(databaseSet.ProviderName))
+                if (string.IsNullOrEmpty(databaseSet.Provider))
                     throw new DalException("DatabaseProvider is null.");
-                if (!DatabaseProviders.ContainsKey(databaseSet.ProviderName))
+                if (!DatabaseProviders.ContainsKey(databaseSet.Provider))
                     throw new DalException("DatabaseProvider doesn't match.");
-                IDatabaseProvider provider = DatabaseProviders[databaseSet.ProviderName];
+                IDatabaseProvider provider = DatabaseProviders[databaseSet.Provider];
 
                 //build set wrapper 同一个DataBaseSet的Provider必须一致
                 var databaseSetWrapper = new DatabaseSetWrapper

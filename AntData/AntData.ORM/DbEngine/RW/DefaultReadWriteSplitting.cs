@@ -26,9 +26,9 @@ namespace AntData.ORM.DbEngine.RW
             {
                 String databaseSet = statement.DatabaseSet;
 
-                var master = DALBootstrap.Instance.DatabaseSets[databaseSet].DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master);
+                var master = DALBootstrap.Instance().DatabaseSets[databaseSet].DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master);
 
-                var slaves = DALBootstrap.Instance.DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave)
+                var slaves = DALBootstrap.Instance().DatabaseSets[databaseSet].DatabaseWrappers.Where(item => item.DatabaseType == DatabaseType.Slave)
                    .ToList();
                 Int32 count = slaves.Count();
                 if (statement.OperationType == OperationType.Read && count > 0)

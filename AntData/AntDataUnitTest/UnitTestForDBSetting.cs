@@ -34,23 +34,14 @@ namespace AntDataUnitTest
         {
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
-            var providerName = "mySqlProvider";
             AntData.ORM.Common.Configuration.DBSettings = new DBSettings
             {
-                DataProviders = new List<DataProviderSettings>
-                {
-                    new DataProviderSettings
-                    {
-                        Name = providerName,
-                        TypeName = "AntData.ORM.Mysql.MySqlDatabaseProvider,AntData.ORM.Mysql"
-                    }
-                },
                 DatabaseSettings = new List<DatabaseSettings>
                 {
                     new DatabaseSettings
                     {
                         Name = "testorm",
-                        ProviderName = providerName,
+                        Provider = "mysql",
                         ConnectionItemList = new List<ConnectionStringItem>
                         {
                             new ConnectionStringItem

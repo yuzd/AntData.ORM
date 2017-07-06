@@ -41,10 +41,10 @@ namespace AntData.ORM.DbEngine.DB
             OperationalDatabases result = null;
             String databaseSet = statement.DatabaseSet;
 
-            if (!DALBootstrap.Instance.DatabaseSets.ContainsKey(databaseSet))
+            if (!DALBootstrap.Instance().DatabaseSets.ContainsKey(databaseSet))
                 throw new ArgumentOutOfRangeException(String.Format(Properties.Resources.DatabaseSetDoesNotExistException, databaseSet));
 
-            var databaseSetWrapper = DALBootstrap.Instance.DatabaseSets[databaseSet];
+            var databaseSetWrapper = DALBootstrap.Instance().DatabaseSets[databaseSet];
             if (databaseSetWrapper.DatabaseWrappers.Count == 0)
                 throw new DalException(String.Format("DatabaseSet '{0}' doesn't contain any database.", databaseSetWrapper.Name));
 

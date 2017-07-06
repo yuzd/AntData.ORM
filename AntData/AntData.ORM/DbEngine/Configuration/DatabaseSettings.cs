@@ -12,14 +12,41 @@ namespace AntData.ORM.DbEngine.Configuration
     public class DatabaseSettings
     {
         /// <summary>
-        /// 连接字符串配置
+        /// 连接字符串配置列表
         /// </summary>
         public List<ConnectionStringItem> ConnectionItemList { get; set; }
+
+       
+        private string _provder = string.Empty;
 
         /// <summary>
         /// 同一个DataBaseSet下的配置的db对应的Provider只有一个
         /// </summary>
-        public string ProviderName { get; set; }
+        public string Provider
+        {
+            get
+            {
+                switch (_provder.ToLower())
+                {
+                    case "mysql":
+                    case "mysqlprovider":
+                        return "AntData.ORM.Mysql.MySqlDatabaseProvider,AntData.ORM.Mysql";
+                    case "sqlserver":
+                    case "sql":
+                    case "mssql":
+                    case "sqlprovider":
+                        return "AntData.ORM.DbEngine.Providers.SqlDatabaseProvider,AntData.ORM";
+                    case "oracle":
+                    case "oracleprovider":
+                        return "AntData.ORM.DbEngine.Providers.SqlDatabaseProvider,AntData.ORM";
+                }
+                return _provder;
+            }
+            set
+            {
+                _provder = value;
+            }
+        }
 
         /// <summary>
         /// DataBaseSet名称

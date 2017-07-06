@@ -61,7 +61,7 @@ namespace AntData.ORM.Dao
                 throw new DalException("Please specify databaseSet.");
 
             LogicDbName = logicDbName;
-            shardingStrategyLazy = new Lazy<IShardingStrategy>(() => DALBootstrap.Instance.GetShardingStrategy(logicDbName), true);
+            shardingStrategyLazy = new Lazy<IShardingStrategy>(() => DALBootstrap.Instance().GetShardingStrategy(logicDbName), true);
         }
 
         /// <summary>

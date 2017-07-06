@@ -15,6 +15,7 @@ using AntData.ORM.Common.Util;
 using AntData.ORM.Dao;
 using AntData.ORM.Dao.Common;
 using AntData.ORM.DbEngine.Connection;
+using AntData.ORM.DbEngine.ConnectionString;
 using AntData.ORM.DbEngine.Providers;
 using AntData.ORM.Enums;
 using StatementType = AntData.ORM.Enums.StatementType;
@@ -47,7 +48,7 @@ namespace AntData.ORM.DbEngine.DB
             get
             {
                 // 原来是 重新读取All In One中的连接串
-                // connectionStringLock.EnterReadLock();
+                //connectionStringLock.EnterReadLock();
                 //String result = m_ConnectionString;
                 //connectionStringLock.ExitReadLock();
                 return m_ConnectionString;

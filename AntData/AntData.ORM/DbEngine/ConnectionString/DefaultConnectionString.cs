@@ -10,6 +10,7 @@ namespace AntData.ORM.DbEngine.ConnectionString
 {
     /// <summary>
     /// 默认的获取连接字符串的方式 从config文件里面获取
+    /// 从config文件里面读取到对应的逻辑数据库名称 然后在去 config文件里面配置的地址去获取对应的connectionString
     /// </summary>
     class DefaultConnectionString : IConnectionString
     {
@@ -22,12 +23,12 @@ namespace AntData.ORM.DbEngine.ConnectionString
             {
 
                 //这里原来的意思是从一个固定的地址去根据逻辑数据库名(key)去读真实的连接字符串
-                String path = DALBootstrap.Instance.GetConnectionLocatorPath();
+                String path = DALBootstrap.Instance().GetConnectionLocatorPath();
                 if (String.IsNullOrEmpty(path))
-                    throw new Exception("ConnectionString file doesn't exist.");
+                    return;
                 rwLock.EnterWriteLock();
                 //默认的是从config文件里面读取的
-                var collection = DALBootstrap.Instance.ConnectionStringKeys;
+                var collection = DALBootstrap.Instance().ConnectionStringKeys;
                 if (collection != null && collection.Count > 0)
                     connectionStringCollection = getConnectionStrings(collection.AllKeys, path);
 
