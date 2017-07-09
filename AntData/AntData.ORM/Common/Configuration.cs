@@ -10,6 +10,7 @@ namespace AntData.ORM.Common
 
 	    /// <summary>
 	    /// DB配置 如果配置了这个就不从Config文件里面读取了
+	    /// 注意 只能在程序初始化的时候配置 如果后期重新修改了得重新启动程序才行 不支持reload操作
 	    /// </summary>
 	    public static DBSettings DBSettings { get; set; }   
 

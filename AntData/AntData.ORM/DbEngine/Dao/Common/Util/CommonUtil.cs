@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
 #if !NETSTANDARD
 using System.Configuration;
 #endif
@@ -7,8 +10,24 @@ using System.Text;
 
 namespace AntData.ORM.Common.Util
 {
-    public partial class CommonUtil
+    public static class CommonUtil
     {
+
+        /// <summary>
+        /// 将NameValueCollection转成keyValue的格式好遍历
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static IEnumerable<KeyValuePair<string, string>> AsKVP(
+            this NameValueCollection source
+        )
+        {
+            return source.AllKeys.SelectMany(
+                source.GetValues,
+                (k, v) => new KeyValuePair<string, string>(k, v));
+        }
+
+
         /// <summary>
         ///  获得string对象的Hash值，每次耗时~5 微秒
         /// </summary>

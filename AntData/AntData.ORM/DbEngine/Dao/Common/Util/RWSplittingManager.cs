@@ -23,7 +23,7 @@ namespace AntData.ORM.Common.Util
                             try
                             {
                                
-                                Type rwType = DALBootstrap.Instance().GetRWSplittingType();
+                                Type rwType = DALBootstrap.GetRWSplittingType();
                                 if (rwType == null)
                                 {
                                     instance = new DefaultReadWriteSplitting();

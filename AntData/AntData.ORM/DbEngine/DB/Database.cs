@@ -48,9 +48,6 @@ namespace AntData.ORM.DbEngine.DB
             get
             {
                 // 原来是 重新读取All In One中的连接串
-                //connectionStringLock.EnterReadLock();
-                //String result = m_ConnectionString;
-                //connectionStringLock.ExitReadLock();
                 return m_ConnectionString;
             }
         }
@@ -123,12 +120,9 @@ namespace AntData.ORM.DbEngine.DB
         /// </summary>
         private void LoadActualConnectionString()
         {
-            //var connectionStringSetting = ConnectionLocatorManager.Instance.GetConnectionString(AllInOneKey);
-            //connectionStringLock.EnterWriteLock();
-            //m_ConnectionString = connectionStringSetting == null ? String.Empty : connectionStringSetting.ConnectionString;
-            //connectionStringLock.ExitWriteLock();
-
-            m_ConnectionString = AllInOneKey;
+            var connectionStringSetting = ConnectionLocatorManager.Instance.GetConnectionString(AllInOneKey);
+            //读取不到的话就
+            m_ConnectionString = connectionStringSetting == null ? AllInOneKey : connectionStringSetting.ConnectionString;
         }
 
         #endregion

@@ -1,11 +1,15 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
 using System.Threading;
 using System.Xml;
 using System.Linq;
+using AntData.ORM.Common.Util;
+using AntData.ORM.Dao;
+
 namespace AntData.ORM.DbEngine.ConnectionString
 {
     /// <summary>
@@ -21,17 +25,23 @@ namespace AntData.ORM.DbEngine.ConnectionString
         {
             try
             {
-
+                var collection = DALBootstrap.ConnectionStringKeys;
+                if (collection == null || collection.Count < 1)
+                {
+                    throw new DalException("Missing DataConnection.ConnectionStrings.");
+                }
                 //这里原来的意思是从一个固定的地址去根据逻辑数据库名(key)去读真实的连接字符串
-                String path = DALBootstrap.Instance().GetConnectionLocatorPath();
+                String path = DALBootstrap.GetConnectionLocatorPath();
                 if (String.IsNullOrEmpty(path))
+                {
+                    //默认是从config文件里面去读取
+                    connectionStringCollection = loadFronBootstrapConfig(collection);
                     return;
-                rwLock.EnterWriteLock();
-                //默认的是从config文件里面读取的
-                var collection = DALBootstrap.Instance().ConnectionStringKeys;
-                if (collection != null && collection.Count > 0)
-                    connectionStringCollection = getConnectionStrings(collection.AllKeys, path);
+                }
 
+                //从指定的路径文件里面读取的
+                rwLock.EnterWriteLock();
+                connectionStringCollection = getConnectionStrings(collection.AllKeys, path);
                 if (connectionStringCollection == null)
                     connectionStringCollection = new ConnectionStringSettingsCollection();
                 rwLock.ExitWriteLock();
@@ -40,6 +50,27 @@ namespace AntData.ORM.DbEngine.ConnectionString
             {
                 throw;
             }
+        }
+
+        private static ConnectionStringSettingsCollection loadFronBootstrapConfig(NameValueCollection ConnectionStringKeys)
+        {
+            var collection = new ConnectionStringSettingsCollection();
+            foreach (KeyValuePair<String, String> connectionStringKeyValue in ConnectionStringKeys.AsKVP())
+            {
+                try
+                {
+                    collection.Add(new ConnectionStringSettings
+                    {
+                        Name = connectionStringKeyValue.Key,
+                        ConnectionString = connectionStringKeyValue.Value
+                    });
+                }
+                catch 
+                {
+                    //ignore
+                }
+            }
+            return collection;
         }
 
         public ConnectionStringSettings GetConnectionString(String key)
@@ -122,14 +153,14 @@ namespace AntData.ORM.DbEngine.ConnectionString
             String connectionString = reader.GetAttribute("connectionString");
             validateRequired("connectionString", connectionString, name);
 
-            String provName = reader.GetAttribute("providerName");
-            validateRequired("providerName", provName, name);
+            //String provName = reader.GetAttribute("providerName");
+            //validateRequired("providerName", provName, name);
 
             return new ConnectionStringSettings
             {
                 Name = name,
                 ConnectionString = connectionString,
-                ProviderName = provName
+                //ProviderName = provName
             };
         }
 

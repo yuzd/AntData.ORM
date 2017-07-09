@@ -17,47 +17,9 @@ namespace AntData.ORM.DbEngine
 {
     internal class DALBootstrap
     {
-        private static readonly ConcurrentDictionary<string, DALBootstrap> Dictionary = new ConcurrentDictionary<string, DALBootstrap>();
-        private static readonly Lazy<DALBootstrap> _accessInstance;
-        private static readonly string _accessKey = "instance";
-
 
         static DALBootstrap()
         {
-            _accessInstance = new Lazy<DALBootstrap>(() => new DALBootstrap());
-        }
-
-
-        public static DALBootstrap Instance()
-        {
-            return Dictionary.AddOrUpdate(_accessKey, key => _accessInstance.Value, (k, model) =>
-            {
-                //如果是配置了不从config获取的情况 过30分钟重新加载
-                if (model == null || model.IsExpired())
-                    return new DALBootstrap();
-                return model;
-            });
-        }
-
-        /// <summary>
-        /// 是否过期
-        /// </summary>
-        /// <returns></returns>
-        private bool IsExpired()
-        {
-            if (Common.Configuration.DBSettings == null)
-            {
-                return false;
-            }
-            return CreateTime.AddMinutes(30) <= DateTime.Now;
-        }
-
-        public DateTime CreateTime { get; private set; }
-       
-
-        public DALBootstrap()
-        {
-            CreateTime = DateTime.Now;
             if (Common.Configuration.DBSettings == null)
             {
                 LoadConfig(); //读取配置文件
@@ -73,38 +35,32 @@ namespace AntData.ORM.DbEngine
             }
         }
 
-        public DALBootstrap(DBSettings dbSettings)
-        {
-            CreateTime = DateTime.Now;
-            LoadDatabaseProvidersExtend(dbSettings);
-            LoadAllInOneKeysExtend(dbSettings);
-            LoadDatabaseSetsExtend(dbSettings);
-        }
+       
 
         /// <summary>
         /// 配置对象
         /// </summary>
-        private  DbEngineConfigurationSection ConfigurationSection { get; set; }
+        private static  DbEngineConfigurationSection ConfigurationSection { get; set; }
 
         /// <summary>
         /// 配置的所有的Provider
         /// </summary>
-        private  Dictionary<String, IDatabaseProvider> DatabaseProviders { get; set; }
+        private static Dictionary<String, IDatabaseProvider> DatabaseProviders { get; set; }
 
         /// <summary>
         /// 配置所有的DataBaseSet
         /// </summary>
-        public  Dictionary<String, DatabaseSetWrapper> DatabaseSets { get; set; }
+        public static Dictionary<String, DatabaseSetWrapper> DatabaseSets { get; set; }
 
         /// <summary>
         /// 配置所有的连接字符串
         /// </summary>
-        public  NameValueCollection ConnectionStringKeys { get; set; }
+        public static NameValueCollection ConnectionStringKeys { get; set; }
 
         /// <summary>
         /// 获取配置
         /// </summary>
-        private  void LoadConfig()
+        private static void LoadConfig()
         {
             //CultureInfo standardizedCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             //standardizedCulture.DateTimeFormat.DateSeparator = "-";
@@ -135,7 +91,7 @@ namespace AntData.ORM.DbEngine
         /// <summary>
         /// 从配置中获取Providers
         /// </summary>
-        private  void LoadDatabaseProviders()
+        private static void LoadDatabaseProviders()
         {
             var databaseProviders = ConfigurationSection.DatabaseProviders;
             if (databaseProviders == null)
@@ -159,7 +115,7 @@ namespace AntData.ORM.DbEngine
         /// <summary>
         /// 从配置
         /// </summary>
-        private void LoadDatabaseProvidersExtend(DBSettings dbSettings)
+        private static void LoadDatabaseProvidersExtend(DBSettings dbSettings)
         {
             if (dbSettings == null || dbSettings.DataProviders == null || !dbSettings.DataProviders.Any())
             {
@@ -182,7 +138,7 @@ namespace AntData.ORM.DbEngine
         /// <summary>
         /// 解析DataBaseSet 读取本地config文件的配置的
         /// </summary>
-        private  void LoadAllInOneKeys()
+        private static void LoadAllInOneKeys()
         {
             var databaseSets = ConfigurationSection.DatabaseSets;
             if (databaseSets == null)
@@ -194,12 +150,12 @@ namespace AntData.ORM.DbEngine
                 foreach (DatabaseElement database in databaseSet.Databases)
                 {
                     if (database != null)
-                        ConnectionStringKeys.Add(database.ConnectionString, database.Name);
+                        ConnectionStringKeys.Add(database.Name,database.ConnectionString);
                 }
             }
         }
 
-        private void LoadAllInOneKeysExtend(DBSettings dbSettings)
+        private static void LoadAllInOneKeysExtend(DBSettings dbSettings)
         {
             if (dbSettings == null || dbSettings.DatabaseSettings == null || !dbSettings.DatabaseSettings.Any())
             {
@@ -214,14 +170,14 @@ namespace AntData.ORM.DbEngine
                     {
                         throw new DalException("Missing DataConnection.ConnectionStrings.ConnectionString or Name .");
                     }
-                    ConnectionStringKeys.Add(item.ConnectionString, item.Name);
+                    ConnectionStringKeys.Add(item.Name, item.ConnectionString);
                 }
 
             }
 
         }
 
-        private  void LoadDatabaseSets()
+        private static void LoadDatabaseSets()
         {
             var databaseSets = ConfigurationSection.DatabaseSets;
             if (databaseSets == null)
@@ -287,7 +243,7 @@ namespace AntData.ORM.DbEngine
         }
 
 
-        private void LoadDatabaseSetsExtend(DBSettings dbSettings)
+        private static void LoadDatabaseSetsExtend(DBSettings dbSettings)
         {
             if (dbSettings == null || dbSettings.DatabaseSettings == null || !dbSettings.DatabaseSettings.Any())
             {
@@ -353,14 +309,14 @@ namespace AntData.ORM.DbEngine
             }
         }
 
-        public  IShardingStrategy GetShardingStrategy(String logicDbName)
+        public static IShardingStrategy GetShardingStrategy(String logicDbName)
         {
             if (!DatabaseSets.ContainsKey(logicDbName))
                 throw new ArgumentOutOfRangeException(String.Format(Resources.DatabaseSetDoesNotExistException, logicDbName));
             return DatabaseSets[logicDbName].ShardingStrategy;
         }
 
-        public  DatabaseProviderType GetProviderType(String logicDbName)
+        public static DatabaseProviderType GetProviderType(String logicDbName)
         {
             if (!DatabaseSets.ContainsKey(logicDbName))
                 throw new ArgumentOutOfRangeException(String.Format(Resources.DatabaseSetDoesNotExistException, logicDbName));
@@ -372,7 +328,7 @@ namespace AntData.ORM.DbEngine
         /// 读取ConnectionString的方式
         /// </summary>
         /// <returns></returns>
-        public  Type GetConnectionLocatorType()
+        public static Type GetConnectionLocatorType()
         {
             if (ConfigurationSection == null || ConfigurationSection.ConnectionLocator == null)
                 return null;
@@ -383,7 +339,7 @@ namespace AntData.ORM.DbEngine
         /// 获取读取真实数据库字符串的文本地址
         /// </summary>
         /// <returns></returns>
-        public  String GetConnectionLocatorPath()
+        public static String GetConnectionLocatorPath()
         {
             if (ConfigurationSection == null || ConfigurationSection.ConnectionLocator == null)
                 return null;
@@ -394,7 +350,7 @@ namespace AntData.ORM.DbEngine
         /// 获取读写分离的配置
         /// </summary>
         /// <returns></returns>
-        public  Type GetRWSplittingType()
+        public static Type GetRWSplittingType()
         {
             if (ConfigurationSection == null || ConfigurationSection.RWSplitting == null)
                 return null;
@@ -402,7 +358,7 @@ namespace AntData.ORM.DbEngine
         }
 
 
-        public  Type GetExecutorType()
+        public static Type GetExecutorType()
         {
             if (ConfigurationSection == null || ConfigurationSection.Executor == null)
                 return null;
