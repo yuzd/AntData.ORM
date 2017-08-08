@@ -8,6 +8,7 @@
     GenerateFindExtensions = true;
 	GenerateDataTypes = true;
     IsCompactColumns = false;
+    GenerateProcedures = false;//是否生成存储过程 目前不支持存储过程
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
 	LoadSqlServerMetadata(@"server=.\SERVERQ;database=Test;uid=sa;pwd=p@ssw0rd;");

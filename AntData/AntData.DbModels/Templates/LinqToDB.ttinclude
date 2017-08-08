@@ -21,6 +21,8 @@ bool GenerateDataTypes      = false;
 bool GenerateDbTypes        = false;
 bool GenerateSchemaAsType   = false;
 bool GenerateFkByTableName   = true;
+bool GenerateProcedures   = false;
+
 bool IsOracle   = false;
 
 string SchemaNameSuffix          = "Schema";
@@ -535,7 +537,7 @@ void GenerateTypesFromMetadata()
 			schema.Type.Members.Add(defAliases);
 
     //´æ´¢¹ý³Ì
-	if (Procedures.Count > 0)
+	if (GenerateProcedures && Procedures.Count > 0)
 	{
 		Model.Usings.Add("System.Data");
 		Model.Usings.Add("System.Threading.Tasks");
