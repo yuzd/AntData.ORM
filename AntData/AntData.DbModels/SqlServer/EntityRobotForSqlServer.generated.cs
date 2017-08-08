@@ -50,23 +50,23 @@ namespace DbModels.SqlServer
 	{
 		#region Column
 
-		[Column("Id",                  DataType=DataType.Int64)   , PrimaryKey, Identity]
+		[Column("Id",                  DataType=AntData.ORM.DataType.Int64)   , PrimaryKey, Identity]
 		public long Id { get; set; } // bigint
 
-		[Column("DataChange_LastTime", DataType=DataType.DateTime), NotNull]
+		[Column("DataChange_LastTime", DataType=AntData.ORM.DataType.DateTime), NotNull]
 		public DateTime DataChangeLastTime // datetime
 		{
 			get { return _DataChangeLastTime; }
 			set { _DataChangeLastTime = value; }
 		}
 
-		[Column("Name",                DataType=DataType.VarChar,  Length=50), NotNull]
+		[Column("Name",                DataType=AntData.ORM.DataType.VarChar,  Length=50), NotNull]
 		public string Name { get; set; } // varchar(50)
 
-		[Column("Age",                 DataType=DataType.Int32)   ,    Nullable]
+		[Column("Age",                 DataType=AntData.ORM.DataType.Int32)   ,    Nullable]
 		public int? Age { get; set; } // int
 
-		[Column("SchoolId",            DataType=DataType.Int64)   ,    Nullable]
+		[Column("SchoolId",            DataType=AntData.ORM.DataType.Int64)   ,    Nullable]
 		public long? SchoolId { get; set; } // bigint
 
 		#endregion
@@ -99,25 +99,25 @@ namespace DbModels.SqlServer
 		/// <summary>
 		/// 主键
 		/// </summary>
-		[Column("Id",                  DataType=DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
+		[Column("Id",                  DataType=AntData.ORM.DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
 		public long Id { get; set; } // bigint
 
 		/// <summary>
 		/// 学校名称
 		/// </summary>
-		[Column("Name",                DataType=DataType.VarChar,  Length=50, Comment="学校名称"),    Nullable]
+		[Column("Name",                DataType=AntData.ORM.DataType.VarChar,  Length=50, Comment="学校名称"),    Nullable]
 		public string Name { get; set; } // varchar(50)
 
 		/// <summary>
 		/// 学校地址
 		/// </summary>
-		[Column("Address",             DataType=DataType.VarChar,  Length=100, Comment="学校地址"),    Nullable]
+		[Column("Address",             DataType=AntData.ORM.DataType.VarChar,  Length=100, Comment="学校地址"),    Nullable]
 		public string Address { get; set; } // varchar(100)
 
 		/// <summary>
 		/// 最后更新时间
 		/// </summary>
-		[Column("DataChange_LastTime", DataType=DataType.DateTime, Comment="最后更新时间"), NotNull]
+		[Column("DataChange_LastTime", DataType=AntData.ORM.DataType.DateTime, Comment="最后更新时间"), NotNull]
 		public DateTime DataChangeLastTime // datetime
 		{
 			get { return _DataChangeLastTime; }
@@ -148,40 +148,40 @@ namespace DbModels.SqlServer
 	{
 		#region Column
 
-		[Column("Id",         DataType=DataType.Int32)   , PrimaryKey, Identity]
+		[Column("Id",         DataType=AntData.ORM.DataType.Int32)   , PrimaryKey, Identity]
 		public int Id { get; set; } // int
 
-		[Column("F_Byte",     DataType=DataType.Byte)    , Nullable]
+		[Column("F_Byte",     DataType=AntData.ORM.DataType.Byte)    , Nullable]
 		public byte? FByte { get; set; } // tinyint
 
-		[Column("F_Int16",    DataType=DataType.Int16)   , Nullable]
+		[Column("F_Int16",    DataType=AntData.ORM.DataType.Int16)   , Nullable]
 		public short? FInt16 { get; set; } // smallint
 
-		[Column("F_Int32",    DataType=DataType.Int32)   , Nullable]
+		[Column("F_Int32",    DataType=AntData.ORM.DataType.Int32)   , Nullable]
 		public int? FInt32 { get; set; } // int
 
-		[Column("F_Int64",    DataType=DataType.Int64)   , Nullable]
+		[Column("F_Int64",    DataType=AntData.ORM.DataType.Int64)   , Nullable]
 		public long? FInt64 { get; set; } // bigint
 
-		[Column("F_Double",   DataType=DataType.Double)  , Nullable]
+		[Column("F_Double",   DataType=AntData.ORM.DataType.Double)  , Nullable]
 		public double? FDouble { get; set; } // float
 
-		[Column("F_Float",    DataType=DataType.Single)  , Nullable]
+		[Column("F_Float",    DataType=AntData.ORM.DataType.Single)  , Nullable]
 		public float? FFloat { get; set; } // real
 
-		[Column("F_Decimal",  DataType=DataType.Decimal,  Precision=18, Scale=0), Nullable]
+		[Column("F_Decimal",  DataType=AntData.ORM.DataType.Decimal,  Precision=18, Scale=0), Nullable]
 		public decimal? FDecimal { get; set; } // decimal(18, 0)
 
-		[Column("F_Bool",     DataType=DataType.Boolean) , Nullable]
+		[Column("F_Bool",     DataType=AntData.ORM.DataType.Boolean) , Nullable]
 		public bool? FBool { get; set; } // bit
 
-		[Column("F_DateTime", DataType=DataType.DateTime), Nullable]
+		[Column("F_DateTime", DataType=AntData.ORM.DataType.DateTime), Nullable]
 		public DateTime? FDateTime { get; set; } // datetime
 
-		[Column("F_Guid",     DataType=DataType.Guid)    , Nullable]
+		[Column("F_Guid",     DataType=AntData.ORM.DataType.Guid)    , Nullable]
 		public Guid? FGuid { get; set; } // uniqueidentifier
 
-		[Column("F_String",   DataType=DataType.NVarChar, Length=100), Nullable]
+		[Column("F_String",   DataType=AntData.ORM.DataType.NVarChar, Length=100), Nullable]
 		public string FString { get; set; } // nvarchar(100)
 
 		#endregion
