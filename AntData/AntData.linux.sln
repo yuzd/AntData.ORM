@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AntData.core", "AntData.ORM\AntData.core.xproj", "{68DD9365-BBE4-4D8D-BC65-532D13F0394F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.ORM", "AntData.ORM\AntData.ORM.csproj", "{68DD9365-BBE4-4D8D-BC65-532D13F0394F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AntData.DbModels.linux", "AntData.DbModels.linux\AntData.DbModels.linux.xproj", "{64405F86-CB6A-4D69-8742-69DD3CA4CA40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.DbModels.linux", "AntData.DbModels.linux\AntData.DbModels.linux.csproj", "{64405F86-CB6A-4D69-8742-69DD3CA4CA40}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AntData.core.Test", "AntData.core.Test\AntData.core.Test.xproj", "{0F41758D-1505-415C-89E0-A7E6B76978C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.core.Test", "AntData.core.Test\AntData.core.Test.csproj", "{0F41758D-1505-415C-89E0-A7E6B76978C1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.xproj", "{E5AB4FD5-305A-4906-99C9-C75D304D8DA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{E5AB4FD5-305A-4906-99C9-C75D304D8DA0}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AntData.core.mysql", "AntData.ORM.Mysql\AntData.core.mysql.xproj", "{33DBDBF5-DDB9-4BEB-A91E-08DA1635D092}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.ORM.Mysql", "AntData.ORM.Mysql\AntData.ORM.Mysql.csproj", "{33DBDBF5-DDB9-4BEB-A91E-08DA1635D092}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +42,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E885E7C5-FADF-4C84-8C59-7F098453794B}
 	EndGlobalSection
 EndGlobal

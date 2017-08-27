@@ -19,7 +19,6 @@ namespace ConsoleApp1
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
-            DB.IsNoLock = true;
 
             var p = DB.Tables.People.FirstOrDefault();
             Console.WriteLine(p.Name);

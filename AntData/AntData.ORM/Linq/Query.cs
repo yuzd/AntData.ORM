@@ -147,7 +147,7 @@ namespace AntData.ORM.Linq
 						{
 							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
 						}
-						catch (Exception)
+						catch (Exception ex)
 						{
 							if (!Configuration.Linq.GenerateExpressionTest)
 							{

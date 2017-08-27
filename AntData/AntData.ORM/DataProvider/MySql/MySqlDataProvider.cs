@@ -29,10 +29,16 @@ namespace AntData.ORM.DataProvider.MySql
 	        get { return false; }
 	    }
 	    public    override string ConnectionNamespace { get { return "MySql.Data.MySqlClient"; } }
-		protected override string ConnectionTypeName  { get { return "{0}.{1}, MySql.Data".Args(ConnectionNamespace, "MySqlConnection"); } }
-		protected override string DataReaderTypeName  { get { return "{0}.{1}, MySql.Data".Args(ConnectionNamespace, "MySqlDataReader"); } }
 
-		Type _mySqlDecimalType;
+#if !NETSTANDARD
+        protected override string ConnectionTypeName  { get { return "{0}.{1}, MySql.Data".Args(ConnectionNamespace, "MySqlConnection"); } }
+		protected override string DataReaderTypeName  { get { return "{0}.{1}, MySql.Data".Args(ConnectionNamespace, "MySqlDataReader"); } }
+#else
+	    protected override string ConnectionTypeName  { get { return "{0}.{1}, MySqlConnector".Args(ConnectionNamespace, "MySqlConnection"); } }
+	    protected override string DataReaderTypeName  { get { return "{0}.{1}, MySqlConnector".Args(ConnectionNamespace, "MySqlDataReader"); } }
+#endif
+
+        Type _mySqlDecimalType;
 		Type _mySqlDateTimeType;
 
 		Func<object,object> _mySqlDecimalValueGetter;

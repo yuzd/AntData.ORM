@@ -34,7 +34,7 @@ namespace AntDataUnitTest
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
-            DB.IsNoLock = true;
+            AntData.ORM.Common.Configuration.Linq.UseNoLock = true;
         }
 
         private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInfo)

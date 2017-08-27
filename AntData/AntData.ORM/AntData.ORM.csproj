@@ -1,439 +1,49 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8156E731-ED0A-404E-9A72-FCA6988270DA}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AntData.ORM</RootNamespace>
-    <AssemblyName>AntData.ORM</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <Description>AntData.Orm For Dotnet Core</Description>
+    <VersionPrefix>1.2.7</VersionPrefix>
+    <Authors>nainaigu</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+    <PackageTags>linq;ORM;database;DB;SQL;SqlServer</PackageTags>
+    <PackageProjectUrl>https://github.com/yuzd/AntData.ORM</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/yuzd/AntData.ORM/blob/master/MIT-LICENSE.txt</PackageLicenseUrl>
+	<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.Linq" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <EmbeddedResource Include="**\*.resx" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <EmbeddedResource Include="**\*.txt" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.CSharp" Version="4.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />
+    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.1.0" />
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
+    <PackageReference Include="System.Dynamic.Runtime" Version="4.0.11" />
+    <PackageReference Include="System.Linq.Queryable" Version="4.0.1" />
+    <PackageReference Include="System.Net.NetworkInformation" Version="4.1.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.0.1" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
+    <PackageReference Include="System.Collections.Specialized" Version="4.0.1" />
+	<PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
+  </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="AsyncExtensions.cs" />
-    <Compile Include="Common\ArrayT.cs" />
-    <Compile Include="Common\Configuration.cs" />
-    <Compile Include="Common\ConvertBuilder.cs" />
-    <Compile Include="Common\Converter.cs" />
-    <Compile Include="Common\ConvertInfo.cs" />
-    <Compile Include="Common\ConvertT.cs" />
-    <Compile Include="Common\CustomerParam.cs" />
-    <Compile Include="Common\DataTypeConvert.cs" />
-    <Compile Include="Common\DefaultValue.cs" />
-    <Compile Include="Common\LinqToDBConvertException.cs" />
-    <Compile Include="Common\Option.cs" />
-    <Compile Include="Common\Tools.cs" />
-    <Compile Include="CompiledQuery.cs" />
-    <Compile Include="DataProvider\Oracle\OracleBulkCopy.cs" />
-    <Compile Include="DataProvider\Oracle\OracleDataProvider.cs" />
-    <Compile Include="DataProvider\Oracle\OracleFactory.cs" />
-    <Compile Include="DataProvider\Oracle\OracleMappingSchema.cs" />
-    <Compile Include="DataProvider\Oracle\OracleMerge.cs" />
-    <Compile Include="DataProvider\Oracle\OracleMultipleRowsHelper.cs" />
-    <Compile Include="DataProvider\Oracle\OracleSqlBuilder.cs" />
-    <Compile Include="DataProvider\Oracle\OracleSqlOptimizer.cs" />
-    <Compile Include="DataProvider\Oracle\OracleTools.cs" />
-    <Compile Include="DataProvider\Oracle\OracleXmlTable.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServer2000SqlBuilder.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServer2000SqlOptimizer.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServer2005SqlBuilder.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServer2005SqlOptimizer.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServer2008SqlBuilder.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServer2012SqlBuilder.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerBulkCopy.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerDataProvider.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerFactory.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerMappingSchema.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerMerge.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerSqlBuilder.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerSqlOptimizer.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerTools.cs" />
-    <Compile Include="DataProvider\SqlServer\SqlServerVersion.cs" />
-    <Compile Include="Data\OracleDbContext.cs" />
-    <Compile Include="Data\SqlServerlDbContext.cs" />
-    <Compile Include="Data\MysqlDbContext.cs" />
-    <Compile Include="Data\DbContext.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseSettings.cs" />
-    <Compile Include="DbEngine\Configuration\DataProviderSettings.cs" />
-    <Compile Include="DbEngine\Configuration\DBSettings.cs" />
-    <Compile Include="DbEngine\Configuration\ExecutorElement.cs" />
-    <Compile Include="DbEngine\Connection\DataConnectionTransaction.cs" />
-    <Compile Include="DbEngine\Dao\BaseDao.cs" />
-    <Compile Include="DbEngine\Dao\BaseDaoFactory.cs" />
-    <Compile Include="DbEngine\Dao\Common\DALExtStatementConstant.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\CommonUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ConnectionLocatorManager.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ExceptionUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ExecutorManager.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\HintsUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\RWSplittingManager.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ShardingUtil.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\ThreadLocalRandom.cs" />
-    <Compile Include="DbEngine\Dao\Common\Util\TypeUtils.cs" />
-    <Compile Include="DbEngine\Dao\DalBridge.cs" />
-    <Compile Include="DbEngine\Dao\DalException.cs" />
-    <Compile Include="DbEngine\Enums\ShardingType.cs" />
-    <Compile Include="DbEngine\HA\OracleHA.cs" />
-    <Compile Include="DbEngine\Sharding\ExecuteParallelHelper.cs" />
-    <Compile Include="DbEngine\Sharding\IShardingStrategy.cs" />
-    <Compile Include="DbEngine\Sharding\ModShardingStrategy.cs" />
-    <Compile Include="DbEngine\Sharding\SequenceShardingStrategy.cs" />
-    <Compile Include="DbEngine\Sharding\ShardingConfig.cs" />
-    <Compile Include="DbEngine\Sharding\ShardingExecutor.cs" />
-    <Compile Include="DbEngine\Sharding\ShardingStrategyFactory.cs" />
-    <Compile Include="Expressions\BinaryAggregateExpression.cs" />
-    <Compile Include="Expressions\Dynamic.cs" />
-    <Compile Include="Mapping\SQL.cs" />
-    <Compile Include="DbEngine\Dao\sql\SqlBuilder.cs" />
-    <Compile Include="DataContext.cs" />
-    <Compile Include="DataContextTransaction.cs" />
-    <Compile Include="DataExtensions.cs" />
-    <Compile Include="DataProvider\AssemblyResolver.cs" />
-    <Compile Include="DataProvider\BasicBulkCopy.cs" />
-    <Compile Include="DataProvider\BasicMerge.cs" />
-    <Compile Include="DataProvider\BulkCopyReader.cs" />
-    <Compile Include="DataProvider\DataProviderBase.cs" />
-    <Compile Include="DataProvider\DataTools.cs" />
-    <Compile Include="DataProvider\DynamicDataProviderBase.cs" />
-    <Compile Include="DataProvider\IDataProvider.cs" />
-    <Compile Include="DataProvider\IDataProviderFactory.cs" />
-    <Compile Include="DataProvider\MultipleRowsHelper.cs" />
-    <Compile Include="DataProvider\MySql\MySqlBulkCopy.cs" />
-    <Compile Include="DataProvider\MySql\MySqlDataProvider.cs" />
-    <Compile Include="DataProvider\MySql\MySqlFactory.cs" />
-    <Compile Include="DataProvider\MySql\MySqlMappingSchema.cs" />
-    <Compile Include="DataProvider\MySql\MySqlSqlBuilder.cs" />
-    <Compile Include="DataProvider\MySql\MySqlSqlOptimizer.cs" />
-    <Compile Include="DataProvider\MySql\MySqlTools.cs" />
-    <Compile Include="DataProvider\ReaderInfo.cs" />
-    <Compile Include="DataType.cs" />
-    <Compile Include="Data\BulkCopyOptions.cs" />
-    <Compile Include="Data\BulkCopyRowsCopied.cs" />
-    <Compile Include="Data\BulkCopyType.cs" />
-    <Compile Include="Data\CommandInfo.cs" />
-    <Compile Include="Data\DataConnection.Async.cs" />
-    <Compile Include="Data\DataConnection.cs" />
-    <Compile Include="Data\DataConnection.Linq.cs" />
-    <Compile Include="Data\DataConnectionExtensions.cs" />
-    <Compile Include="Data\DataConnectionTransaction.cs" />
-    <Compile Include="Data\DataParameter.cs" />
-    <Compile Include="Data\DataReader.cs" />
-    <Compile Include="Data\DataReaderAsync.cs" />
-    <Compile Include="Data\TraceInfo.cs" />
-    <Compile Include="DbEngine\Configuration\ConnectionLocatorElement.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseElement.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseElementCollection.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseProviderElement.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseProviderElementCollection.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseSetElement.cs" />
-    <Compile Include="DbEngine\Configuration\DatabaseSetElementCollection.cs" />
-    <Compile Include="DbEngine\Configuration\DbEngineConfigurationSection.cs" />
-    <Compile Include="DbEngine\Configuration\RWSplittingElement.cs" />
-    <Compile Include="DbEngine\ConnectionString\DefaultConnectionString.cs" />
-    <Compile Include="DbEngine\ConnectionString\IConnectionString.cs" />
-    <Compile Include="DbEngine\Connection\ConnectionWrapper.cs" />
-    <Compile Include="DbEngine\Connection\TransactionConnectionManager.cs" />
-    <Compile Include="DbEngine\DALBootstrap.cs" />
-    <Compile Include="DbEngine\DB\Database.cs" />
-    <Compile Include="DbEngine\DB\DatabaseBridge.cs" />
-    <Compile Include="DbEngine\DB\DatabaseFactory.cs" />
-    <Compile Include="DbEngine\DB\DatabaseSetWrapper.cs" />
-    <Compile Include="DbEngine\DB\DatabaseWrapper.cs" />
-    <Compile Include="DbEngine\DB\OperationalDatabases.cs" />
-    <Compile Include="DbEngine\Enums\DALState.cs" />
-    <Compile Include="DbEngine\Enums\DatabaseProviderType.cs" />
-    <Compile Include="DbEngine\Enums\DatabaseType.cs" />
-    <Compile Include="DbEngine\Enums\OperationType.cs" />
-    <Compile Include="DbEngine\Enums\SqlStatementType.cs" />
-    <Compile Include="DbEngine\Enums\StatementType.cs" />
-    <Compile Include="DbEngine\Executor\DefaultExecutor.cs" />
-    <Compile Include="DbEngine\Executor\IExecutor.cs" />
-    <Compile Include="DbEngine\HA\AbstractHA.cs" />
-    <Compile Include="DbEngine\HA\HAFactory.cs" />
-    <Compile Include="DbEngine\HA\IHA.cs" />
-    <Compile Include="DbEngine\HA\MySqlHA.cs" />
-    <Compile Include="DbEngine\HA\SqlServerHA.cs" />
-    <Compile Include="DbEngine\Providers\IDatabaseProvider.cs" />
-    <Compile Include="DbEngine\Providers\OdbcDatabaseProvider.cs" />
-    <Compile Include="DbEngine\Providers\OleDatabaseProvider.cs" />
-    <Compile Include="DbEngine\Providers\SqlDatabaseProvider.cs" />
-    <Compile Include="DbEngine\RW\DefaultReadWriteSplitting.cs" />
-    <Compile Include="DbEngine\RW\IReadWriteSplitting.cs" />
-    <Compile Include="DbEngine\Statement\Statement.cs" />
-    <Compile Include="DbEngine\Statement\StatementParameter.cs" />
-    <Compile Include="DbEngine\Statement\StatementParameterCollection.cs" />
-    <Compile Include="ExpressionMethodAttribute.cs" />
-    <Compile Include="Expressions\ChangeTypeExpression.cs" />
-    <Compile Include="Expressions\ConvertFromDataReaderExpression.cs" />
-    <Compile Include="Expressions\DefaultValueExpression.cs" />
-    <Compile Include="Expressions\Extensions.cs" />
-    <Compile Include="Expressions\GetItemExpression.cs" />
-    <Compile Include="Expressions\IGenericInfoProvider.cs" />
-    <Compile Include="Expressions\InternalExtensions.cs" />
-    <Compile Include="Expressions\MemberHelper.cs" />
-    <Compile Include="Expressions\TransformInfo.cs" />
-    <Compile Include="Extensions\MappingExtensions.cs" />
-    <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="IDataContext.cs" />
-    <Compile Include="ITableT.cs" />
-    <Compile Include="KeepConnectionAliveScope.cs" />
-    <Compile Include="LinqExtensions.cs" />
-    <Compile Include="LinqToDBException.cs" />
-    <Compile Include="Linq\Builder\AggregationBuilder.cs" />
-    <Compile Include="Linq\Builder\AllAnyBuilder.cs" />
-    <Compile Include="Linq\Builder\AsUpdatableBuilder.cs" />
-    <Compile Include="Linq\Builder\BuildInfo.cs" />
-    <Compile Include="Linq\Builder\CastBuilder.cs" />
-    <Compile Include="Linq\Builder\ChangeTypeExpressionBuilder.cs" />
-    <Compile Include="Linq\Builder\ConcatUnionBuilder.cs" />
-    <Compile Include="Linq\Builder\ContainsBuilder.cs" />
-    <Compile Include="Linq\Builder\ContextParser.cs" />
-    <Compile Include="Linq\Builder\ConvertFlags.cs" />
-    <Compile Include="Linq\Builder\CountBuilder.cs" />
-    <Compile Include="Linq\Builder\DefaultIfEmptyBuilder.cs" />
-    <Compile Include="Linq\Builder\DeleteBuilder.cs" />
-    <Compile Include="Linq\Builder\DistinctBuilder.cs" />
-    <Compile Include="Linq\Builder\DropBuilder.cs" />
-    <Compile Include="Linq\Builder\ExpressionBuilder.cs" />
-    <Compile Include="Linq\Builder\ExpressionBuilder.QueryBuilder.cs" />
-    <Compile Include="Linq\Builder\ExpressionBuilder.SqlBuilder.cs" />
-    <Compile Include="Linq\Builder\ExpressionContext.cs" />
-    <Compile Include="Linq\Builder\ExpressionHoder.cs" />
-    <Compile Include="Linq\Builder\ExpressionTestGenerator.cs" />
-    <Compile Include="Linq\Builder\FirstSingleBuilder.cs" />
-    <Compile Include="Linq\Builder\GroupByBuilder.cs" />
-    <Compile Include="Linq\Builder\IBuildContext.cs" />
-    <Compile Include="Linq\Builder\InsertBuilder.cs" />
-    <Compile Include="Linq\Builder\InsertOrUpdateBuilder.cs" />
-    <Compile Include="Linq\Builder\IntersectBuilder.cs" />
-    <Compile Include="Linq\Builder\ISequenceBuilder.cs" />
-    <Compile Include="Linq\Builder\IsExpressionResult.cs" />
-    <Compile Include="Linq\Builder\JoinBuilder.cs" />
-    <Compile Include="Linq\Builder\LoadWithBuilder.cs" />
-    <Compile Include="Linq\Builder\MethodCallBuilder.cs" />
-    <Compile Include="Linq\Builder\OfTypeBuilder.cs" />
-    <Compile Include="Linq\Builder\OrderByBuilder.cs" />
-    <Compile Include="Linq\Builder\PassThroughBuilder.cs" />
-    <Compile Include="Linq\Builder\PassThroughContext.cs" />
-    <Compile Include="Linq\Builder\RequestFor.cs" />
-    <Compile Include="Linq\Builder\ScalarSelectBuilder.cs" />
-    <Compile Include="Linq\Builder\SelectBuilder.cs" />
-    <Compile Include="Linq\Builder\SelectContext.cs" />
-    <Compile Include="Linq\Builder\SelectManyBuilder.cs" />
-    <Compile Include="Linq\Builder\SequenceContextBase.cs" />
-    <Compile Include="Linq\Builder\SequenceConvertInfo.cs" />
-    <Compile Include="Linq\Builder\SequenceConvertPath.cs" />
-    <Compile Include="Linq\Builder\SqlInfo.cs" />
-    <Compile Include="Linq\Builder\SubQueryContext.cs" />
-    <Compile Include="Linq\Builder\TableAttributeBuilder.cs" />
-    <Compile Include="Linq\Builder\TableBuilder.cs" />
-    <Compile Include="Linq\Builder\TakeSkipBuilder.cs" />
-    <Compile Include="Linq\Builder\UpdateBuilder.cs" />
-    <Compile Include="Linq\Builder\WhereBuilder.cs" />
-    <Compile Include="Linq\Builder\WithTableExpressionBuilder.cs" />
-    <Compile Include="Linq\CompiledTableT.cs" />
-    <Compile Include="Linq\DataContextInfo.cs" />
-    <Compile Include="Linq\DefaultDataContextInfo.cs" />
-    <Compile Include="Linq\ExpressionQuery.cs" />
-    <Compile Include="Linq\ExpressionQueryImpl.cs" />
-    <Compile Include="Linq\Expressions.cs" />
-    <Compile Include="Linq\IDataContextInfo.cs" />
-    <Compile Include="Linq\IEntity.cs" />
-    <Compile Include="Linq\IExpressionInfo.cs" />
-    <Compile Include="Linq\IExpressionQuery.cs" />
-    <Compile Include="Linq\IExpressionQueryT.cs" />
-    <Compile Include="Linq\IQueryContext.cs" />
-    <Compile Include="Linq\ISelectInsertable.cs" />
-    <Compile Include="Linq\ITable.cs" />
-    <Compile Include="Linq\IUpdatable.cs" />
-    <Compile Include="Linq\IValueInsertable.cs" />
-    <Compile Include="Linq\LinqException.cs" />
-    <Compile Include="Linq\MemberInfoComparer.cs" />
-    <Compile Include="Linq\Query.cs" />
-    <Compile Include="Linq\QueryableAccessor.cs" />
-    <Compile Include="Linq\QueryContext.cs" />
-    <Compile Include="Linq\ReflectionHelper.cs" />
-    <Compile Include="Linq\TableT.cs" />
-    <Compile Include="Mapping\AssociationAttribute.cs" />
-    <Compile Include="Mapping\AssociationDescriptor.cs" />
-    <Compile Include="Mapping\ColumnAliasAttribute.cs" />
-    <Compile Include="Mapping\ColumnAttribute.cs" />
-    <Compile Include="Mapping\ColumnDescriptor.cs" />
-    <Compile Include="Mapping\DataTypeAttribute.cs" />
-    <Compile Include="Mapping\EntityDescriptor.cs" />
-    <Compile Include="Mapping\EntityMappingBuilder.cs" />
-    <Compile Include="Mapping\FluentMappingBuilder.cs" />
-    <Compile Include="Mapping\IdentityAttribute.cs" />
-    <Compile Include="Mapping\InheritanceMapping.cs" />
-    <Compile Include="Mapping\InheritanceMappingAttribute.cs" />
-    <Compile Include="Mapping\MappingSchema.cs" />
-    <Compile Include="Mapping\MappingSchemaInfo.cs" />
-    <Compile Include="Mapping\MapValue.cs" />
-    <Compile Include="Mapping\MapValueAttribute.cs" />
-    <Compile Include="Mapping\NotColumnAttribute.cs" />
-    <Compile Include="Mapping\NotNullAttribute.cs" />
-    <Compile Include="Mapping\NullableAttribute.cs" />
-    <Compile Include="Mapping\PrimaryKeyAttribute.cs" />
-    <Compile Include="Mapping\PropertyMappingBuilder.cs" />
-    <Compile Include="Mapping\Relationship.cs" />
-    <Compile Include="Mapping\ScalarTypeAttribute.cs" />
-    <Compile Include="Mapping\SequenceNameAttribute.cs" />
-    <Compile Include="Mapping\StoredProcedure.cs" />
-    <Compile Include="Mapping\TableAttribute.cs" />
-    <Compile Include="Metadata\AttributeInfo.cs" />
-    <Compile Include="Metadata\AttributeReader.cs" />
-    <Compile Include="Metadata\FluentMetadataReader.cs" />
-    <Compile Include="Metadata\IMetadataReader.cs" />
-    <Compile Include="Metadata\MetadataException.cs" />
-    <Compile Include="Metadata\MetadataReader.cs" />
-    <Compile Include="Metadata\MetaMemberInfo.cs" />
-    <Compile Include="Metadata\MetaTypeInfo.cs" />
-    <Compile Include="Metadata\SystemComponentModelDataAnnotationsSchemaAttributeReader.cs" />
-    <Compile Include="Metadata\SystemDataLinqAttributeReader.cs" />
-    <Compile Include="Metadata\SystemDataSqlServerAttributeReader.cs" />
-    <Compile Include="Metadata\XmlAttributeReader.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\JetBrains.Annotations.cs" />
-    <Compile Include="Properties\LinqToDBConstants.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-    <Compile Include="ProviderName.cs" />
-    <Compile Include="Reflection\DynamicMethodEmit.cs" />
-    <Compile Include="Reflection\IObjectFactory.cs" />
-    <Compile Include="Reflection\MemberAccessor.cs" />
-    <Compile Include="Reflection\MethodWrapper.cs" />
-    <Compile Include="Reflection\ObjectFactoryAttribute.cs" />
-    <Compile Include="Reflection\PropertyWrapper.cs" />
-    <Compile Include="Reflection\ReflectionExtensions.cs" />
-    <Compile Include="Reflection\TypeAccessor.cs" />
-    <Compile Include="Reflection\TypeAccessorT.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="SchemaProvider\AssociationType.cs" />
-    <Compile Include="SchemaProvider\ColumnInfo.cs" />
-    <Compile Include="SchemaProvider\ColumnSchema.cs" />
-    <Compile Include="SchemaProvider\DatabaseSchema.cs" />
-    <Compile Include="SchemaProvider\DataTypeInfo.cs" />
-    <Compile Include="SchemaProvider\ForeignKeySchema.cs" />
-    <Compile Include="SchemaProvider\ForeingKeyInfo.cs" />
-    <Compile Include="SchemaProvider\GetSchemaOptions.cs" />
-    <Compile Include="SchemaProvider\ISchemaProvider.cs" />
-    <Compile Include="SchemaProvider\ParameterSchema.cs" />
-    <Compile Include="SchemaProvider\PrimaryKeyInfo.cs" />
-    <Compile Include="SchemaProvider\ProcedureInfo.cs" />
-    <Compile Include="SchemaProvider\ProcedureParameterInfo.cs" />
-    <Compile Include="SchemaProvider\ProcedureSchema.cs" />
-    <Compile Include="SchemaProvider\SchemaProviderBase.cs" />
-    <Compile Include="SchemaProvider\TableInfo.cs" />
-    <Compile Include="SchemaProvider\TableSchema.cs" />
-    <Compile Include="SqlProvider\BasicSqlBuilder.cs" />
-    <Compile Include="SqlProvider\BasicSqlOptimizer.cs" />
-    <Compile Include="SqlProvider\ConvertType.cs" />
-    <Compile Include="SqlProvider\ISqlBuilder.cs" />
-    <Compile Include="SqlProvider\ISqlOptimizer.cs" />
-    <Compile Include="SqlProvider\JoinOptimizer.cs" />
-    <Compile Include="SqlProvider\SqlProviderFlags.cs" />
-    <Compile Include="SqlProvider\ValueToSqlConverter.cs" />
-    <Compile Include="SqlQuery\DefaulNullable.cs" />
-    <Compile Include="SqlQuery\Extensions.cs" />
-    <Compile Include="SqlQuery\ICloneableElement.cs" />
-    <Compile Include="SqlQuery\IQueryElement.cs" />
-    <Compile Include="SqlQuery\ISqlExpression.cs" />
-    <Compile Include="SqlQuery\ISqlExpressionWalkable.cs" />
-    <Compile Include="SqlQuery\ISqlPredicate.cs" />
-    <Compile Include="SqlQuery\ISqlTableSource.cs" />
-    <Compile Include="SqlQuery\IValueContainer.cs" />
-    <Compile Include="SqlQuery\Precedence.cs" />
-    <Compile Include="SqlQuery\QueryElementType.cs" />
-    <Compile Include="SqlQuery\QueryType.cs" />
-    <Compile Include="SqlQuery\QueryHelper.cs" />
-    <Compile Include="SqlQuery\QueryVisitor.cs" />
-    <Compile Include="SqlQuery\SelectQuery.cs" />
-    <Compile Include="SqlQuery\SelectQueryOptimizer.cs" />
-    <Compile Include="SqlQuery\SqlBinaryExpression.cs" />
-    <Compile Include="SqlQuery\SqlDataType.cs" />
-    <Compile Include="SqlQuery\SqlException.cs" />
-    <Compile Include="SqlQuery\SqlExpression.cs" />
-    <Compile Include="SqlQuery\SqlField.cs" />
-    <Compile Include="SqlQuery\SqlFunction.cs" />
-    <Compile Include="SqlQuery\SqlParameter.cs" />
-    <Compile Include="SqlQuery\SqlTable.cs" />
-    <Compile Include="SqlQuery\SqlTableT.cs" />
-    <Compile Include="SqlQuery\SqlTableType.cs" />
-    <Compile Include="SqlQuery\SqlValue.cs" />
-    <Compile Include="Sql\Sql.cs" />
-    <Compile Include="Sql\Sql.EnumAttribute.cs" />
-    <Compile Include="Sql\Sql.ExpressionAttribute.cs" />
-    <Compile Include="Sql\Sql.FunctionAttribute.cs" />
-    <Compile Include="Sql\Sql.GroupBy.cs" />
-    <Compile Include="Sql\Sql.PropertyAttribute.cs" />
-    <Compile Include="Sql\Sql.TableExpressionAttribute.cs" />
-    <Compile Include="Sql\Sql.TableFunctionAttribute.cs" />
+    <Compile Remove="node_modules\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <None Remove="node_modules\**" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="SqlQuery\ReservedWords.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\README.md">
-      <Link>README.md</Link>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

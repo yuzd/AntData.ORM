@@ -302,6 +302,7 @@ namespace AntData.ORM.DbEngine.DB
                         parameter.Direction = p.Direction;
                         parameter.IsNullable = p.IsNullable;
 
+#if !NETSTANDARD
                         if (providerName.Equals("MySqlDatabaseProvider"))
                         {
                             command.Parameters.Insert(-1, parameter);   //work around for legacy mysql driver versions
@@ -310,6 +311,9 @@ namespace AntData.ORM.DbEngine.DB
                         {
                             command.Parameters.Add(parameter);
                         }
+#else
+                        command.Parameters.Add(parameter);
+#endif
                     }
                 }
             }
@@ -380,7 +384,7 @@ namespace AntData.ORM.DbEngine.DB
             }
         }
 #endif
-        #endregion
+#endregion
 
 #if !NETSTANDARD
 
@@ -520,7 +524,7 @@ namespace AntData.ORM.DbEngine.DB
                                 ? CommandBehavior.Default
                                 : CommandBehavior.CloseConnection);
 #else
-                        reader = command.ExecuteReader(trans_wrapper!=null ?CommandBehavior.Default :CommandBehavior.CloseConnection);
+                            reader = command.ExecuteReader(trans_wrapper!=null ?CommandBehavior.Default :CommandBehavior.CloseConnection);
 #endif
                         }
                         finally

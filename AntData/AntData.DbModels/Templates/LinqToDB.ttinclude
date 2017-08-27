@@ -20,9 +20,8 @@ bool IsCompactColumnAliases = true;
 bool GenerateDataTypes      = false;
 bool GenerateDbTypes        = false;
 bool GenerateSchemaAsType   = false;
-bool GenerateFkByTableName   = true;
-bool GenerateProcedures   = false;
-
+bool GenerateFkByTableName  = true;
+bool GenerateProcedures     = false;
 bool IsOracle   = false;
 
 string SchemaNameSuffix          = "Schema";
