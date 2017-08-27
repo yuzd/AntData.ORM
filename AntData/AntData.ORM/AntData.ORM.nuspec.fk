@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>AntData.ORM</id>
+    <version>1.2.7</version>
+    <title>AntData.ORM</title>
+    <authors>yuzd</authors>
+    <owners>nainaigu</owners>
+    <licenseUrl>https://github.com/yuzd/AntData.ORM</licenseUrl>
+    <projectUrl>https://github.com/yuzd/AntData.ORM</projectUrl>
+    <iconUrl>https://github.com/yuzd/AntData.ORM</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>linq Orm 框架</description>
+    <releaseNotes>性能优化</releaseNotes>
+    <copyright>Copyright nainaigu 2017</copyright>
+    <tags>linq Orm</tags>
+  </metadata>
+  <files>
+    <file src="bin\Release\AntData.ORM.dll" target="lib" />
+  </files>
+</package>
