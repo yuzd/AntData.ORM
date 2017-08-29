@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>AntData.Orm mysql For Dotnet Core</Description>
-    <VersionPrefix>1.2.5</VersionPrefix>
+    <VersionPrefix>1.2.9</VersionPrefix>
     <Authors>nainaigu</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
