@@ -9,11 +9,13 @@ Mysql：Install-Package AntData.ORM.Mysql
 Oracle: Install-Package AntData.ORM.Oracle
 
 
-# NUGET FOR Dotnetcore
+# NUGET FOR Dotnetcore2.0
 
 SqlServer : Install-Package AntData.Core
 
-QQ Group ：609142508
+Mysql：Install-Package AntData.Core.Mysql
+
+QQ Group ：433685124
 
 # How to use CodeGen to auto Create Db models 
 
