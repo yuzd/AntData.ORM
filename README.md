@@ -1,3 +1,9 @@
+![](https://img.shields.io/badge/platform-dotnet-red.svg) ![](https://img.shields.io/badge/language-CSharp-orange.svg) 
+![](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg) 
+[![Support](https://img.shields.io/badge/support-NetCore-blue.svg?style=flat)](https://www.microsoft.com/net/core) 
+[![Weibo](https://img.shields.io/badge/博客园-@鱼东东-yellow.svg?style=flat)](http://www.cnblogs.com/yudongdong) 
+[![GitHub stars](https://img.shields.io/github/stars/yuzd/AntData.ORM.svg)](https://github.com/yuzd/AntData.ORM/stargazers)
+
 # AntData.ORM
 
 # NUGET FOR .NET
