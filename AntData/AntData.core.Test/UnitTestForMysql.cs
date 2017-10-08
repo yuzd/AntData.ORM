@@ -402,10 +402,10 @@ namespace AntDataUnitTest
                 Age = 27
             };
 
-            DB.UseTransaction(con =>
+            DB.UseTransaction(() =>
             {
-                con.Tables.Schools.Where(r => r.Name.Equals("上海大学")).Set(r => r.Address, "no update").Update();
-                con.Insert(p);
+                DB.Tables.Schools.Where(r => r.Name.Equals("上海大学")).Set(r => r.Address, "no update").Update();
+                DB.Insert(p);
                 return true;
             });
 
@@ -739,21 +739,21 @@ namespace AntDataUnitTest
             Assert.AreEqual(rows.RowsCopied,2);
         }
 
-        //[TestMethod]
-        //public void TestMethod6_09()
-        //{
-        //    Person p = new Person
-        //    {
-        //        Age = 27,
-        //    };
+        [TestMethod]
+        public void TestMethod6_09()
+        {
+            Person p = new Person
+            {
+                Age = 27,
+            };
 
-        //    DB.UseTransaction1(con =>
-        //    {
-        //        con.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update1").Update();
-        //        con.Insert(p);
-        //    });
+            DB.UseTransaction(() =>
+            {
+                DB.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update1").Update();
+                DB.Insert(p);
+            });
 
-         
-        //}
+
+        }
     }
 }

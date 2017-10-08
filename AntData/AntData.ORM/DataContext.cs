@@ -204,7 +204,31 @@ namespace AntData.ORM
 			ReleaseQuery();
 		}
 
-		SqlProviderFlags IDataContext.SqlProviderFlags
+	    public void UseTransaction(Action func)
+	    {
+	        var ctx = GetDataConnection() as IDataContext;
+	        ctx.UseTransaction(func);
+        }
+
+	    public void UseTransaction(Action func, IsolationLevel isolationLevel)
+	    {
+	        var ctx = GetDataConnection() as IDataContext;
+	        ctx.UseTransaction(func, isolationLevel);
+        }
+
+	    public void UseTransaction(Func<bool> func)
+	    {
+	        var ctx = GetDataConnection() as IDataContext;
+	        ctx.UseTransaction(func);
+        }
+
+	    public void UseTransaction(Func<bool> func, IsolationLevel isolationLevel)
+	    {
+	        var ctx = GetDataConnection() as IDataContext;
+	        ctx.UseTransaction(func, isolationLevel);
+        }
+
+	    SqlProviderFlags IDataContext.SqlProviderFlags
 		{
 			get { return DataProvider.SqlProviderFlags; }
 		}

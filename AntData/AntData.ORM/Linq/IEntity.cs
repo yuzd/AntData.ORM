@@ -18,6 +18,7 @@ namespace AntData.ORM.Linq
        IQueryable<T> Get<T>() where T : class;
     }
 
+
     public class BaseEntity
     {
         

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AntData.ORM.Data;
 using DbModels.SqlServer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleApp1
 {
@@ -15,18 +16,38 @@ namespace ConsoleApp1
         private static SqlServerlDbContext<Entitys> DB;
         public static void Main(string[] args)
         {
+            AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
+            //Insert的时候 忽略Null的字段
+            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
+       
+
+
             var builder = new ConfigurationBuilder()
                 .AddJsonFile(Directory.GetCurrentDirectory() + "\\Config\\Dal.json").Build();
             AntData.ORM.Common.Configuration.UseDBConfig(builder);
 
+
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddSqlServerEntitys<Entitys>("testorm_sqlserver", ops =>
+            {
+                ops.IsEnableLogTrace = true;
+                ops.OnLogTrace = OnCustomerTraceConnection;
+            });
+
+            var Services = serviceCollection.BuildServiceProvider();
+            var entitys = Services.GetService<Entitys>();
+
+            var p1 = entitys.People.FirstOrDefault();
+           
+            var p2 = entitys.People.FirstOrDefault(r => r.Name.Equals("yuzd"));
+            Console.WriteLine(p1.Name);
+
             DB = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
-            AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
-            //Insert的时候 忽略Null的字段
-            AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
 
             var p = DB.Tables.People.FirstOrDefault();
+            var p22 = DB.Tables.People.FirstOrDefault(r => r.Name.Equals("yuzd"));
             Console.WriteLine(p.Name);
             Console.ReadLine();
         }
