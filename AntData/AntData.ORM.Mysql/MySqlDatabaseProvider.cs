@@ -62,7 +62,6 @@ namespace AntData.ORM.Mysql
             return name;
         }
 
-#if !NETSTANDARD
         /// <summary>
         /// 创建数据库适配器
         /// </summary>
@@ -71,7 +70,7 @@ namespace AntData.ORM.Mysql
         {
             return new MySqlDataAdapter();
         }
-
+#if !NETSTANDARD
 
         /// <summary>
         /// 是否支持参数导出
@@ -105,7 +104,6 @@ namespace AntData.ORM.Mysql
                 }
             }
         }
-
 #endif
         public string ProviderType
         {

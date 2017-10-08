@@ -9,7 +9,6 @@ namespace AntData.DbEngine.Sharding
     class ShardingExecutor
     {
         #region ExecuteShardTable
-#if !NETSTANDARD
         /// <summary>
         /// 表结构均相同, 只有一个数据库，将一个表分为多个名称不同的表
         /// </summary>
@@ -31,7 +30,6 @@ namespace AntData.DbEngine.Sharding
             return MergeDataReader(result);
         }
 
-#endif
         public static List<int> ExecuteShardingNonQuery(IList<Statement> statements)
         {
             if (statements == null || statements.Count == 0)
@@ -61,7 +59,6 @@ namespace AntData.DbEngine.Sharding
 
             return ExecuteParallelHelper.ParallelExcuter(funcs, CheckSameShard(statements));
         }
-#if !NETSTANDARD
         public static DataSet ExecuteShardingDataSet(IList<Statement> statements)
         {
             if (statements == null || statements.Count == 0)
@@ -83,7 +80,6 @@ namespace AntData.DbEngine.Sharding
 
             return ExecuteParallelHelper.ParallelExcuter(dataSets, CheckSameShard(statements));
         }
-#endif
         public static IList<IDataReader> GetShardingDataReaderList(IList<Statement> statements)
         {
             var dataReaders = new List<Func<IDataReader>>();
@@ -98,7 +94,6 @@ namespace AntData.DbEngine.Sharding
         }
 
 #endregion
-#if !NETSTANDARD
         private static DataTable MergeDataReader(IList<IDataReader> dataReaders)
         {
             if (dataReaders == null || dataReaders.Count == 0)
@@ -140,7 +135,6 @@ namespace AntData.DbEngine.Sharding
 
             return result;
         }
-#endif
         private static bool CheckSameShard(IList<Statement> statements)
         {
             var shardId = (string)null;

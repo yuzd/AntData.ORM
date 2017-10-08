@@ -183,7 +183,6 @@ namespace AntData.ORM.Dao
 
 
         #endregion
-#if !NETSTANDARD
         #region SelectDataTable
 
         /// <summary>
@@ -351,7 +350,6 @@ namespace AntData.ORM.Dao
 
 
         #endregion
-#endif
         #region ExecScalar
 
         /// <summary>

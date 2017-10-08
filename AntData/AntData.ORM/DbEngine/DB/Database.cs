@@ -334,7 +334,6 @@ namespace AntData.ORM.DbEngine.DB
                     p.Value = command.Parameters[m_DatabaseProvider.CreateParameterName(p.Name)].Value;
             }
         }
-#if !NETSTANDARD
 
         /// <summary>
         /// 加载程序集
@@ -383,10 +382,8 @@ namespace AntData.ORM.DbEngine.DB
                 adapter.Fill(dataSet);
             }
         }
-#endif
 #endregion
 
-#if !NETSTANDARD
 
 
         /// <summary>
@@ -439,7 +436,6 @@ namespace AntData.ORM.DbEngine.DB
                 statement.Duration = TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds);
             }
         }
-#endif
 
 
         /// <summary>

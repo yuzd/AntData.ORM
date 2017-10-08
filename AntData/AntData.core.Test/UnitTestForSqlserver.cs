@@ -342,17 +342,17 @@ namespace AntDataUnitTest
 
         }
 
-        //[TestMethod]
-        //public void TestMethod3_08()
-        //{
-        //    var name = "yuzd";
-        //    SQL sql = "select * from person where name=@name";
-        //    sql = sql["name", name];
-        //    var list = DB.QueryTable(sql);
-        //    Assert.IsNotNull(list);
-        //    Assert.AreEqual(list.Rows.Count > 0, true);
+        [TestMethod]
+        public void TestMethod3_08()
+        {
+            var name = "yuzd";
+            SQL sql = "select * from person where name=@name";
+            sql = sql["name", name];
+            var list = DB.QueryTable(sql);
+            Assert.IsNotNull(list);
+            Assert.AreEqual(list.Rows.Count > 0, true);
 
-        //}
+        }
 
         [TestMethod]
         public void TestMethod3_09()

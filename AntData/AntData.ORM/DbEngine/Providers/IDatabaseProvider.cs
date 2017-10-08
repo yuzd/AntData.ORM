@@ -25,13 +25,12 @@ namespace AntData.ORM.DbEngine.Providers
         /// <returns>数据库指令</returns>
         DbCommand CreateCommand();
 
-#if !NETSTANDARD
         /// <summary>
         /// 创建数据库适配器
         /// </summary>
         /// <returns></returns>
         DbDataAdapter CreateDataAdapter();
-
+#if !NETSTANDARD
         
         /// <summary>
         /// 是否支持参数导出
@@ -44,7 +43,6 @@ namespace AntData.ORM.DbEngine.Providers
         /// <param name="command">数据库指令</param>
         void DeriveParameters(DbCommand command);
 #endif
-
 
         /// <summary>
         /// 将名称变为数据库相关的参数名称

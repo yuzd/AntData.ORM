@@ -42,7 +42,7 @@ namespace AntData.ORM.DbEngine.Providers
 
             return name;
         }
-#if !NETSTANDARD
+
         /// <summary>
         /// 创建数据库适配器
         /// </summary>
@@ -51,7 +51,7 @@ namespace AntData.ORM.DbEngine.Providers
         {
             return new SqlDataAdapter();
         }
-
+#if !NETSTANDARD
         /// <summary>
         /// 是否支持导出数据库指令参数
         /// </summary>

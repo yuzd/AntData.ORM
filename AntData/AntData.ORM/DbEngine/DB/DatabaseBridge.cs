@@ -13,7 +13,7 @@ namespace AntData.ORM.DbEngine.DB
         private static readonly DatabaseBridge instance = new DatabaseBridge();
 
         public static DatabaseBridge Instance { get { return instance; } }
-#if !NETSTANDARD
+
         /// <summary>
         /// 根据Statement，返回DataSet结果集
         /// </summary>
@@ -31,7 +31,6 @@ namespace AntData.ORM.DbEngine.DB
             {
             }
         }
-#endif
 
         public DataConnectionTransaction BeginTransaction(Statement statement)
         {
