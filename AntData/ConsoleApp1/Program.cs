@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AntData.ORM.Data;
 using DbModels.SqlServer;
+using Microsoft.Extensions.Configuration;
 
 namespace ConsoleApp1
 {
@@ -13,6 +15,10 @@ namespace ConsoleApp1
         private static SqlServerlDbContext<Entitys> DB;
         public static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile(Directory.GetCurrentDirectory() + "\\Config\\Dal.json").Build();
+            AntData.ORM.Common.Configuration.UseDBConfig(builder);
+
             DB = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             //Insert的时候 忽略Null的字段

@@ -98,65 +98,8 @@ namespace AntData.ORM.Reflection
 
         #endregion
 
-        /// <summary>
-        /// 返回FieldInfo实例反射优化后的GetValue调用结果
-        /// </summary>
-        /// <param name="fieldInfo">FieldInfo对象实例</param>
-        /// <param name="obj">调用参数,用于数组索引器等成员</param>
-        /// <returns>调用结果</returns>
-        public static object FastGetValue(this FieldInfo fieldInfo, object obj)
-		{
-			if( fieldInfo == null )
-				throw new ArgumentNullException("fieldInfo");
+  
 
-			GetValueDelegate getter = (GetValueDelegate)s_getterDict[fieldInfo];
-			if( getter == null ) {
-				getter = DynamicMethodFactory.CreateFieldGetter(fieldInfo);
-				s_getterDict[fieldInfo] = getter;
-			}
-
-			return getter(obj);
-		}
-
-		/// <summary>
-		/// 使用反射优化的方式对FieldInfo实例赋值
-		/// </summary>
-		/// <param name="fieldInfo">FieldInfo对象实例</param>
-		/// <param name="obj">调用参数,用于数组索引器等成员</param>
-		/// <param name="value">对象值</param>
-		public static void FastSetField(this FieldInfo fieldInfo, object obj, object value)
-		{
-			if( fieldInfo == null )
-				throw new ArgumentNullException("fieldInfo");
-
-			SetValueDelegate setter = (SetValueDelegate)s_setterDict[fieldInfo];
-			if( setter == null ) {
-				setter = DynamicMethodFactory.CreateFieldSetter(fieldInfo);
-				s_setterDict[fieldInfo] = setter;
-			}
-
-			setter(obj, value);
-		}
-
-		/// <summary>
-		/// 返回使用反射优化后动态创建对应类型实例的结果
-		/// </summary>
-		/// <param name="instanceType">类型</param>
-		/// <returns>类型实例</returns>
-		public static object FastNew(this Type instanceType)
-		{
-			if( instanceType == null )
-				throw new ArgumentNullException("instanceType");
-
-			CtorDelegate ctor = (CtorDelegate)s_methodDict[instanceType];
-			if( ctor == null ) {
-				ConstructorInfo ctorInfo = instanceType.GetConstructor(Type.EmptyTypes);
-				ctor = DynamicMethodFactory.CreateConstructor(ctorInfo);
-				s_methodDict[instanceType] = ctor;
-			}
-
-			return ctor();
-		}
 
 
         /// <summary>

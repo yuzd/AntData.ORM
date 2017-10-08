@@ -19,6 +19,9 @@
       <Link>App.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Config\dal.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="App.config" />
   </ItemGroup>
 
@@ -27,11 +30,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AntData.Core" Version="1.2.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AntData.ORM\AntData.ORM.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties Config_4dal_1json__JSONSchema="http://json.schemastore.org/bower" /></VisualStudio></ProjectExtensions>
 
 </Project>

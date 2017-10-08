@@ -206,17 +206,9 @@ namespace AntData.ORM.Reflection
 				throw new ArgumentNullException("method");
 
 			if( method.IsStatic )
-#if NETSTANDARD
-                _caller = DynamicMethodFactory.CreateDelegate(typeof(TDelegate), method,true) as TDelegate;
-#else
                 _caller = Delegate.CreateDelegate(typeof(TDelegate), method) as TDelegate;
-#endif
             else
-#if NETSTANDARD
-                _caller = DynamicMethodFactory.CreateDelegate(typeof(TDelegate), method) as TDelegate;
-#else
                 _caller = Delegate.CreateDelegate(typeof(TDelegate), null, method) as TDelegate;
-#endif
         }
 
 		public object Invoke(object target, object[] parameters)

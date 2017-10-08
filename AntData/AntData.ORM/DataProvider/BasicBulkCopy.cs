@@ -122,14 +122,8 @@ namespace AntData.ORM.DataProvider
             var senderParameter = Expression.Parameter(eventParams[0].ParameterType, eventParams[0].Name);
             var argsParameter = Expression.Parameter(eventParams[1].ParameterType, eventParams[1].Name);
 
-#if !NETSTANDARD
 			var mi = MemberHelper.MethodOf(() =>Delegate.CreateDelegate(typeof(string), (object) null, "", false));
-#else
-            MethodInfo mi = null;
-            throw new NotImplementedException("This is not implemented for .Net Core");
-            //Func<string> func = () => null;
-            //var del = func.GetMethodInfo().CreateDelegate(typeof(string));
-#endif
+
 
             var lambda = Expression.Lambda<Func<Action<object>, Delegate>>(
                 Expression.Call(

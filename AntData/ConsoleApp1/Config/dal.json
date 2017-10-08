@@ -1,0 +1,19 @@
+﻿{
+  "dal": [
+    {
+      "Provider": "sqlserver",
+      "Name": "testorm_sqlserver",
+      "ShardingStrategy": "",
+      "ConnectionItemList": [
+        {
+          "Name": "testorm_sqlserver",
+          "ConnectionString": "server=YUZD\\SERVERQ;database=Test;uid=sa;pwd=p@ssw0rd;",
+          "DatabaseType": "Master",
+          "Sharding": ""
+        }
+      ]
+
+    }
+  ]
+}
+

@@ -5,10 +5,6 @@ using System.Reflection;
 using AntData.ORM.Common;
 using JetBrains.Annotations;
 
-#if NETSTANDARD
-using System.Runtime.Loader;
-using System.Linq;
-#endif
 
 namespace LinqToDB.DataProvider
 {
@@ -43,7 +39,7 @@ namespace LinqToDB.DataProvider
             SetResolver();
         }
 
-#if !NETSTANDARD
+
 		void SetResolver()
 		{
 			ResolveEventHandler resolver = Resolver;
@@ -64,7 +60,7 @@ namespace LinqToDB.DataProvider
 				return _assembly ?? (_assembly = Assembly.LoadFile(File.Exists(_path) ? _path : Path.Combine(_path, args.Name, ".dll")));
 			return null;
 		}
-#else
+#if !NETSTANDARD
         public class FileAssemblyLoadContext : AssemblyLoadContext
         {
             readonly string _path;

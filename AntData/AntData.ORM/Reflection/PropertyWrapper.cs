@@ -72,13 +72,8 @@ namespace AntData.ORM.Reflection
 
             if (mi.IsStatic)
             {
-#if NETSTANDARD
-                throw new NotSupportedException("不支Static持写操作。");
-#else
-              Type instanceType = typeof(StaticGetterWrapper<>).MakeGenericType(propertyInfo.PropertyType);
+                Type instanceType = typeof(StaticGetterWrapper<>).MakeGenericType(propertyInfo.PropertyType);
                 return (IGetValue)Activator.CreateInstance(instanceType, propertyInfo);
-#endif
-
             }
             else
             {
@@ -106,13 +101,8 @@ namespace AntData.ORM.Reflection
 
             if (mi.IsStatic)
             {
-#if NETSTANDARD
-                throw new NotSupportedException("不支Static持写操作。");
-#else
-             Type instanceType = typeof(StaticSetterWrapper<>).MakeGenericType(propertyInfo.PropertyType);
+                Type instanceType = typeof(StaticSetterWrapper<>).MakeGenericType(propertyInfo.PropertyType);
                 return (ISetValue)Activator.CreateInstance(instanceType, propertyInfo);     
-#endif
-
             }
             else
             {
@@ -125,11 +115,8 @@ namespace AntData.ORM.Reflection
 
     internal class GetterWrapper<TTarget, TValue> : IGetValue
     {
-#if !NETSTANDARD
        private Func<TTarget, TValue> _getter;
-#else
-        private GetValueDelegate _getter;
-#endif
+
         
 
         public GetterWrapper(PropertyInfo propertyInfo)
@@ -139,13 +126,8 @@ namespace AntData.ORM.Reflection
 
             if (propertyInfo.CanRead == false)
                 throw new InvalidOperationException("属性不支持读操作。");
-#if !NETSTANDARD
             MethodInfo m = propertyInfo.GetGetMethod(true);
             _getter = (Func<TTarget, TValue>)Delegate.CreateDelegate(typeof(Func<TTarget, TValue>), null, m);
-#else
-            _getter = DynamicMethodFactory.CreatePropertyGetter(typeof(Func<TTarget, TValue>), propertyInfo);
-#endif
-
         }
 
         public TValue GetValue(TTarget target)
@@ -160,11 +142,8 @@ namespace AntData.ORM.Reflection
 
     internal class SetterWrapper<TTarget, TValue> : ISetValue
     {
-#if !NETSTANDARD
         private Action<TTarget, TValue> _setter;
-#else
-        private SetValueDelegate _setter;
-#endif
+
         public SetterWrapper(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
@@ -172,12 +151,8 @@ namespace AntData.ORM.Reflection
 
             if (propertyInfo.CanWrite == false)
                 throw new NotSupportedException("属性不支持写操作。");
-#if !NETSTANDARD
             MethodInfo m = propertyInfo.GetSetMethod(true);
             _setter = (Action<TTarget, TValue>)Delegate.CreateDelegate(typeof(Action<TTarget, TValue>), null, m);
-#else
-            _setter = DynamicMethodFactory.CreatePropertySetter(typeof(Action<TTarget, TValue>), propertyInfo);
-#endif
 
         }
 
@@ -190,7 +165,6 @@ namespace AntData.ORM.Reflection
             _setter((TTarget)target, (TValue)val);
         }
     }
-#if !NETSTANDARD
     internal class StaticGetterWrapper<TValue> : IGetValue
     {
         private Func<TValue> _getter;
@@ -244,5 +218,4 @@ namespace AntData.ORM.Reflection
             _setter((TValue)val);
         }
     }
-#endif
 }
