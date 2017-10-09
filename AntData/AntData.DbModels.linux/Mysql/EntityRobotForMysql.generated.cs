@@ -13,20 +13,12 @@ namespace DbModels.Mysql
 	/// <summary>
 	/// Database       : testorm
 	/// Data Source    : localhost
-	/// Server Version : 5.6.26-log
+	/// Server Version : 5.1.49-community
 	/// </summary>
 	public partial class TestormEntitys : IEntity
 	{
-		/// <summary>
-		/// 人员
-		/// </summary>
-		public IQueryable<Person>      People      { get { return this.Get<Person>(); } }
-		/// <summary>
-		/// 学校
-		/// </summary>
-		public IQueryable<School>      Schools     { get { return this.Get<School>(); } }
-		public IQueryable<SchoolName>  SchoolName  { get { return this.Get<SchoolName>(); } }
-		public IQueryable<school_name> school_name { get { return this.Get<school_name>(); } }
+		public IQueryable<Person> People  { get { return this.Get<Person>(); } }
+		public IQueryable<School> Schools { get { return this.Get<School>(); } }
 
 		private readonly DataConnection con;
 
@@ -47,10 +39,7 @@ namespace DbModels.Mysql
 		}
 	}
 
-	/// <summary>
-	/// 人员
-	/// </summary>
-	[Table(Comment="人员", Name="person")]
+	[Table("person")]
 	public partial class Person : BaseEntity
 	{
 		#region Column
@@ -100,18 +89,15 @@ namespace DbModels.Mysql
 		#region Associations
 
 		/// <summary>
-		/// person_SchoolId_school_Id
+		/// persons_school
 		/// </summary>
-		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, IsBackReference=true)]
+		[Association(ThisKey="SchoolId", OtherKey="Id", CanBeNull=true, KeyName="persons_school", BackReferenceName="persons")]
 		public School School { get; set; }
 
 		#endregion
 	}
 
-	/// <summary>
-	/// 学校
-	/// </summary>
-	[Table(Comment="学校", Name="school")]
+	[Table("school")]
 	public partial class School : BaseEntity
 	{
 		#region Column
@@ -155,50 +141,10 @@ namespace DbModels.Mysql
 		#region Associations
 
 		/// <summary>
-		/// school_Id_person_SchoolId
+		/// persons_school_BackReference
 		/// </summary>
 		[Association(ThisKey="Id", OtherKey="SchoolId", CanBeNull=true, IsBackReference=true)]
 		public IEnumerable<Person> PersonList { get; set; }
-
-		#endregion
-	}
-
-	[Table("school__name")]
-	public partial class SchoolName : BaseEntity
-	{
-		#region Column
-
-		/// <summary>
-		/// 主键
-		/// </summary>
-		[Column("Id", DataType=AntData.ORM.DataType.Int64, Comment="主键"), PrimaryKey, Identity]
-		public long Id { get; set; } // bigint(20)
-
-		#endregion
-	}
-
-	[Table("school_name")]
-	public partial class school_name : BaseEntity
-	{
-		#region Column
-
-		/// <summary>
-		/// 主键
-		/// </summary>
-		[Column("Id",      DataType=AntData.ORM.DataType.Int64,   Comment="主键"), PrimaryKey, NotNull]
-		public long Id { get; set; } // bigint(20)
-
-		/// <summary>
-		/// 测试
-		/// </summary>
-		[Column("Name",    DataType=AntData.ORM.DataType.Boolean, Comment="测试"), NotNull]
-		public bool Name { get; set; } // bit(1)
-
-		/// <summary>
-		/// 订单号
-		/// </summary>
-		[Column("OrderID", DataType=AntData.ORM.DataType.Int64,   Comment="订单号"), NotNull]
-		public long OrderID { get; set; } // bigint(20)
 
 		#endregion
 	}
@@ -224,30 +170,6 @@ namespace DbModels.Mysql
 		}
 
 		public static async Task<School> FindByBkAsync(this IQueryable<School> table, long Id)
-		{
-			return await table.FirstOrDefaultAsync(t =>
-				t.Id == Id);
-		}
-
-		public static SchoolName FindByBk(this IQueryable<SchoolName> table, long Id)
-		{
-			return table.FirstOrDefault(t =>
-				t.Id == Id);
-		}
-
-		public static async Task<SchoolName> FindByBkAsync(this IQueryable<SchoolName> table, long Id)
-		{
-			return await table.FirstOrDefaultAsync(t =>
-				t.Id == Id);
-		}
-
-		public static school_name FindByBk(this IQueryable<school_name> table, long Id)
-		{
-			return table.FirstOrDefault(t =>
-				t.Id == Id);
-		}
-
-		public static async Task<school_name> FindByBkAsync(this IQueryable<school_name> table, long Id)
 		{
 			return await table.FirstOrDefaultAsync(t =>
 				t.Id == Id);

@@ -22,7 +22,7 @@ namespace AntData.ORM.Common
         /// netcore 新的配置读取方式
         /// </summary>
         /// <param name="config"></param>
-        public static void UseDBConfig(IConfigurationRoot config)
+        public static void UseDBConfig(IConfiguration config)
         {
             if (config == null)
             {

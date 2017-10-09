@@ -11,13 +11,13 @@
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
-	LoadMySqlMetadata("localhost","28747", "testorm", "root", "123456");
+	LoadMySqlMetadata("localhost","3306", "testorm", "root", "p@ssw0rd");
 	//LoadMySqlMetadata("localhost","3306", "DBName", "DbUserName", "DbPassword");
 
 	//SetTableSharding("orders_{0}","orders_0","orders_1");
 	//school表对应person是一对多关系
-	SetFk("school","Id","person","SchoolId",AssociationType.OneToMany);
+	//SetFk("school","Id","person","SchoolId",AssociationType.OneToMany);
 	//person表对应school是一对一关系
-	SetFk("person","SchoolId","school","Id",AssociationType.OneToOne);
+	//SetFk("person","SchoolId","school","Id",AssociationType.OneToOne);
 	GenerateModel();
 #>

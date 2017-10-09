@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.ORM", "AntData.ORM\AntData.ORM.csproj", "{68DD9365-BBE4-4D8D-BC65-532D13F0394F}"
 EndProject
@@ -12,6 +12,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{E5AB4FD5-305A-4906-99C9-C75D304D8DA0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.ORM.Mysql", "AntData.ORM.Mysql\AntData.ORM.Mysql.csproj", "{33DBDBF5-DDB9-4BEB-A91E-08DA1635D092}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{171D4E22-C46B-450C-8A14-5A21F424ADF9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "netcore2web", "Test\netcore2web\netcore2web.csproj", "{9A4D0476-860C-46AB-B82B-D08F812FF3B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +43,18 @@ Global
 		{33DBDBF5-DDB9-4BEB-A91E-08DA1635D092}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33DBDBF5-DDB9-4BEB-A91E-08DA1635D092}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33DBDBF5-DDB9-4BEB-A91E-08DA1635D092}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A4D0476-860C-46AB-B82B-D08F812FF3B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A4D0476-860C-46AB-B82B-D08F812FF3B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A4D0476-860C-46AB-B82B-D08F812FF3B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A4D0476-860C-46AB-B82B-D08F812FF3B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0F41758D-1505-415C-89E0-A7E6B76978C1} = {171D4E22-C46B-450C-8A14-5A21F424ADF9}
+		{E5AB4FD5-305A-4906-99C9-C75D304D8DA0} = {171D4E22-C46B-450C-8A14-5A21F424ADF9}
+		{9A4D0476-860C-46AB-B82B-D08F812FF3B9} = {171D4E22-C46B-450C-8A14-5A21F424ADF9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E885E7C5-FADF-4C84-8C59-7F098453794B}

@@ -14,8 +14,10 @@ using AntData.ORM;
 using AntData.ORM.Data;
 using AntData.ORM.DataProvider;
 using AntData.ORM.DataProvider.MySql;
+using AntData.ORM.DataProvider.Oracle;
 using AntData.ORM.DataProvider.SqlServer;
 using AntData.ORM.Linq;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -120,6 +122,16 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class AntOrmServiceCollectionExtensions
     {
+        /// <summary>
+        /// 添加Msyql entity到DI
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serviceCollection"></param>
+        /// <param name="mappingName">逻辑数据库名称</param>
+        /// <param name="opsAction"></param>
+        /// <param name="contextLifetime">默认每次获取都是新的实例</param>
+        /// <param name="optionsLifetime">默认每次获取都是新的实例</param>
+        /// <returns></returns>
         public static IServiceCollection AddMysqlEntitys<T>(this IServiceCollection serviceCollection, string mappingName,Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
         {
             if (serviceCollection == null)
@@ -137,6 +149,17 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             return serviceCollection;
         }
+
+        /// <summary>
+        /// 添加sqlserver entity 到DI
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serviceCollection"></param>
+        /// <param name="mappingName">逻辑数据库名称</param>
+        /// <param name="opsAction"></param>
+        /// <param name="contextLifetime">默认每次获取都是新的实例</param>
+        /// <param name="optionsLifetime">默认每次获取都是新的实例</param>
+        /// <returns></returns>
         public static IServiceCollection AddSqlServerEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
         {
             if (serviceCollection == null)
@@ -156,6 +179,34 @@ namespace Microsoft.Extensions.DependencyInjection
             return serviceCollection;
         }
 
+        /// <summary>
+        /// 添加oracle entity 到DI
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serviceCollection"></param>
+        /// <param name="mappingName">逻辑数据库名称</param>
+        /// <param name="opsAction"></param>
+        /// <param name="contextLifetime">默认每次获取都是新的实例</param>
+        /// <param name="optionsLifetime">默认每次获取都是新的实例</param>
+        /// <returns></returns>
+        public static IServiceCollection AddOracleEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
+        {
+            if (serviceCollection == null)
+            {
+                throw new ArgumentException("serviceCollection is null");
+            }
+            serviceCollection.AddSingleton<IDataProvider>(new OracleDataProvider());
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            var dbOptions = new DbContextOptions(mappingName);
+            if (opsAction != null)
+            {
+                opsAction(dbOptions);
+            }
+            serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
+            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            return serviceCollection;
+        }
         private static void CheckContextConstructors(Type type)
         {
             List<ConstructorInfo> list = type.GetTypeInfo().DeclaredConstructors.ToList<ConstructorInfo>();
