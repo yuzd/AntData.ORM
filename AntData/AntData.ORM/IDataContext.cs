@@ -36,14 +36,6 @@ namespace AntData.ORM
 
         #endregion
 
-        #region 事物
-
-	    void UseTransaction(System.Action func);
-	    void UseTransaction(System.Action func, System.Data.IsolationLevel isolationLevel);
-	    void UseTransaction(System.Func<bool> func);
-	    void UseTransaction(System.Func<bool> func, System.Data.IsolationLevel isolationLevel);
-
-        #endregion
         /// <summary>
         /// 获取Sql文
         /// </summary>

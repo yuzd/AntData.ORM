@@ -82,7 +82,7 @@ namespace Microsoft.Extensions.DependencyInjection
         T Build();
     }
 
-    public class DbContextFactory : IServiceFactory<IDataContext>
+    public class DbContextFactory : IServiceFactory<DataConnection>
     {
         private readonly IDataProvider _dataProvider;
         private readonly DbContextOptions _dbContextOptions;
@@ -93,7 +93,7 @@ namespace Microsoft.Extensions.DependencyInjection
             _dbContextOptions = dbContextOptions;
         }
 
-        public IDataContext Build()
+        public DataConnection Build()
         {
             return new DataConnection(_dataProvider, _dbContextOptions.Name)
             {
@@ -120,7 +120,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class AntOrmServiceCollectionExtensions
     {
-        public static IServiceCollection AddMysqlEntitys<T>(this IServiceCollection serviceCollection, string mappingName,Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Scoped, ServiceLifetime optionsLifetime = ServiceLifetime.Scoped) where T : IEntity
+        public static IServiceCollection AddMysqlEntitys<T>(this IServiceCollection serviceCollection, string mappingName,Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
         {
             if (serviceCollection == null)
             {
@@ -133,11 +133,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 opsAction(dbOptions);
             }
             serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
-            serviceCollection.AddTransientFactory<IDataContext, DbContextFactory>();
+            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             return serviceCollection;
         }
-        public static IServiceCollection AddSqlServerEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Scoped, ServiceLifetime optionsLifetime = ServiceLifetime.Scoped) where T : IEntity
+        public static IServiceCollection AddSqlServerEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
         {
             if (serviceCollection == null)
             {
@@ -151,7 +151,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 opsAction(dbOptions);
             }
             serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
-            serviceCollection.AddTransientFactory<IDataContext, DbContextFactory>();
+            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             return serviceCollection;
         }

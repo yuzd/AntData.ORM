@@ -13,7 +13,7 @@ namespace ConsoleApp1
 {
     public class Program
     {
-        private static SqlServerlDbContext<Entitys> DB;
+        private static SqlServerlDbContext<TestEntitys> DB;
         public static void Main(string[] args)
         {
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
@@ -28,21 +28,21 @@ namespace ConsoleApp1
 
 
             IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddSqlServerEntitys<Entitys>("testorm_sqlserver", ops =>
+            serviceCollection.AddSqlServerEntitys<TestEntitys>("testorm_sqlserver", ops =>
             {
                 ops.IsEnableLogTrace = true;
                 ops.OnLogTrace = OnCustomerTraceConnection;
             });
 
             var Services = serviceCollection.BuildServiceProvider();
-            var entitys = Services.GetService<Entitys>();
+            var newDB = Services.GetService<TestEntitys>();
 
-            var p1 = entitys.People.FirstOrDefault();
+            var p1 = newDB.People.FirstOrDefault();
            
-            var p2 = entitys.People.FirstOrDefault(r => r.Name.Equals("yuzd"));
+            var p2 = newDB.People.FirstOrDefault(r => r.Name.Equals("yuzd"));
             Console.WriteLine(p1.Name);
 
-            DB = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
+            DB = new SqlServerlDbContext<TestEntitys>("testorm_sqlserver");
             DB.IsEnableLogTrace = true;
             DB.OnLogTrace = OnCustomerTraceConnection;
 

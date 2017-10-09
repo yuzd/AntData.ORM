@@ -1,0 +1,47 @@
+<#@ template language="C#" debug="True" hostSpecific="True"                            #>
+<#@ output extension=".generated.cs"                                                   #>
+<#@ include file="..\Templates\LinqToDB.Oracle.Tools.ttinclude" #>
+<#@ include file="..\Templates\PluralizationService.ttinclude" #>
+<#
+	
+	NamespaceName = "DbModels.Oracle";
+	GenerateConstructors     = true;
+    GenerateFindExtensions = true;
+	GenerateDataTypes = true;
+    IsCompactColumns = false;
+	IsOracle = true;
+    BaseDataContextClass = "IEntity";
+    BaseEntityClass = "BaseEntity";
+	LoadOracleMetadata("192.168.1.6", "1521", "orcl", "test", "test");
+	//LoadOracleMetadata("DBHostIP", "DBHostPort", "DBServiceName", "UserName", "PASSWORD");
+
+	//set Identity field of table (ps:oracle表的自增类型是通过trigger seq来实现的，如果表有自增类型的字段要在这里手动设置一下)
+	SetIdentity("PERSON","ID","PERSONSEQ","GET_PERSONSEQ_IDENTITY_ID");
+	SetIdentity("SCHOOL","ID","SCHOOLSEQ","GET_SCHOOLSEQ_IDENTITY_ID");
+	//SetIdentity参数说明：第一个参数为表名称。第二个参数为自增字段的字段名称，第三个参数是创建的SEQ，第四个参数是创建的获取SEQ的结果Function(创建方法请参照下方)
+	//create entities
+	GenerateModel();
+#>
+
+//下面的sql是创建SEQUENCE
+//CREATE SEQUENCE PERSONSEQ;
+//CREATE SEQUENCE SCHOOLSEQ; 
+
+//下面的sql是创建一个获取指定的Seq的结果的function，其中PERSONSEQ是我创建的seq
+//CREATE
+//OR REPLACE FUNCTION GET_PERSONSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
+//BEGIN
+//	SELECT
+//		PERSONSEQ.nextval INTO num
+//	FROM
+//		dual ; RETURN num ;
+//	END GET_PERSONSEQ_IDENTITY_ID ;
+
+//CREATE
+//OR REPLACE FUNCTION GET_SCHOOLSEQ_IDENTITY_ID RETURN NUMBER AS num NUMBER ;
+//BEGIN
+//	SELECT
+//		PERSONSEQ.nextval INTO num
+//	FROM
+//		dual ; RETURN num ;
+//	END GET_SCHOOLSEQ_IDENTITY_ID ;

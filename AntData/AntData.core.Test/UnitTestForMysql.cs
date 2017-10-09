@@ -17,11 +17,11 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTestForMysql
     {
-        private static MysqlDbContext<Entitys> DB
+        private static MysqlDbContext<TestormEntitys> DB
         {
             get
             {
-                var db = new MysqlDbContext<Entitys>("testorm");
+                var db = new MysqlDbContext<TestormEntitys>("testorm");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;
@@ -215,21 +215,21 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_04()
         {
-            var p = DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefault(r => r.Name.Equals("nainaigu"));
+            var p = DB.Tables.People.LoadWith(r => r.School).FirstOrDefault(r => r.Name.Equals("nainaigu"));
             
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschool);
-            Assert.IsNotNull(p.Personsschool.Name);
+            Assert.IsNotNull(p.School);
+            Assert.IsNotNull(p.School.Name);
         }
 
         [TestMethod]
         public void TestMethod2_05()
         {
-            var p = DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefault(r => r.Name.Equals("北京大学"));
+            var p = DB.Tables.Schools.LoadWith(r => r.PersonList).FirstOrDefault(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Persons);
-            Assert.IsTrue(p.Persons.Any());
+            Assert.IsNotNull(p.PersonList);
+            Assert.IsTrue(p.PersonList.Any());
         }
 
         [TestMethod]
@@ -658,22 +658,22 @@ namespace AntDataUnitTest
         public async Task TestMethod6_02()
         {
             var p =
-                await DB.Tables.People.LoadWith(r => r.Personsschool)
+                await DB.Tables.People.LoadWith(r => r.School)
                     .FirstOrDefaultAsync(r => r.Name.Equals("nainaigu"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschool);
-            Assert.IsNotNull(p.Personsschool.Name);
+            Assert.IsNotNull(p.School);
+            Assert.IsNotNull(p.School.Name);
         }
 
         [TestMethod]
         public async Task TestMethod6_03()
         {
-            var p = await DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefaultAsync(r => r.Name.Equals("北京大学"));
+            var p = await DB.Tables.Schools.LoadWith(r => r.PersonList).FirstOrDefaultAsync(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Persons);
-            Assert.IsTrue(p.Persons.Any());
+            Assert.IsNotNull(p.PersonList);
+            Assert.IsTrue(p.PersonList.Any());
         }
 
         [TestMethod]

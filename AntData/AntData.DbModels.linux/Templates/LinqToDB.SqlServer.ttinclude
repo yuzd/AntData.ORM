@@ -1,0 +1,55 @@
+<#@ include file="LinqToDB.ttinclude" #>
+<#
+	{
+		var afterGenerateLinqToDBModel = AfterGenerateLinqToDBModel;
+		AfterGenerateLinqToDBModel = () =>
+		{
+			afterGenerateLinqToDBModel();
+			GenerateSqlServerTypes();
+		};
+	}
+#>
+<#+
+void GenerateSqlServerTypes()
+{
+	Model.Usings.Add("System.Collections.Generic");
+	Model.Usings.Add("System.Linq.Expressions");
+	Model.Usings.Add("System.Reflection");
+
+
+	
+}
+
+LinqToDB.Data.DataConnection GetSqlServerConnection(string connectionString)
+{
+	return LinqToDB.DataProvider.SqlServer.SqlServerTools.CreateDataConnection(connectionString);
+}
+
+LinqToDB.Data.DataConnection GetSqlServerConnection(string server, string database)
+{
+	return GetSqlServerConnection(string.Format("Data Source={0};Database={1};Integrated Security=SSPI", server, database));
+}
+
+LinqToDB.Data.DataConnection GetSqlServerConnection(string server, string database, string user, string password)
+{
+	return GetSqlServerConnection(string.Format("Server={0};Database={1};User Id={2};Password={3};", server, database, user, password));
+}
+
+void LoadSqlServerMetadata(string connectionString)
+{
+	var dataConnection = GetSqlServerConnection(connectionString);
+	LoadMetadata(dataConnection);
+}
+
+void LoadSqlServerMetadata(string server, string database)
+{
+	var dataConnection = GetSqlServerConnection(server, database);
+	LoadMetadata(dataConnection);
+}
+
+void LoadSqlServerMetadata(string server, string database, string user, string password)
+{
+	var dataConnection = GetSqlServerConnection(server, database, user, password);
+	LoadMetadata(dataConnection);
+}
+#>

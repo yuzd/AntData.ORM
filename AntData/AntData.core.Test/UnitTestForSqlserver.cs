@@ -21,14 +21,14 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTest2
     {
-        private static SqlServerlDbContext<Entitys> DB;
+        private static SqlServerlDbContext<TestEntitys> DB;
 
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
            
            
-            DB = new SqlServerlDbContext<Entitys>("testorm_sqlserver");
+            DB = new SqlServerlDbContext<TestEntitys>("testorm_sqlserver");
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;
             //Insert的时候 忽略Null的字段
             AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert = true;
@@ -210,21 +210,21 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod2_04()
         {
-            var p = DB.Tables.People.LoadWith(r => r.Personsschool).FirstOrDefault(r => r.Name.Equals("nainaigu"));
+            var p = DB.Tables.People.LoadWith(r => r.School).FirstOrDefault(r => r.Name.Equals("nainaigu"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Personsschool);
-            Assert.IsNotNull(p.Personsschool.Name);
+            Assert.IsNotNull(p.School);
+            Assert.IsNotNull(p.School.Name);
         }
 
         [TestMethod]
         public void TestMethod2_05()
         {
-            var p = DB.Tables.Schools.LoadWith(r => r.Persons).FirstOrDefault(r => r.Name.Equals("北京大学"));
+            var p = DB.Tables.Schools.LoadWith(r => r.PersonList).FirstOrDefault(r => r.Name.Equals("北京大学"));
 
             Assert.IsNotNull(p);
-            Assert.IsNotNull(p.Persons);
-            Assert.IsTrue(p.Persons.Any());
+            Assert.IsNotNull(p.PersonList);
+            Assert.IsTrue(p.PersonList.Any());
         }
 
         [TestMethod]

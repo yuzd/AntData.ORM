@@ -1,0 +1,712 @@
+<#@ assembly name="System.Data"                #>
+<#@ import namespace="System.Data"             #>
+<#@ import namespace="LinqToDB.SchemaProvider" #>
+<#@ import namespace="LinqToDB.Data"           #>
+<#@ include file="T4Model.ttinclude"           #>
+<#
+	{
+		var beforeGenerateModel = BeforeGenerateModel;
+		BeforeGenerateModel = () =>
+		{
+			GenerateTypesFromMetadata();
+			beforeGenerateModel();
+		};
+	}
+#><#+
+
+string   NamespaceName
+{
+	get { return Model.Namespace.Name;  }
+	set { Model.Namespace.Name = value; }
+}
+
+string   DatabaseName             = null;
+string   DataContextName          = null;
+string   BaseDataContextClass     = null;
+string   BaseEntityClass          = null;
+string   OneToManyAssociationType = "IEnumerable<{0}>";
+
+bool     GenerateDatabaseName     = false;
+bool     GenerateConstructors     = true;
+string   DefaultConfiguration     = null;
+bool     GenerateAssociations     = true;
+bool     GenerateBackReferences   = true;
+bool     ReplaceSimilarTables     = true;
+bool     IncludeDefaultSchema     = true;
+
+Class    DataContextObject;
+
+bool PluralizeClassNames                 = false;
+bool SingularizeClassNames               = true;
+bool PluralizeDataContextPropertyNames   = true;
+bool SingularizeDataContextPropertyNames = false;
+
+LinqToDB.SchemaProvider.GetSchemaOptions GetSchemaOptions =
+	new LinqToDB.SchemaProvider.GetSchemaOptions();
+
+LinqToDB.SqlProvider.ISqlBuilder SqlBuilder;
+
+Func<TableSchema,Table> LoadProviderSpecificTable = tableSchema => null;
+
+void LoadServerMetadata(DataConnection dataConnection)
+{
+	 SqlBuilder = dataConnection.DataProvider.CreateSqlBuilder();
+
+	var sp = dataConnection.DataProvider.GetSchemaProvider();
+	var db = sp.GetSchema(dataConnection, GetSchemaOptions);
+
+	if (DatabaseName == null && GenerateDatabaseName)
+		DatabaseName = db.Database;
+
+    if (DataContextName == null)
+        DataContextObject.Name = DataContextName = ToPascalCase(db.Database) + "Entitys";
+	
+	DataContextObject.Comment.Add("/ <summary>");
+	DataContextObject.Comment.Add("/ Database       : " + db.Database);
+	DataContextObject.Comment.Add("/ Data Source    : " + db.DataSource);
+	DataContextObject.Comment.Add("/ Server Version : " + db.ServerVersion);
+	DataContextObject.Comment.Add("/ </summary>");
+
+	var tables = db.Tables
+		.Where(t => !t.IsProviderSpecific)
+		.Select(t => new
+		{
+			t,
+			key = t.IsDefaultSchema ? t.TableName : t.SchemaName + "." + t.TableName,
+			table = new Table
+			{
+				TableSchema             = t,
+				Schema                  = (t.IsDefaultSchema && !IncludeDefaultSchema) || string.IsNullOrEmpty(t.SchemaName)? null : t.SchemaName,
+				BaseClass               = BaseEntityClass,
+				TableName               = t.TableName,
+				TypeName                =
+					PluralizeClassNames   ? ToPlural  (t.TypeName) :
+					SingularizeClassNames ? ToSingular(t.TypeName) : t.TypeName,
+				DataContextPropertyName =
+					PluralizeDataContextPropertyNames   ? ToPlural  (t.TypeName) :
+					SingularizeDataContextPropertyNames ? ToSingular(t.TypeName) : t.TypeName,
+				IsView                  = t.IsView,
+				IsProviderSpecific      = false,
+				Description             = t.Description,
+				Columns                 = t.Columns.ToDictionary(
+					c => c.ColumnName,
+					c => new Column
+					{
+						ColumnName      = c.ColumnName,
+						ColumnType      = c.ColumnType,
+						DataType        = "DataType." + c.DataType,
+						Length          = c.Length,
+						Precision       = c.Precision,
+						Scale           = c.Scale,
+						IsNullable      = c.IsNullable,
+						IsIdentity      = c.IsIdentity,
+						IsPrimaryKey    = c.IsPrimaryKey,
+						PrimaryKeyOrder = c.PrimaryKeyOrder,
+						MemberName      = CheckType(c.SystemType, c.MemberName),
+						Type            = c.MemberType,
+						SkipOnInsert    = c.SkipOnInsert,
+						SkipOnUpdate    = c.SkipOnUpdate,
+						Description     = c.Description,
+					})
+			}
+		})
+		.ToList();
+
+	tables.AddRange(db.Tables
+		.Where(t => t.IsProviderSpecific)
+		.Select(t => new
+		{
+			t,
+			key = t.IsDefaultSchema ? t.TableName : t.SchemaName + "." + t.TableName,
+			table = LoadProviderSpecificTable(t)
+		})
+		.Where(t => t.table != null));
+
+	foreach (var t in tables)
+		Tables.Add(t.key, t.table);
+
+	var keys =
+	(
+		from t in tables
+		from k in t.t.ForeignKeys
+		let otherTable = tables.Where(tbl => tbl.t == k.OtherTable).Select(tbl => tbl.table).Single()
+		select new
+		{
+			k,
+			k.KeyName,
+			t,
+			key = new ForeignKey
+			{
+				KeyName         = k.KeyName,
+				OtherTable      = otherTable,
+				OtherColumns    = k.OtherColumns.Select(c => otherTable.Columns[c.ColumnName]).ToList(),
+				ThisColumns     = k.ThisColumns. Select(c => t.table.   Columns[c.ColumnName]).ToList(),
+				CanBeNull       = k.CanBeNull,
+				MemberName      = k.MemberName,
+				AssociationType = (AssociationType)(int)k.AssociationType,
+			}
+		}
+	).ToList();
+
+	foreach (var key in keys)
+	{
+		key.t.table.ForeignKeys.Add(key.KeyName, key.key);
+
+		if (key.k.BackReference != null)
+			key.key.BackReference = keys.First(k => k.k == key.k.BackReference).key;
+
+		key.key.MemberName = key.key.AssociationType == AssociationType.OneToMany ?
+			ToPlural(key.key.MemberName) : ToSingular(key.key.MemberName);
+	}
+
+	var procedures = db.Procedures
+		.Select(p => new
+		{
+			p,
+			key = p.IsDefaultSchema ? p.ProcedureName : p.SchemaName + "." + p.ProcedureName,
+			proc = new Procedure
+			{
+				Schema          = (p.IsDefaultSchema && !IncludeDefaultSchema) || string.IsNullOrEmpty(p.SchemaName)? null : p.SchemaName,
+				ProcedureName   = p.ProcedureName,
+				Name            = p.MemberName,
+				IsFunction      = p.IsFunction,
+				IsTableFunction = p.IsTableFunction,
+				IsDefaultSchema = p.IsDefaultSchema,
+				IsLoaded        = p.IsLoaded,
+				ResultTable     = p.ResultTable == null ? null :
+					new Table
+					{
+						TypeName =
+							PluralizeClassNames   ? ToPlural  (p.ResultTable.TypeName) :
+							SingularizeClassNames ? ToSingular(p.ResultTable.TypeName) : p.ResultTable.TypeName,
+						Columns  = ToDictionary(
+							p.ResultTable.Columns,
+							c => c.ColumnName,
+							c => new Column
+							{
+								ColumnName      = c.ColumnName,
+								ColumnType      = c.ColumnType,
+								IsNullable      = c.IsNullable,
+								IsIdentity      = c.IsIdentity,
+								IsPrimaryKey    = c.IsPrimaryKey,
+								PrimaryKeyOrder = c.PrimaryKeyOrder,
+								MemberName      = CheckType(c.SystemType, c.MemberName),
+								Type            = c.MemberType,
+								SkipOnInsert    = c.SkipOnInsert,
+								SkipOnUpdate    = c.SkipOnUpdate,
+								Description     = c.Description,
+							},
+							(c,n) =>
+							{
+								c.IsDuplicateOrEmpty = true;
+								return "$" + (c.MemberName = "Column" + n);
+							})
+					},
+				ResultException = p.ResultException,
+				SimilarTables   = p.SimilarTables == null ? new List<Table>() :
+					p.SimilarTables
+						.Select(t => tables.Single(tbl => tbl.t == t).table)
+						.ToList(),
+				ProcParameters  = p.Parameters
+					.Select(pr => new Parameter
+					{
+						SchemaName    = pr.SchemaName,
+						SchemaType    = pr.SchemaType,
+						IsIn          = pr.IsIn,
+						IsOut         = pr.IsOut,
+						IsResult      = pr.IsResult,
+						Size          = pr.Size,
+						ParameterName = pr.ParameterName,
+						ParameterType = pr.ParameterType,
+						SystemType    = pr.SystemType,
+						DataType      = pr.DataType.ToString(),
+					})
+					.ToList(),
+			}
+		})
+		.ToList();
+
+	foreach (var p in procedures)
+	{
+		if (ReplaceSimilarTables)
+			if (p.proc.SimilarTables.Count() == 1 || p.proc.SimilarTables.Count(t => !t.IsView) == 1)
+				p.proc.ResultTable = p.proc.SimilarTables.Count() == 1 ?
+					p.proc.SimilarTables[0] :
+					p.proc.SimilarTables.First(t => !t.IsView);
+
+		Procedures[p.key] = p.proc;
+	}
+}
+
+Dictionary<string,TR> ToDictionary<T,TR>(IEnumerable<T> source, Func<T,string> keyGetter, Func<T,TR> objGetter, Func<TR,int,string> getKeyName)
+{
+	var dic     = new Dictionary<string,TR>();
+	var current = 1;
+
+	foreach (var item in source)
+	{
+		var key = keyGetter(item);
+		var obj = objGetter(item);
+
+		if (string.IsNullOrEmpty(key) || dic.ContainsKey(key))
+			key = getKeyName(obj, current);
+
+		dic.Add(key, obj);
+
+		current++;
+	}
+
+	return dic;
+}
+
+string CheckType(Type type, string typeName)
+{
+	if (!Model.Usings.Contains(type.Namespace))
+		Model.Usings.Add(type.Namespace);
+	return typeName;
+}
+
+Action AfterLoadMetadata = () => {};
+
+void LoadMetadata(DataConnection dataConnection)
+{
+	if (DataContextObject == null)
+	{
+		DataContextObject = new Class(DataContextName) { BaseClass = BaseDataContextClass, };
+
+		Model.Types.Add(DataContextObject);
+	}
+
+	LoadServerMetadata(dataConnection);
+
+	if (Tables.Values.SelectMany(_ => _.ForeignKeys.Values).Any(_ => _.AssociationType == AssociationType.OneToMany))
+		Model.Usings.Add("System.Collections.Generic");
+
+	var keyWords = new HashSet<string>
+	{
+		"abstract", "as",       "base",     "bool",    "break",     "byte",     "case",       "catch",     "char",    "checked",
+		"class",    "const",    "continue", "decimal", "default",   "delegate", "do",         "double",    "else",    "enum",
+		"event",    "explicit", "extern",   "false",   "finally",   "fixed",    "float",      "for",       "foreach", "goto",
+		"if",       "implicit", "in",       "int",     "interface", "internal", "is",         "lock",      "long",    "new",
+		"null",     "object",   "operator", "out",     "override",  "params",   "private",    "protected", "public",  "readonly",
+		"ref",      "return",   "sbyte",    "sealed",  "short",     "sizeof",   "stackalloc", "static",    "struct",  "switch",
+		"this",     "throw",    "true",     "try",     "typeof",    "uint",     "ulong",      "unchecked", "unsafe",  "ushort",
+		"using",    "virtual",  "volatile", "void",    "while"
+	};
+
+	foreach (var t in Tables.Values)
+	{
+		if (keyWords.Contains(t.TypeName))
+			t.TypeName = "@" + t.TypeName;
+
+		if (keyWords.Contains(t.DataContextPropertyName))
+			t.DataContextPropertyName = "@" + t.DataContextPropertyName;
+
+		t.TypeName                = ConvertToCompilable(t.TypeName);
+		t.DataContextPropertyName = ConvertToCompilable(t.DataContextPropertyName);
+
+		foreach (var col in t.Columns.Values)
+		{
+			if (keyWords.Contains(col.MemberName))
+				col.MemberName = "@" + col.MemberName;
+
+			col.MemberName = ConvertToCompilable(col.MemberName);
+
+			if (col.MemberName == t.TypeName)
+				col.MemberName += "_Column";
+		}
+	}
+
+	AfterLoadMetadata();
+}
+
+string ConvertToCompilable(string name)
+{
+	var query =
+		from c in name
+		select char.IsLetterOrDigit(c) || c == '@' ? c : '_';
+
+	return new string(query.ToArray());
+}
+
+Table GetTable(string name)
+{
+	Table tbl;
+
+	if (Tables.TryGetValue(name, out tbl))
+		return tbl;
+
+	WriteLine("#error Table '" + name +  "' not found.");
+	WriteLine("/*");
+	WriteLine("\tExisting tables:");
+	WriteLine("");
+
+	foreach (var key in Tables.Keys)
+		WriteLine("\t" + key);
+
+	WriteLine(" */");
+
+	throw new ArgumentException("Table '" + name +  "' not found.");
+}
+
+Procedure GetProcedure(string name)
+{
+	Procedure proc;
+
+	if (Procedures.TryGetValue(name, out proc))
+		return proc;
+
+	WriteLine("#error Procedure '" + name +  "' not found.");
+	WriteLine("");
+	WriteLine("/*");
+	WriteLine("\tExisting procedures:");
+	WriteLine("");
+
+	foreach (var key in Procedures.Keys)
+		WriteLine("\t" + key);
+
+	WriteLine(" */");
+
+	throw new ArgumentException("Procedure '" + name +  "' not found.");
+}
+
+Column GetColumn(string tableName, string columnName)
+{
+	var tbl = GetTable(tableName);
+
+	Column col;
+
+	if (tbl.Columns.TryGetValue(columnName, out col))
+		return col;
+
+	WriteLine("#error Column '" + tableName + "'.'" + columnName +  "' not found.");
+	WriteLine("");
+	WriteLine("/*");
+	WriteLine("\tExisting '" + tableName + "'columns:");
+	WriteLine("");
+
+	foreach (var key in tbl.Columns.Keys)
+		WriteLine("\t" + key);
+
+	WriteLine(" */");
+
+	throw new ArgumentException("Column '" + tableName + "'.'" + columnName +  "' not found.");
+}
+
+ForeignKey GetFK(string tableName, string fkName)
+{
+	return GetForeignKey(tableName, fkName);
+}
+
+ForeignKey GetForeignKey(string tableName, string fkName)
+{
+	var tbl = GetTable(tableName);
+
+	ForeignKey col;
+
+	if (tbl.ForeignKeys.TryGetValue(fkName, out col))
+		return col;
+
+	WriteLine("#error FK '" + tableName + "'.'" + fkName +  "' not found.");
+	WriteLine("");
+	WriteLine("/*");
+	WriteLine("\tExisting '" + tableName + "'FKs:");
+	WriteLine("");
+
+	foreach (var key in tbl.ForeignKeys.Keys)
+		WriteLine("\t" + key);
+
+	WriteLine(" */");
+
+	throw new ArgumentException("FK '" + tableName + "'.'" + fkName +  "' not found.");
+}
+
+
+public TableContext SetTable(string tableName,
+	string TypeName                = null,
+	string DataContextPropertyName = null)
+{
+	var ctx = new TableContext { Transformation = this, TableName = tableName };
+
+	if (TypeName != null || DataContextPropertyName != null)
+	{
+		var t = GetTable(tableName);
+
+		if (TypeName                != null) t.TypeName                = TypeName;
+		if (DataContextPropertyName != null) t.DataContextPropertyName = DataContextPropertyName;
+	}
+
+	return ctx;
+}
+
+public void SetIdentity(string tableName,string columnName,string sequenceName,string sequenceFunctionName,string config = "Oracle",bool flag = true)
+{
+	if(string.IsNullOrEmpty(sequenceName))
+    {
+		WriteLine("#error SetIdentity sequenceName is IsNullOrEmpty");
+		return;
+    }
+
+	if(string.IsNullOrEmpty(sequenceFunctionName))
+    {
+		WriteLine("#error SetIdentity sequenceFunctionName is IsNullOrEmpty");
+		return;
+    }
+
+	var c = GetColumn(tableName,columnName);
+
+	if ( c != null)
+	{
+		c.IsIdentity = flag;
+		if(flag)
+		{
+			//增加SequenceName Attribute
+			c.Attributes.Add(new Attribute("SequenceName","\"" + config + "\"","\"" + sequenceName + "\"","SequenceFunction = \"" + sequenceFunctionName + "\""));
+        }
+		return;
+	}
+	WriteLine("#error SetIdentity '" + tableName + "'.'" + columnName +  "' not found.");
+}
+
+//辅助分表
+public void SetTableSharding(string tableNameFormat,params string[] tables)
+{
+	if(string.IsNullOrEmpty(tableNameFormat))
+    {
+		WriteLine("#error SetTableSharding tableNameFormat is IsNullOrEmpty");
+		return;
+    }
+
+	if(tables.Length <= 1)
+    {
+		WriteLine("#error SetTableSharding tables must >1");
+		return;
+    }
+
+	//查看是否有对应的table分片 如果有 取第一个 将剩余的 干掉。
+	//try{
+	//	var t = GetTable(tableNameFormat);
+	//	if(t!=null)
+	//	{
+	//		WriteLine("#error SetTableSharding tableNameFormat invalid");
+	//		return;
+	//	}
+   // }catch{
+    //}
+	
+
+    for (int i = 0; i < tables.Length; i++)
+    {
+		var tt=tables[i];
+		if(i == 0)
+		{
+			//第一个
+			var firstT = GetTable(tt);
+			if(firstT == null)
+			{
+				WriteLine("#error SetTableSharding table not exists：" + tt);
+				return;
+			}
+			firstT.TableName =tableNameFormat;
+			ShardingTables.Add(tableNameFormat,tableNameFormat.Split('_')[0]);
+		}
+		else
+		{
+			
+			Tables.Remove(tt);
+		}
+    }
+
+
+}
+
+
+//辅助手动设置外键
+public void SetFk(string tableAName,string columnAName,string tableBName,string columnBName,AssociationType type)
+{
+	if(string.IsNullOrEmpty(tableAName) || string.IsNullOrEmpty(columnAName)|| string.IsNullOrEmpty(tableBName)|| string.IsNullOrEmpty(columnBName))
+    {
+		WriteLine("#error SetFk tableName or columnName is IsNullOrEmpty");
+		return;
+    }
+
+	var tableA = GetTable(tableAName);
+	var columnA = GetColumn(tableAName,columnAName);
+	var tableB = GetTable(tableBName);
+	var columnB = GetColumn(tableBName,columnBName);
+	var fksA = tableA.ForeignKeys;
+	var foreignKey = new ForeignKey();
+	var KeyName = string.Concat(tableAName,"_",columnAName,"_",tableBName,"_",columnBName);
+	foreignKey.KeyName = KeyName;
+	foreignKey.OtherTable = tableB;
+	foreignKey.CanBeNull = true;
+	foreignKey.AssociationType = type;
+	foreignKey.ThisColumns = new List<Column>{columnA};
+	foreignKey.OtherColumns = new List<Column>{columnB};
+	fksA.Add(KeyName,foreignKey);
+}
+
+public class TableContext
+{
+	public GeneratedTextTransformation Transformation;
+	public string                      TableName;
+
+	public TableContext Column(string columnName,
+		string MemberName = null,
+		string Type       = null,
+		bool?  IsNullable = null)
+	{
+		var c = Transformation.GetColumn(TableName, columnName);
+
+		if (MemberName != null) c.MemberName = MemberName;
+		if (Type       != null) c.Type       = Type;
+		if (IsNullable != null) c.IsNullable = IsNullable.Value;
+
+		return this;
+	}
+
+	public TableContext FK(string fkName,
+		string           MemberName      = null,
+		AssociationType? AssociationType = null,
+		bool?            CanBeNull       = null)
+	{
+		var c = Transformation.GetFK(TableName, fkName);
+
+		if (MemberName      != null) c.MemberName      = MemberName;
+		if (AssociationType != null) c.AssociationType = AssociationType.Value;
+		if (CanBeNull       != null) c.CanBeNull       = CanBeNull.Value;
+
+		return this;
+	}
+}
+
+
+Dictionary<string,Table>     Tables     = new Dictionary<string,Table>    ();
+Dictionary<string,Procedure> Procedures = new Dictionary<string,Procedure>();
+
+public partial class Table : Class
+{
+	public TableSchema TableSchema             { get; set; }
+	public string      Schema                  { get; set; }
+	public string      TableName               { get; set; }
+	public string      DataContextPropertyName { get; set; }
+	public MemberBase  DataContextProperty     { get; set; }
+	public bool        IsView                  { get; set; }
+	public bool        IsProviderSpecific      { get; set; }
+	public string      Description             { get; set; }
+	public string      AliasPropertyName       { get; set; }
+	public string      AliasTypeName           { get; set; }
+	public string      TypePrefix              { get; set; }
+
+	public string TypeName
+	{
+		get { return Name;  }
+		set { Name = value; }
+	}
+
+	public Dictionary<string,Column>     Columns;
+	public Dictionary<string,ForeignKey> ForeignKeys = new Dictionary<string,ForeignKey>();
+}
+
+public partial class Column : Property
+{
+	public string    ColumnName; // Column name in database
+	public bool      IsNullable;
+	public bool      IsIdentity;
+	public string    ColumnType; // Type of the column in database
+	public string    DataType;
+	public long?     Length;
+	public int?      Precision;
+	public int?      Scale;
+	public DbType    DbType;
+	public string    Description;
+	public bool      IsPrimaryKey;
+	public int       PrimaryKeyOrder;
+	public bool      SkipOnUpdate;
+	public bool      SkipOnInsert;
+	public bool      IsDuplicateOrEmpty;
+	public string    AliasName;
+
+	public string MemberName
+	{
+		get { return Name;  }
+		set { Name = value; }
+	}
+}
+
+public enum AssociationType
+{
+	Auto,
+	OneToOne,
+	OneToMany,
+	ManyToOne,
+}
+
+public partial class ForeignKey : Property
+{
+	public string       KeyName;
+	public Table        OtherTable;
+	public List<Column> ThisColumns;
+	public List<Column> OtherColumns;
+	public bool         CanBeNull;
+	public ForeignKey   BackReference;
+
+	public string MemberName
+	{
+		get { return Name;  }
+		set { Name = value; }
+	}
+
+	private AssociationType _associationType = AssociationType.Auto;
+	public  AssociationType  AssociationType
+	{
+		get { return _associationType; }
+		set
+		{
+			_associationType = value;
+
+			if (BackReference != null)
+			{
+				switch (value)
+				{
+					case AssociationType.Auto      : BackReference.AssociationType = AssociationType.Auto;      break;
+					case AssociationType.OneToOne  : BackReference.AssociationType = AssociationType.OneToOne;  break;
+					case AssociationType.OneToMany : BackReference.AssociationType = AssociationType.ManyToOne; break;
+					case AssociationType.ManyToOne : BackReference.AssociationType = AssociationType.OneToMany; break;
+				}
+			}
+		}
+	}
+}
+
+public partial class Procedure : Method
+{
+	public string Schema          { get; set; }
+	public string ProcedureName   { get; set; }
+	public bool   IsFunction      { get; set; }
+	public bool   IsTableFunction { get; set; }
+	public bool   IsDefaultSchema { get; set; }
+	public bool   IsLoaded        { get; set; }
+
+	public Table           ResultTable     { get; set; }
+	public Exception       ResultException { get; set; }
+	public List<Table>     SimilarTables   { get; set; }
+	public List<Parameter> ProcParameters  { get; set; }
+}
+
+public class Parameter
+{
+	public string   SchemaName    { get; set; }
+	public string   SchemaType    { get; set; }
+	public bool     IsIn          { get; set; }
+	public bool     IsOut         { get; set; }
+	public bool     IsResult      { get; set; }
+	public long?    Size          { get; set; }
+
+	public string   ParameterName { get; set; }
+	public string   ParameterType { get; set; }
+	public Type     SystemType    { get; set; }
+	public string   DataType      { get; set; }
+}
+
+#>
