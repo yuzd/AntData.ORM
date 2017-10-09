@@ -2711,12 +2711,15 @@ namespace AntData.ORM.SqlProvider
 		{
 			return Add<int>(expr1, new SqlValue(value));
 		}
+	    protected virtual bool IsReserved(string word)
+	    {
+	        return ReservedWords.IsReserved(word);
+	    }
+        #endregion
 
-		#endregion
+        #region ISqlProvider Members
 
-		#region ISqlProvider Members
-
-		public virtual ISqlExpression GetIdentityExpression(SqlTable table)
+        public virtual ISqlExpression GetIdentityExpression(SqlTable table)
 		{
 			return null;
 		}

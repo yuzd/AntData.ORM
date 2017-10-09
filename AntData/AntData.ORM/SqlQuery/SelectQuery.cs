@@ -18,22 +18,22 @@ namespace AntData.ORM.SqlQuery
     {
         #region Init
 
-        static readonly Dictionary<string, object> _reservedWords = new Dictionary<string, object>();
+        //static readonly Dictionary<string, object> _reservedWords = new Dictionary<string, object>();
 
-        static SelectQuery()
-        {
-#if NETSTANDARD
-            using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream("AntData.ORM.SqlQuery.ReservedWords.txt"))
-#else
-            using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream(typeof(SelectQuery), "ReservedWords.txt"))
-#endif
-            using (var reader = new StreamReader(stream))
-            {
-                string s;
-                while ((s = reader.ReadLine()) != null)
-                    _reservedWords.Add(s, s);
-            }
-        }
+//        static SelectQuery()
+//        {
+//#if NETSTANDARD
+//            using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream("AntData.ORM.SqlQuery.ReservedWords.txt"))
+//#else
+//            using (var stream = typeof(SelectQuery).AssemblyEx().GetManifestResourceStream(typeof(SelectQuery), "ReservedWords.txt"))
+//#endif
+//            using (var reader = new StreamReader(stream))
+//            {
+//                string s;
+//                while ((s = reader.ReadLine()) != null)
+//                    _reservedWords.Add(s, s);
+//            }
+//        }
 
         public SelectQuery()
         {
@@ -3674,7 +3674,7 @@ namespace AntData.ORM.SqlQuery
             {
                 var s = alias.ToUpper();
 
-                if (!_aliases.ContainsKey(s) && !_reservedWords.ContainsKey(s))
+                if (!_aliases.ContainsKey(s) && !ReservedWords.IsReserved(s))
                 {
                     _aliases.Add(s, s);
                     break;

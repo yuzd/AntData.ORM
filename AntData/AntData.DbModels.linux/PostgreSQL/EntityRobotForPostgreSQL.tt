@@ -1,0 +1,18 @@
+<#@ template language="C#" debug="True" hostSpecific="True"                            #>
+<#@ output extension=".generated.cs"                                                   #>
+<#@ include file="..\Templates\LinqToDB.PostgreSQL.Tools.ttinclude" #>
+<#@ include file="..\Templates\PluralizationService.ttinclude" #>
+<#
+	
+	NamespaceName = "DbModels.PostgreSQL";
+	GenerateConstructors     = true;
+    GenerateFindExtensions = true;
+	GenerateDataTypes = true;
+    IsCompactColumns = false;
+    BaseDataContextClass = "IEntity";
+    BaseEntityClass = "BaseEntity";
+	LoadPostgreSQLMetadata("127.0.0.1", "5432", "carkeyv2", "postgres", "postgres");
+	//LoadPostgreSQLMetadata("DBHostIP", "DBHostPort", "DBServiceName", "UserName", "PASSWORD");
+
+	GenerateModel();
+#>

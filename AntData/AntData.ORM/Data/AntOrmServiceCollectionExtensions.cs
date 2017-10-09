@@ -22,7 +22,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceCollectionExtensions
+    internal static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddSingletonFactory<T, TFactory>(this IServiceCollection collection)
             where T : class where TFactory : class, IServiceFactory<T>

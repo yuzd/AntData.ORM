@@ -26,6 +26,10 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>EntityRobotForOracle.generated.cs</LastGenOutput>
     </None>
+    <None Update="PostgreSQL\EntityRobotForPostgreSQL.tt">
+      <LastGenOutput>EntityRobotForPostgreSQL.generated.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
     <None Update="SqlServer\EntityRobotForSqlServer.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>EntityRobotForSqlServer.cs</LastGenOutput>
@@ -46,6 +50,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>EntityRobotForOracle.tt</DependentUpon>
+    </Compile>
+    <Compile Update="PostgreSQL\EntityRobotForPostgreSQL.generated.cs">
+      <DependentUpon>EntityRobotForPostgreSQL.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Update="SqlServer\EntityRobotForSqlServer.cs">
       <DesignTime>True</DesignTime>
