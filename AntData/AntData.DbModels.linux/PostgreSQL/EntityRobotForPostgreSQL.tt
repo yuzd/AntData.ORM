@@ -11,7 +11,7 @@
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
-	LoadPostgreSQLMetadata("127.0.0.1", "5432", "carkeyv2", "postgres", "postgres");
+	LoadPostgreSQLMetadata("127.0.0.1", "5432", "pgTest", "postgres", "postgres");
 	//LoadPostgreSQLMetadata("DBHostIP", "DBHostPort", "DBServiceName", "UserName", "PASSWORD");
 
 	GenerateModel();

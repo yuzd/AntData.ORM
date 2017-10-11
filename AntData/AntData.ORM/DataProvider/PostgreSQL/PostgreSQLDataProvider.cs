@@ -14,7 +14,7 @@ namespace AntData.ORM.DataProvider.PostgreSQL
 
 	public class PostgreSQLDataProvider : DynamicDataProviderBase
 	{
-		public PostgreSQLDataProvider(PostgreSQLVersion version = PostgreSQLVersion.v92)
+		public PostgreSQLDataProvider(PostgreSQLVersion version = PostgreSQLVersion.v93)
 			: this(
 				version == PostgreSQLVersion.v92 ? ProviderName.PostgreSQL92 : ProviderName.PostgreSQL93,
 				new PostgreSQLMappingSchema(),
