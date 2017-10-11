@@ -5,8 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AntData.ORM;
 using AntData.ORM.Data;
-using AntData.ORM.Linq;
-using AntData.ORM.Mapping;
 using DbModels.PostgreSQL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

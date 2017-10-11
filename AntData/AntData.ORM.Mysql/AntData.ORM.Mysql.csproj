@@ -10,7 +10,7 @@
     <PackageTags>linq;ORM;mysql</PackageTags>
     <PackageProjectUrl>https://github.com/yuzd/AntData.ORM</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/yuzd/AntData.ORM/blob/master/MIT-LICENSE.txt</PackageLicenseUrl>
-	<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+	  <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

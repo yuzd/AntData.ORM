@@ -1,7 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Description>AntData.Orm postgre For Dotnet Core</Description>
+    <Authors>nainaigu</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+    <PackageTags>linq;ORM;postgre</PackageTags>
+    <PackageProjectUrl>https://github.com/yuzd/AntData.ORM</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/yuzd/AntData.ORM/blob/master/MIT-LICENSE.txt</PackageLicenseUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.3.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="3.2.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AntData.ORM\AntData.ORM.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -9,7 +9,8 @@ namespace AntData.ORM.Enums
     {
         MySql,
         SqlServer,
-        Oracle
+        Oracle,
+        PostGre
     }
 
     public class DatabaseProviderTypeFactory
@@ -29,6 +30,8 @@ namespace AntData.ORM.Enums
                     return DatabaseProviderType.SqlServer;
                 case "ORACLE":
                     return DatabaseProviderType.Oracle;
+                case "POSTGRE":
+                    return DatabaseProviderType.PostGre;
                 default:
                     throw new NotSupportedException();
             }
