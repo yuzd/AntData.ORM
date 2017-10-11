@@ -53,7 +53,10 @@ namespace AntData.ORM.DataProvider
 		private         Type _dataReaderType;
 		public override Type  DataReaderType
 		{
-			get { return _dataReaderType ?? (_dataReaderType = Type.GetType(DataReaderTypeName, true)); }
+		    get
+		    {
+		        return _dataReaderType ?? (_dataReaderType = Type.GetType(DataReaderTypeName, true));
+		    }
 		}
 
 

@@ -22,6 +22,8 @@ namespace AntData.ORM.DbEngine.HA
                     return new MySqlHA();
                 case DatabaseProviderType.Oracle:
                     return new OracleHA();
+                case DatabaseProviderType.PostGre:
+                    return new PostgreHA();
                 default:
                     throw new NotImplementedException("Not supported.");
             }

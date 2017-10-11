@@ -175,11 +175,32 @@ namespace AntData.ORM.DataProvider.PostgreSQL
 	    public override bool InsertWinthIdentityWithNoCache {
 	        get { return false; }
 	    }
-	    public    override string ConnectionNamespace { get { return "Npgsql";                          } }
-		protected override string ConnectionTypeName  { get { return "Npgsql.NpgsqlConnection, Npgsql"; } }
-		protected override string DataReaderTypeName  { get { return "Npgsql.NpgsqlDataReader, Npgsql"; } }
 
-		public override ISqlBuilder CreateSqlBuilder()
+	    public override string ConnectionNamespace
+	    {
+	        get
+	        {
+	            return "Npgsql";
+	        }
+	    }
+
+	    protected override string ConnectionTypeName
+	    {
+	        get
+	        {
+	            return "Npgsql.NpgsqlConnection, Npgsql";
+	        }
+	    }
+
+	    protected override string DataReaderTypeName
+	    {
+	        get
+	        {
+	            return "Npgsql.NpgsqlDataReader, Npgsql";
+	        }
+	    }
+
+	    public override ISqlBuilder CreateSqlBuilder()
 		{
 			return new PostgreSQLSqlBuilder(GetSqlOptimizer(), SqlProviderFlags, MappingSchema.ValueToSqlConverter);
 		}

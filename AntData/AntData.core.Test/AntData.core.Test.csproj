@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AntData.DbModels.linux\AntData.DbModels.linux.csproj" />
     <ProjectReference Include="..\AntData.ORM.Mysql\AntData.ORM.Mysql.csproj" />
+    <ProjectReference Include="..\AntData.ORM.Postgre\AntData.ORM.Postgre.csproj" />
     <ProjectReference Include="..\AntData.ORM\AntData.ORM.csproj" />
   </ItemGroup>
 

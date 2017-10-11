@@ -17,7 +17,7 @@ namespace AntDataUnitTest
         {
             get
             {
-                var db = new PostgreDbContext<PgTestEntitys>("testorm");
+                var db = new PostgreDbContext<PgTestEntitys>("testpgorm");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;
