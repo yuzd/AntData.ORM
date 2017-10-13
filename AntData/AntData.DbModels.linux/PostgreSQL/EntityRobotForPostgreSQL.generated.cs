@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using AntData.ORM;
 using AntData.ORM.Data;
@@ -16,6 +17,9 @@ namespace DbModels.PostgreSQL
 	/// </summary>
 	public partial class PgTestEntitys : IEntity
 	{
+		/// <summary>
+		/// 用户表
+		/// </summary>
 		public IQueryable<Person> People { get { return this.Get<Person>(); } }
 
 		private readonly DataConnection con;
@@ -37,17 +41,41 @@ namespace DbModels.PostgreSQL
 		}
 	}
 
-	[Table(Schema="public", Name="person")]
+	/// <summary>
+	/// 用户表
+	/// </summary>
+	[Table(Schema="public", Comment="用户表", Name="person")]
 	public partial class Person : BaseEntity
 	{
 		#region Column
 
-		[Column("id",   DataType=AntData.ORM.DataType.Int32,     Precision=32, Scale=0), Identity]
-		public int Id { get; set; } // integer
+		/// <summary>
+		/// 自增主键
+		/// </summary>
+		[Column("id",   DataType=AntData.ORM.DataType.Int64,    Precision=64, Scale=0, Comment="自增主键"), PrimaryKey, Identity]
+		public long Id { get; set; } // bigint
 
-		[Column("name", DataType=AntData.ORM.DataType.Undefined), Nullable]
-		public object Name { get; set; } // ARRAY
+		/// <summary>
+		/// 名字
+		/// </summary>
+		[Column("name", DataType=AntData.ORM.DataType.NVarChar, Length=20, Comment="名字"), Nullable]
+		public string Name { get; set; } // character varying(20)
 
 		#endregion
+	}
+
+	public static partial class TableExtensions
+	{
+		public static Person FindByBk(this IQueryable<Person> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static async Task<Person> FindByBkAsync(this IQueryable<Person> table, long Id)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Id == Id);
+		}
 	}
 }

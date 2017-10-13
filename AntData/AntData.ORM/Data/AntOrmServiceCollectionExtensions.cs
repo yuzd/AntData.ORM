@@ -15,6 +15,7 @@ using AntData.ORM.Data;
 using AntData.ORM.DataProvider;
 using AntData.ORM.DataProvider.MySql;
 using AntData.ORM.DataProvider.Oracle;
+using AntData.ORM.DataProvider.PostgreSQL;
 using AntData.ORM.DataProvider.SqlServer;
 using AntData.ORM.Linq;
 using Microsoft.Extensions.Configuration;
@@ -207,6 +208,36 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             return serviceCollection;
         }
+
+        /// <summary>
+        /// 添加Postgre entity 到DI
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serviceCollection"></param>
+        /// <param name="mappingName"></param>
+        /// <param name="opsAction"></param>
+        /// <param name="contextLifetime"></param>
+        /// <param name="optionsLifetime"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddPostgreSQLEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
+        {
+            if (serviceCollection == null)
+            {
+                throw new ArgumentException("serviceCollection is null");
+            }
+            serviceCollection.AddSingleton<IDataProvider>(new PostgreSQLDataProvider());
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            var dbOptions = new DbContextOptions(mappingName);
+            if (opsAction != null)
+            {
+                opsAction(dbOptions);
+            }
+            serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
+            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
+            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            return serviceCollection;
+        }
+
         private static void CheckContextConstructors(Type type)
         {
             List<ConstructorInfo> list = type.GetTypeInfo().DeclaredConstructors.ToList<ConstructorInfo>();

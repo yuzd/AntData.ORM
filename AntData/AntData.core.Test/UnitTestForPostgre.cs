@@ -48,7 +48,7 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod1_00()
         {
-            var aa = DB.Tables.People.FirstOrDefault();
+           
 
         }
 
