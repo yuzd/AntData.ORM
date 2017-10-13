@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
-
+using AntData.ORM.Mapping;
 using JetBrains.Annotations;
 
 // ReSharper disable CheckNamespace
@@ -55,8 +56,8 @@ namespace AntData.ORM
 			public bool   InlineParameters { get; set; }
 			public bool   ExpectExpression { get; set; }
 			public bool   IsPredicate      { get; set; }
-
-			private bool? _canBeNull;
+		    public bool IsAggregate { get; set; }
+            private bool? _canBeNull;
 			public  bool   CanBeNull
 			{
 				get { return _canBeNull ?? true;  }
@@ -93,6 +94,11 @@ namespace AntData.ORM
 			{
 				return new SqlExpression(member.GetMemberType(), Expression ?? member.Name, Precedence, ConvertArgs(member, args)) { CanBeNull = CanBeNull };
 			}
-		}
+
+		    public virtual ISqlExpression GetExpression(MappingSchema mapping, SelectQuery query, Expression expression, Func<Expression, ISqlExpression> converter)
+		    {
+		        return null;
+		    }
+        }
 	}
 }

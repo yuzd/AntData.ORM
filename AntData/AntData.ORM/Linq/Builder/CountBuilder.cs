@@ -109,7 +109,7 @@ namespace AntData.ORM.Linq.Builder
 				query.SetElementQuery(mapper.Compile());
 			}
 
-			public override Expression BuildExpression(Expression expression, int level)
+			public override Expression BuildExpression(Expression expression, int level, bool enforceServerSide)
 			{
 				return Builder.BuildSql(_returnType, ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
 			}

@@ -77,7 +77,7 @@ namespace AntData.ORM.Linq.Builder
 
 			public override void BuildQuery<T>(Query<T> query, ParameterExpression queryParameter)
 			{
-				var expr = BuildExpression(null, 0);
+				var expr = BuildExpression(null, 0,false);
 
 				if (expr.Type != typeof(T))
 					expr = Expression.Convert(expr, typeof(T));
@@ -110,12 +110,12 @@ namespace AntData.ORM.Linq.Builder
 				return base.IsExpression(expression, level, requestFlag);
 			}
 
-			public override Expression BuildExpression(Expression expression, int level)
+			public override Expression BuildExpression(Expression expression, int level, bool enforceServerSide)
 			{
 				if (expression == Lambda.Parameters[1])
 					return _counterParam;
 
-				return base.BuildExpression(expression, level);
+				return base.BuildExpression(expression, level, enforceServerSide);
 			}
 		}
 

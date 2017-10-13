@@ -61,7 +61,7 @@ namespace AntData.ORM.Linq.Builder
                 query.SetElementQuery(mapper.Compile());
             }
 
-            public override Expression BuildExpression(Expression expression, int level)
+            public override Expression BuildExpression(Expression expression, int level, bool enforceServerSide)
             {
                 var idx = ConvertToIndex(expression, level, ConvertFlags.Field);
                 return Builder.BuildSql(typeof(bool), idx[0].Index);

@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using AntData.ORM.Mapping;
 
 namespace AntData.ORM.Linq.Builder
 {
@@ -13,8 +14,14 @@ namespace AntData.ORM.Linq.Builder
 	class AggregationBuilder : MethodCallBuilder
 	{
 		public static string[] MethodNames = new[] { "Average", "Min", "Max", "Sum" };
-
-		protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
+	    public static Sql.ExpressionAttribute GetAggregateDefinition(MethodCallExpression methodCall, MappingSchema mapping)
+	    {
+	        var functions = mapping.GetAttributes<Sql.ExpressionAttribute>(methodCall.Method.ReflectedTypeEx(),
+	            methodCall.Method,
+	            f => f.Configuration);
+	        return functions.FirstOrDefault(f => f.IsAggregate);
+	    }
+        protected override bool CanBuildMethodCall(ExpressionBuilder builder, MethodCallExpression methodCall, BuildInfo buildInfo)
 		{
 			return methodCall.IsQueryable(MethodNames);
 		}
@@ -100,7 +107,7 @@ namespace AntData.ORM.Linq.Builder
 				query.SetElementQuery(mapper.Compile());
 			}
 
-			public override Expression BuildExpression(Expression expression, int level)
+			public override Expression BuildExpression(Expression expression, int level, bool enforceServerSide)
 			{
 				return BuildExpression(ConvertToIndex(expression, level, ConvertFlags.Field)[0].Index);
 			}

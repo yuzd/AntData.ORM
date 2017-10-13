@@ -235,39 +235,39 @@ namespace AntData.ORM.Linq.Builder
 				throw new LinqException("Inheritance mapping is not defined for discriminator value '{0}' in the '{1}' hierarchy.", value, type);
 			}
 
-			void SetLoadWithBindings(Type objectType, ParameterExpression parentObject, List<Expression> exprs)
-			{
-				var loadWith = GetLoadWith();
+		    void SetLoadWithBindings(Type objectType, ParameterExpression parentObject, List<Expression> exprs)
+		    {
+		        var loadWith = GetLoadWith();
 
-				if (loadWith == null)
-					return;
+		        if (loadWith == null)
+		            return;
 
-				var members = GetLoadWith(loadWith);
+		        var members = GetLoadWith(loadWith);
 
-				foreach (var member in members)
-				{
-					var ma = Expression.MakeMemberAccess(Expression.Constant(null, objectType), member.MemberInfo);
+		        foreach (var member in members)
+		        {
+		            var ma = Expression.MakeMemberAccess(Expression.Constant(null, objectType), member.MemberInfo);
 
-					if (member.NextLoadWith.Count > 0)
-					{
-						var table = FindTable(ma, 1, false);
-						table.Table.LoadWith = member.NextLoadWith;
-					}
+		            if (member.NextLoadWith.Count > 0)
+		            {
+		                var table = FindTable(ma, 1, false, true);
+		                table.Table.LoadWith = member.NextLoadWith;
+		            }
 
-					var attr = Builder.MappingSchema.GetAttribute<AssociationAttribute>(member.MemberInfo);
+		            var attr = Builder.MappingSchema.GetAttribute<AssociationAttribute>(member.MemberInfo);
 
-					var ex = BuildExpression(ma, 1, parentObject);
-					var ax = Expression.Assign(
-						attr != null && attr.Storage != null ?
-							Expression.PropertyOrField (parentObject, attr.Storage) :
-							Expression.MakeMemberAccess(parentObject, member.MemberInfo),
-						ex);
+		            var ex = BuildExpression(ma, 1, parentObject);
+		            var ax = Expression.Assign(
+		                attr != null && attr.Storage != null ?
+		                    Expression.PropertyOrField(parentObject, attr.Storage) :
+		                    Expression.MakeMemberAccess(parentObject, member.MemberInfo),
+		                ex);
 
-					exprs.Add(ax);
-				}
-			}
+		            exprs.Add(ax);
+		        }
+		    }
 
-			static bool IsRecordAttribute(Attribute attr)
+            static bool IsRecordAttribute(Attribute attr)
 			{
 				return attr.GetType().FullName == "Microsoft.FSharp.Core.CompilationMappingAttribute";
 			}
@@ -357,76 +357,101 @@ namespace AntData.ORM.Linq.Builder
 				public string     Name;
 				public Expression Expression;
 			}
+		    static bool IsRecord(IEnumerable<Attribute> attrs)
+		    {
+		        return attrs.Any(attr => attr.GetType().FullName == "Microsoft.FSharp.Core.CompilationMappingAttribute")
+		               && !attrs.Any(attr => attr.GetType().FullName == "Microsoft.FSharp.Core.CLIMutableAttribute");
+		    }
+            IEnumerable<Expression> GetExpressions(TypeAccessor typeAccessor, bool isRecordType, List<ColumnInfo> columns)
+            {
+                var members = isRecordType ?
+                    typeAccessor.Members.Where(m =>
+                        IsRecord(Builder.MappingSchema.GetAttributes<Attribute>(m.MemberInfo))) :
+                    typeAccessor.Members;
 
-			IEnumerable<Expression> GetExpressions(TypeAccessor typeAccessor, bool isRecordType, List<ColumnInfo> columns)
-			{
-				var members = isRecordType ?
-					typeAccessor.Members.Where(m =>
-						Builder.MappingSchema.GetAttributes<Attribute>(m.MemberInfo).Any(IsRecordAttribute)) :
-					typeAccessor.Members;
+                var loadWith = GetLoadWith();
+                var loadWithItems = loadWith == null ? new List<LoadWithItem>() : GetLoadWith(loadWith);
+                foreach (var member in members)
+                {
+                    var column = columns.FirstOrDefault(c => !c.IsComplex && c.Name == member.Name);
 
-				foreach (var member in members)
-				{
-					var column = columns.FirstOrDefault(c => !c.IsComplex && c.Name == member.Name);
+                    if (column != null)
+                    {
+                        yield return column.Expression;
+                    }
+                    else
+                    {
+                        var assocAttr = Builder.MappingSchema.GetAttributes<AssociationAttribute>(member.MemberInfo).FirstOrDefault();
+                        bool isAssociation = assocAttr != null;
+                        if (isAssociation)
+                        {
+                            var loadWithItem = loadWithItems.FirstOrDefault(_ => _.MemberInfo == member.MemberInfo);
+                            if (loadWithItem != null)
+                            {
+                                var ma = Expression.MakeMemberAccess(Expression.Constant(null, typeAccessor.Type), member.MemberInfo);
+                                if (loadWithItem.NextLoadWith.Count > 0)
+                                {
+                                    var table = FindTable(ma, 1, false, true);
+                                    table.Table.LoadWith = loadWithItem.NextLoadWith;
+                                }
+                                yield return BuildExpression(ma, 1, false);
+                            }
+                        }
+                        else
+                        {
+                            var name = member.Name + '.';
+                            var cols = columns.Where(c => c.IsComplex && c.Name.StartsWith(name)).ToList();
 
-					if (column != null)
-					{
-						yield return column.Expression;
-					}
-					else
-					{
-						var name = member.Name + '.';
-						var cols = columns.Where(c => c.IsComplex && c.Name.StartsWith(name)).ToList();
+                            if (cols.Count == 0)
+                            {
+                                yield return null;
+                            }
+                            else
+                            {
+                                foreach (var col in cols)
+                                {
+                                    col.Name = col.Name.Substring(name.Length);
+                                    col.IsComplex = col.Name.Contains(".");
+                                }
 
-						if (cols.Count == 0)
-						{
-							yield return null;
-						}
-						else
-						{
-							foreach (var col in cols)
-							{
-								col.Name      = col.Name.Substring(name.Length);
-								col.IsComplex = col.Name.Contains(".");
-							}
+                                var typeAcc = TypeAccessor.GetAccessor(member.Type);
+                                var isRecord = IsRecord(Builder.MappingSchema.GetAttributes<Attribute>(member.Type));
 
-							var typeAcc = TypeAccessor.GetAccessor(member.Type);
-							var isRec   = Builder.MappingSchema.GetAttributes<Attribute>(member.Type).Any(IsRecordAttribute);
+                                var exprs = GetExpressions(typeAcc, isRecord, cols).ToList();
 
-							var exprs = GetExpressions(typeAcc, isRec, cols).ToList();
+                                if (isRecord)
+                                {
+                                    var ctor = member.Type.GetConstructorsEx().Single();
+                                    var ctorParms = ctor.GetParameters();
 
-							if (isRec)
-							{
-								var ctor      = member.Type.GetConstructorsEx().Single();
-								var ctorParms = ctor.GetParameters();
+                                    var parms =
+                                        (
+                                        from p in ctorParms.Select((p, i) => new { p, i })
+                                        join e in exprs.Select((e, i) => new { e, i }) on p.i equals e.i into j
+                                        from e in j.DefaultIfEmpty()
+                                        select
+                                        (e == null ? null : e.e) ?? Expression.Constant(p.p.DefaultValue ?? Builder.MappingSchema.GetDefaultValue(p.p.ParameterType), p.p.ParameterType)
+                                        ).ToList();
 
-								var parms =
-								(
-									from p in ctorParms.Select((p,i) => new { p, i })
-									join e in exprs.Select((e,i) => new { e, i }) on p.i equals e.i into j
-									from e in j.DefaultIfEmpty()
-									select
-										e.e ?? Expression.Constant(p.p.DefaultValue ?? Builder.MappingSchema.GetDefaultValue(p.p.ParameterType), p.p.ParameterType)
-								).ToList();
+                                    yield return Expression.New(ctor, parms);
+                                }
+                                else
+                                {
+                                    var expr = Expression.MemberInit(
+                                        Expression.New(member.Type),
+                                        from m in typeAcc.Members.Zip(exprs, (m, e) => new { m, e })
+                                        where m.e != null
+                                        select (MemberBinding)Expression.Bind(m.m.MemberInfo, m.e));
 
-								yield return Expression.New(ctor, parms);
-							}
-							else
-							{
-								var expr = Expression.MemberInit(
-									Expression.New(member.Type),
-									from m in typeAcc.Members.Zip(exprs, (m,e) => new { m, e })
-									where m.e != null
-									select (MemberBinding)Expression.Bind(m.m.MemberInfo, m.e));
+                                    yield return expr;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-								yield return expr;
-							}
-						}
-					}
-				}
-			}
-
-			Expression BuildRecordConstructor(EntityDescriptor entityDescriptor, Type objectType, int[] index)
+            Expression BuildRecordConstructor(EntityDescriptor entityDescriptor, Type objectType, int[] index)
 			{
 				var ctor = objectType.GetConstructorsEx().Single();
 
@@ -586,7 +611,7 @@ namespace AntData.ORM.Linq.Builder
 
 			#region BuildExpression
 
-			public Expression BuildExpression(Expression expression, int level)
+			public Expression BuildExpression(Expression expression, int level, bool enforceServerSide)
 			{
 				return BuildExpression(expression, level, null);
 			}
@@ -595,7 +620,7 @@ namespace AntData.ORM.Linq.Builder
 			{
 				// Build table.
 				//
-				var table = FindTable(expression, level, false);
+				var table = FindTable(expression, level, false,false);
 
 				if (table == null)
 				{
@@ -1177,29 +1202,35 @@ namespace AntData.ORM.Linq.Builder
 				public bool         IsNew;
 			}
 
-			TableLevel FindTable(Expression expression, int level, bool throwException)
+			TableLevel FindTable(Expression expression, int level, bool throwException, bool throwExceptionForNull =false)
 			{
-				if (expression == null)
-					return new TableLevel { Table = this };
+			    if (expression == null)
+			        return new TableLevel { Table = this };
 
-				var levelExpression = expression.GetLevelExpression(level);
+			    var levelExpression = expression.GetLevelExpression(level);
 
-				switch (levelExpression.NodeType)
-				{
-					case ExpressionType.MemberAccess :
-					case ExpressionType.Parameter    :
-						{
-							var field = GetField(expression, level, throwException);
+			    TableLevel result = null;
 
-							if (field != null || (level == 0 && levelExpression == expression))
-								return new TableLevel { Table = this, Field = field, Level = level };
+			    switch (levelExpression.NodeType)
+			    {
+			        case ExpressionType.MemberAccess:
+			        case ExpressionType.Parameter:
+			        {
+			            var field = GetField(expression, level, throwException);
 
-							return GetAssociation(expression, level);
-						}
-				}
+			            if (field != null || (level == 0 && levelExpression == expression))
+			                return new TableLevel { Table = this, Field = field, Level = level };
 
-				return null;
-			}
+			            result = GetAssociation(expression, level);
+			            break;
+			        }
+			    }
+
+			    if (throwExceptionForNull && result == null)
+			        throw new LinqException("Expression '{0}' ({1}) is not a table.".Args(expression, levelExpression));
+
+			    return result;
+            }
 
 			TableLevel GetAssociation(Expression expression, int level)
 			{

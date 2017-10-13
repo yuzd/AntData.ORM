@@ -106,7 +106,7 @@ namespace AntData.ORM.Linq.Builder
 					query.MakeAlternativeInsertOrUpdate(SelectQuery);
 			}
 
-			public override Expression BuildExpression(Expression expression, int level)
+			public override Expression BuildExpression(Expression expression, int level, bool enforceServerSide)
 			{
 				throw new NotImplementedException();
 			}

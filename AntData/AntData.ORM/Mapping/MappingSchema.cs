@@ -541,45 +541,56 @@ namespace AntData.ORM.Mapping
 			SetConvertExpression((string  s) => (DateTimeOffset?)DateTimeOffset.Parse(s, info.DateTimeFormat));
 		}
 
-		#endregion
+        #endregion
 
-		#region MetadataReader
+        #region MetadataReader
+	    readonly object _metadataReadersSyncRoot = new object();
+        void InitMetadataReaders()
+	    {
+	        var list = new List<IMetadataReader>(Schemas.Length);
+	        var hash = new HashSet<IMetadataReader>();
 
-		public IMetadataReader MetadataReader
+	        for (var i = 0; i < Schemas.Length; i++)
+	        {
+	            var s = Schemas[i];
+	            if (s.MetadataReader != null && hash.Add(s.MetadataReader))
+	                list.Add(s.MetadataReader);
+	        }
+
+	        _metadataReaders = list.ToArray();
+	    }
+        public IMetadataReader MetadataReader
 		{
 			get { return Schemas[0].MetadataReader; }
 			set
 			{
 				Schemas[0].MetadataReader = value;
-				_metadataReaders = null;
-			}
+			    InitMetadataReaders();
+            }
 		}
 
 		public void AddMetadataReader(IMetadataReader reader)
 		{
-			MetadataReader = MetadataReader == null ? reader : new MetadataReader(reader, MetadataReader);
-		}
+		    lock (_metadataReadersSyncRoot)
+		    {
+		        var currentReader = MetadataReader;
+		        MetadataReader = currentReader == null ? reader : new MetadataReader(reader, currentReader);
+		    }
+        }
 
 		IMetadataReader[] _metadataReaders;
 		IMetadataReader[]  MetadataReaders
 		{
-			get
-			{
-				if (_metadataReaders == null)
-				{
-					var hash = new HashSet<IMetadataReader>();
-					var list = new List<IMetadataReader>();
+		    get
+		    {
+		        if (_metadataReaders == null)
+		            lock (_metadataReadersSyncRoot)
+		                if (_metadataReaders == null)
+		                    InitMetadataReaders();
 
-					foreach (var s in Schemas)
-						if (s.MetadataReader != null && hash.Add(s.MetadataReader))
-							list.Add(s.MetadataReader);
-
-					_metadataReaders = list.ToArray();
-				}
-
-				return _metadataReaders;
-			}
-		}
+		        return _metadataReaders;
+		    }
+        }
 
 		public T[] GetAttributes<T>(Type type, bool inherit = true)
 			where T : Attribute
@@ -651,8 +662,46 @@ namespace AntData.ORM.Mapping
 			var attrs = GetAttributes(type, configGetter, inherit);
 			return attrs.Length == 0 ? null : attrs[0];
 		}
-		
-		public T GetAttribute<T>(MemberInfo memberInfo, Func<T,string> configGetter, bool inherit = true)
+	    /// <summary>
+	    /// Gets attribute of specified type, associated with specified type member.
+	    /// Attributes filtered by schema's configuration names (see  <see cref="ConfigurationList"/>).
+	    /// </summary>
+	    /// <typeparam name="T">Attribute type.</typeparam>
+	    /// <param name="type">Member's owner type.</param>
+	    /// <param name="memberInfo">Attribute owner member.</param>
+	    /// <param name="configGetter">Attribute configuration name provider.</param>
+	    /// <param name="inherit">If <c>true</c> - include inherited attribute.</param>
+	    /// <returns>First found attribute of specified type or <c>null</c>, if no attributes found.</returns>
+	    public T GetAttribute<T>(Type type, MemberInfo memberInfo, Func<T, string> configGetter, bool inherit = true)
+	        where T : Attribute
+	    {
+	        var attrs = GetAttributes(type, memberInfo, configGetter, inherit);
+	        return attrs.Length == 0 ? null : attrs[0];
+	    }
+	    public T[] GetAttributes<T>(Type type, MemberInfo memberInfo, Func<T, string> configGetter, bool inherit = true)
+	        where T : Attribute
+	    {
+	        var list = new List<T>();
+	        var attrs = GetAttributes<T>(type, memberInfo, inherit);
+
+	        foreach (var c in ConfigurationList)
+	        foreach (var a in attrs)
+	            if (configGetter(a) == c)
+	                list.Add(a);
+
+	        return list.Concat(attrs.Where(a => string.IsNullOrEmpty(configGetter(a)))).ToArray();
+	    }
+	    public T[] GetAttributes<T>(Type type, MemberInfo memberInfo, bool inherit = true)
+	        where T : Attribute
+	    {
+	        var q =
+	            from mr in MetadataReaders
+	            from a in mr.GetAttributes<T>(type, memberInfo, inherit)
+	            select a;
+
+	        return q.ToArray();
+	    }
+        public T GetAttribute<T>(MemberInfo memberInfo, Func<T,string> configGetter, bool inherit = true)
 			where T : Attribute
 		{
 			var attrs = GetAttributes(memberInfo, configGetter, inherit);

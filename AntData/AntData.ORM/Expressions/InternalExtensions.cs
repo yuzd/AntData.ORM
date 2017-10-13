@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using AntData.ORM.Linq.Builder;
+using AntData.ORM.Mapping;
 
 namespace AntData.ORM.Expressions
 {
@@ -885,8 +887,21 @@ namespace AntData.ORM.Expressions
 
 			return false;
 		}
+	    public static bool IsAggregate(this MethodCallExpression methodCall, MappingSchema mapping)
+	    {
+	        if (methodCall.IsQueryable(AggregationBuilder.MethodNames))
+	            return true;
 
-		static Expression FindLevel(Expression expression, int level, ref int current)
+	        if (methodCall.Arguments.Count > 0)
+	        {
+	            var function = AggregationBuilder.GetAggregateDefinition(methodCall, mapping);
+                return function != null;
+	        }
+
+	        return false;
+	    }
+
+        static Expression FindLevel(Expression expression, int level, ref int current)
 		{
 			switch (expression.NodeType)
 			{

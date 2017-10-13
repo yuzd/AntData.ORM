@@ -646,7 +646,7 @@ namespace AntData.ORM.Linq.Builder
 
 		public ISqlExpression ConvertToSql(IBuildContext context, Expression expression, bool unwrap = false)
 		{
-			if (!PreferServerSide(expression))
+			if (!PreferServerSide(expression,false))
 			{
 				if (CanBeConstant(expression))
 					return BuildConstant(expression);
@@ -1067,8 +1067,8 @@ namespace AntData.ORM.Linq.Builder
 
 							if (l != null)
 							{
-								result = l.Body.Unwrap().Find(IsServerSideOnly) != null;
-							}
+							    result = l.Body.Unwrap().Find(ex => IsServerSideOnly(ex)) != null;
+                            }
 							else
 							{
 								var attr = GetExpressionAttribute(e.Method);

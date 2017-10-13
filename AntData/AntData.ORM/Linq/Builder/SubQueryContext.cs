@@ -97,7 +97,7 @@ namespace AntData.ORM.Linq.Builder
 		{
 			return SubQuery
 				.ConvertToIndex(expression, level, flags)
-				.Select(idx => new SqlInfo((idx.Members)) { Sql = SubQuery.SelectQuery.Select.Columns[idx.Index] })
+				.Select(idx => new SqlInfo(idx.Members) { Sql = SubQuery.SelectQuery.Select.Columns[idx.Index] })
 				.ToArray();
 		}
 

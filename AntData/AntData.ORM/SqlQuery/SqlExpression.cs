@@ -7,40 +7,46 @@ namespace AntData.ORM.SqlQuery
 {
 	public class SqlExpression : ISqlExpression
 	{
-		public SqlExpression(Type systemType, string expr, int precedence, params ISqlExpression[] parameters)
-		{
-			if (parameters == null) throw new ArgumentNullException("parameters");
 
-			foreach (var value in parameters)
-				if (value == null) throw new ArgumentNullException("parameters");
+	    public SqlExpression(Type systemType, string expr, int precedence, bool isAggregate, params ISqlExpression[] parameters)
+	    {
+	        if (parameters == null) throw new ArgumentNullException("parameters");
 
-			SystemType = systemType;
-			Expr       = expr;
-			Precedence = precedence;
-			Parameters = parameters;
-		}
+	        foreach (var value in parameters)
+	            if (value == null) throw new ArgumentNullException("parameters");
 
-		public SqlExpression(string expr, int precedence, params ISqlExpression[] parameters)
-			: this(null, expr, precedence, parameters)
-		{
-		}
+	        SystemType = systemType;
+	        Expr = expr;
+	        Precedence = precedence;
+	        Parameters = parameters;
+	        IsAggregate = isAggregate;
+	    }
 
-		public SqlExpression(Type systemType, string expr, params ISqlExpression[] parameters)
-			: this(systemType, expr, SqlQuery.Precedence.Unknown, parameters)
-		{
-		}
+	    public SqlExpression(Type systemType, string expr, int precedence, params ISqlExpression[] parameters)
+	        : this(systemType, expr, precedence, false, parameters)
+	    {
+	    }
 
-		public SqlExpression(string expr, params ISqlExpression[] parameters)
-			: this(null, expr, SqlQuery.Precedence.Unknown, parameters)
-		{
-		}
+	    public SqlExpression(string expr, int precedence, params ISqlExpression[] parameters)
+	        : this(null, expr, precedence, parameters)
+	    {
+	    }
 
-		public Type             SystemType { get; private set; }
+	    public SqlExpression(Type systemType, string expr, params ISqlExpression[] parameters)
+	        : this(systemType, expr, SqlQuery.Precedence.Unknown, parameters)
+	    {
+	    }
+
+	    public SqlExpression(string expr, params ISqlExpression[] parameters)
+	        : this(null, expr, SqlQuery.Precedence.Unknown, parameters)
+	    {
+	    }
+        public Type             SystemType { get; private set; }
 		public string           Expr       { get; private set; }
 		public int              Precedence { get; private set; }
 		public ISqlExpression[] Parameters { get; private set; }
-
-		#region Overrides
+	    public bool IsAggregate { get; private set; }
+        #region Overrides
 
 #if OVERRIDETOSTRING
 
@@ -51,11 +57,11 @@ namespace AntData.ORM.SqlQuery
 
 #endif
 
-		#endregion
+        #endregion
 
-		#region ISqlExpressionWalkable Members
+        #region ISqlExpressionWalkable Members
 
-		ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
+        ISqlExpression ISqlExpressionWalkable.Walk(bool skipColumns, Func<ISqlExpression,ISqlExpression> func)
 		{
 			for (var i = 0; i < Parameters.Length; i++)
 				Parameters[i] = Parameters[i].Walk(skipColumns, func);
@@ -112,35 +118,34 @@ namespace AntData.ORM.SqlQuery
 
 			return comparer(this, other);
 		}
-	
-		#endregion
 
-		#region ICloneableElement Members
+        #endregion
 
-		public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
-		{
-			if (!doClone(this))
-				return this;
+        #region ICloneableElement Members
 
-			ICloneableElement clone;
+	    public ICloneableElement Clone(Dictionary<ICloneableElement, ICloneableElement> objectTree, Predicate<ICloneableElement> doClone)
+	    {
+	        if (!doClone(this))
+	            return this;
 
-			if (!objectTree.TryGetValue(this, out clone))
-			{
-				objectTree.Add(this, clone = new SqlExpression(
-					SystemType,
-					Expr,
-					Precedence,
-					Parameters.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
-			}
+	        ICloneableElement clone;
 
-			return clone;
-		}
+	        if (!objectTree.TryGetValue(this, out clone))
+	        {
+	            objectTree.Add(this, clone = new SqlExpression(
+	                SystemType,
+	                Expr,
+	                Precedence,
+	                Parameters.Select(e => (ISqlExpression)e.Clone(objectTree, doClone)).ToArray()));
+	        }
 
-		#endregion
+	        return clone;
+	    }
+        #endregion
 
-		#region IQueryElement Members
+        #region IQueryElement Members
 
-		public QueryElementType ElementType { get { return QueryElementType.SqlExpression; } }
+        public QueryElementType ElementType { get { return QueryElementType.SqlExpression; } }
 
 		StringBuilder IQueryElement.ToString(StringBuilder sb, Dictionary<IQueryElement,IQueryElement> dic)
 		{

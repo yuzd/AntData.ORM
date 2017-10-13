@@ -41,7 +41,7 @@ namespace AntDataUnitTest
             {
                 string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
                     (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
-                Debug.Write(sql + Environment.NewLine);
+                Trace.Write(sql + Environment.NewLine);
             }
             catch (Exception)
             {
@@ -415,7 +415,7 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod4_02()
         {
-            var p = DB.Tables.People.FindByBk(69);
+            var p = DB.Tables.People.FindByBk(2);
             Assert.IsNotNull(p);
             var s = DB.Tables.Schools.FindByBk(1);
             Assert.IsNotNull(s);
@@ -752,6 +752,25 @@ namespace AntDataUnitTest
                 DB.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update1").Update();
                 DB.Insert(p);
             });
+
+
+        }
+        [Sql.Expression("MONTH({0})", ServerSideOnly = true)]
+        public static int ByMonth(DateTime date)
+        {
+            return date.Month;
+        }
+
+        [Sql.Expression("YEAR({0})", ServerSideOnly = true)]
+        public static int ByYear(DateTime date)
+        {
+            return date.Year;
+        }
+
+        [TestMethod]
+        public void TestMethod7_01()
+        {
+            var TABLE3 = (from syst in DB.Tables.People group syst by new { Y = ByYear(syst.DataChangeLastTime) }).ToList();
 
 
         }
