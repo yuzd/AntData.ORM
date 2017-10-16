@@ -50,9 +50,9 @@ namespace AntData.ORM.Postgre
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
 
-            if (name[0] != '@')
+            if (name[0] != ':')
             {
-                return "@" + name;
+                return ":" + name;
             }
             return name;
         }

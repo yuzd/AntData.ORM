@@ -39,7 +39,7 @@ namespace AntData.ORM.DataProvider.PostgreSQL
 			var owner    = GetTableOwnerName   (into);
 
 			AppendIndent()
-				.Append("SELECT currval('");
+				.Append(";SELECT currval('");
 
 			BuildTableName(StringBuilder, database, owner, name.ToString());
 

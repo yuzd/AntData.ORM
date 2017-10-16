@@ -171,7 +171,7 @@ namespace AntData.ORM.DataProvider.PostgreSQL
 			}
 		}
 
-	    public override string ParameterSymbol { get { return "@"; } }
+	    public override string ParameterSymbol { get { return ":"; } }
 	    public override bool InsertWinthIdentityWithNoCache {
 	        get { return false; }
 	    }

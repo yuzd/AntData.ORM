@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.NetworkInformation;
 using System.Text;
+using AntData.ORM.SqlQuery;
 
 namespace AntData.ORM.DataProvider.PostgreSQL
 {
@@ -16,7 +17,7 @@ namespace AntData.ORM.DataProvider.PostgreSQL
 		{
 			ColumnComparisonOption = StringComparison.OrdinalIgnoreCase;
 
-			SetDataType(typeof(string), DataType.Undefined);
+			SetDataType(typeof(string), new SqlDataType(DataType.NVarChar, typeof(string), 255));
 
 			AddScalarType(typeof(PhysicalAddress), DataType.Udt);
 

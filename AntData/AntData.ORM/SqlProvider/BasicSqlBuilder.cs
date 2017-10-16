@@ -1363,7 +1363,7 @@ namespace AntData.ORM.SqlProvider
                
                 SqlTable sqlTable = (SqlTable)table.Source;
 	            var columns = sqlTable.Fields.Keys.Select(r => r.ToLower()).ToList();
-	            var dic = sqlTable.Fields.Keys.ToDictionary(r => r.ToLower(), y => y);
+	            var dic = sqlTable.Fields.Select(r=>new {columnName = r.Key,realName = r.Value.PhysicalName}).ToDictionary(r => r.columnName.ToLower(), y => y.realName);
                 foreach (var ar in arr)
 	            {
 	                if (ar.StartsWith("!!"))
