@@ -21,6 +21,8 @@ SqlServer : Install-Package AntData.Core
 
 Mysql：Install-Package AntData.Core.Mysql
 
+Postgre：Install-Package AntData.Core.Postgre
+
 QQ Group ：433685124
 
 # How to use CodeGen to auto Create Db models 
