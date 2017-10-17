@@ -34,11 +34,17 @@ namespace AntData.ORM.DbEngine.Configuration
                     case "sqlserver":
                     case "sql":
                     case "mssql":
+                    case "mssqlrovider":
                     case "sqlprovider":
                         return "AntData.ORM.DbEngine.Providers.SqlDatabaseProvider,AntData.ORM";
                     case "oracle":
                     case "oracleprovider":
-                        return "AntData.ORM.DbEngine.Providers.SqlDatabaseProvider,AntData.ORM";
+                        return "AntData.ORM.Oracle.OracleDatabaseProvider,AntData.ORM.Oracle";
+                    case "postgre":
+                    case "postgresql":
+                    case "postgreprovider":
+                    case "postgresqlprovider":
+                        return "AntData.ORM.Postgre.PostgreDatabaseProvider,AntData.ORM.Postgre";
                 }
                 return _provder;
             }
