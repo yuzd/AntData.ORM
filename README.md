@@ -3,6 +3,7 @@
 [![Support](https://img.shields.io/badge/support-NetCore-blue.svg?style=flat)](https://www.microsoft.com/net/core) 
 [![Weibo](https://img.shields.io/badge/博客园-@鱼东东-yellow.svg?style=flat)](http://www.cnblogs.com/yudongdong) 
 [![GitHub stars](https://img.shields.io/github/stars/yuzd/AntData.ORM.svg)](https://github.com/yuzd/AntData.ORM/stargazers)
+[![NuGet Status](https://img.shields.io/nuget/v/GoogleMapsApi.svg)](https://www.nuget.org/packages/AntData.Core/)
 
 # AntData.ORM
 
