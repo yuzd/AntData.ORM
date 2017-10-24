@@ -26,20 +26,12 @@ Postgre：Install-Package AntData.Core.Postgre
 
 QQ Group ：433685124
 
-# How to use CodeGen to auto Create Db models 
+[How to use CodeGen to auto Create Db models](http://www.cnblogs.com/yudongdong/p/6421312.html)
 
-Please see:
-
-http://note.youdao.com/noteshare?id=f4958dbc7b42971f64f44675fd116413&sub=8EF852DD85064E02AB187ACA9823D576
 
 # DEMO
-AntData.ORM For Oracle Demo：
 
-http://note.youdao.com/share/?id=998f6da78d9d7dfcc5293ca41a6d7c3a&type=note#/
-
-Dotnetcore Demo
-
-http://note.youdao.com/noteshare?id=5e85736b7f5de49e4f4fecda4e3c1e8b&sub=8A0F25C519F4413193B5D6F20DC22ED1
+[Dotnetcore Demo](http://www.cnblogs.com/yudongdong/p/6427432.html)
 
 # Instance  DbContext
 
@@ -357,9 +349,7 @@ DB.UseTransaction(con =>
 
 ```
 
-# 6.Read-write separation DEMO
+# 6.[Read-write separation DEMO](http://www.cnblogs.com/yudongdong/p/6432049.html)
 
-http://note.youdao.com/noteshare?id=6249b5fc2d17569bef12a24d54fc1b30&sub=2A83E464B28D4F41B8A93C87179AE20D
-
-# 6.Sharding By DB And Sharding By Table
+# 7.Sharding By DB And Sharding By Table
 Please see unit test
