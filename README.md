@@ -5,7 +5,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/yuzd/AntData.ORM.svg)](https://github.com/yuzd/AntData.ORM/stargazers)
 [![NuGet Status](https://img.shields.io/nuget/v/GoogleMapsApi.svg)](https://www.nuget.org/packages/AntData.Core/)
 
-# AntData.ORM
+# AntData.ORM Is Fork from [Linq2db](https://github.com/linq2db/linq2db)
+.Read-write separation
+.Sharding By DB And Sharding By Table
 
 # NUGET FOR .NET
 
