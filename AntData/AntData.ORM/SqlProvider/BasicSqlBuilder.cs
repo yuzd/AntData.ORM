@@ -984,7 +984,7 @@ namespace AntData.ORM.SqlProvider
 				BuildPhysicalTable(ts.Source, alias);
 			}
             //是否加nolock
-		    if (Common.Configuration.Linq.UseNoLock && !isJoin)
+		    if (!isJoin && NeedUseNolock && Common.Configuration.Linq.UseNoLock)
 		    {
 		        StringBuilder.Append(" (NOLOCK) ");
 		    }
@@ -1055,6 +1055,11 @@ namespace AntData.ORM.SqlProvider
 
 			Indent--;
 		}
+
+        protected virtual bool NeedUseNolock
+        {
+            get { return false; }
+        }
 
 		protected virtual bool BuildJoinType(SelectQuery.JoinedTable join)
 		{

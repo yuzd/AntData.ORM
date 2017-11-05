@@ -92,7 +92,9 @@ namespace AntData.ORM.DataProvider.SqlServer
 				StringBuilder.Append(Convert(GetTableAlias(table), ConvertType.NameToQueryTableAlias));
 		}
 
-		protected override void BuildColumnExpression(ISqlExpression expr, string alias, ref bool addAlias/*,bool isSelect = false*/)
+        protected override bool NeedUseNolock => true;
+
+        protected override void BuildColumnExpression(ISqlExpression expr, string alias, ref bool addAlias/*,bool isSelect = false*/)
 		{
 			var wrap = false;
 
