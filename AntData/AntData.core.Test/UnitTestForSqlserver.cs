@@ -386,10 +386,10 @@ namespace AntDataUnitTest
                 Age = 27
             };
 
-            DB.UseTransaction(() =>
+            DB.UseTransaction((con) =>
             {
-                DB.Tables.Schools.Where(r => r.Name.Equals("上海大学")).Set(r => r.Address, "no update").Update();
-                DB.Insert(p);
+                con.Tables.Schools.Where(r => r.Name.Equals("上海大学")).Set(r => r.Address, "no update").Update();
+                con.Insert(p);
                 return true;
             });
 
@@ -581,10 +581,10 @@ namespace AntDataUnitTest
                 Name = "test2"
             };
 
-            DB.UseTransaction(() =>
+            DB.UseTransaction((con) =>
             {
-                DB.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update").Update();
-                DB.Insert(p);
+                con.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update").Update();
+                con.Insert(p);
                 return true;
             });
 

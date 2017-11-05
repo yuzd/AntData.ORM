@@ -35,11 +35,11 @@ namespace ConsoleApp1
             });
 
             var Services = serviceCollection.BuildServiceProvider();
-            var newDB = Services.GetService<TestEntitys>();
+            var newDB = Services.GetService<DbContext<TestEntitys>>();
 
-            var p1 = newDB.People.FirstOrDefault();
+            var p1 = newDB.Tables.People.FirstOrDefault();
            
-            var p2 = newDB.People.FirstOrDefault(r => r.Name.Equals("yuzd"));
+            var p2 = newDB.Tables.People.FirstOrDefault(r => r.Name.Equals("yuzd"));
             Console.WriteLine(p1.Name);
 
             DB = new SqlServerlDbContext<TestEntitys>("testorm_sqlserver");

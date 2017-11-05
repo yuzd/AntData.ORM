@@ -27,9 +27,6 @@ namespace AntData.ORM.Data
         static DataConnection()
         {
             _configurationIDs = new ConcurrentDictionary<string, int>();
-            AntData.ORM.DataProvider.SqlServer.SqlServerTools.GetDataProvider();
-            AntData.ORM.DataProvider.MySql.MySqlTools.GetDataProvider();
-            AntData.ORM.DataProvider.Oracle.OracleTools.GetDataProvider();
         }
 
 
@@ -528,75 +525,5 @@ namespace AntData.ORM.Data
         }
         #endregion
 
-
-        #region Transaction
-
-	    public void UseTransaction(System.Action func)
-	    {
-	        using (var scope = ExecuteTransaction())
-	        {
-	            try
-	            {
-	                func();
-	                scope.Commit();
-	            }
-	            finally
-	            {
-	                Close();
-	            }
-	        }
-	    }
-	    public void UseTransaction(System.Action func, System.Data.IsolationLevel isolationLevel)
-	    {
-	        using (var scope = ExecuteTransaction(isolationLevel))
-	        {
-	            try
-	            {
-	                func();
-	                scope.Commit();
-	            }
-	            finally
-	            {
-	                Close();
-	            }
-	        }
-	    }
-
-	    public void UseTransaction(System.Func<bool> func)
-	    {
-	        using (var scope = ExecuteTransaction())
-	        {
-	            try
-	            {
-	                if (func())
-	                {
-	                    scope.Commit();
-	                }
-	            }
-	            finally
-	            {
-	                Close();
-	            }
-	        }
-	    }
-
-	    public void UseTransaction(System.Func<bool> func, System.Data.IsolationLevel isolationLevel)
-	    {
-	        using (var scope = ExecuteTransaction(isolationLevel))
-	        {
-	            try
-	            {
-	                if (func())
-	                {
-	                    scope.Commit();
-	                }
-	            }
-	            finally
-	            {
-	                Close();
-	            }
-	        }
-	    }
-        #endregion
     }
 }

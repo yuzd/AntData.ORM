@@ -7,7 +7,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using AntData.ORM;
@@ -26,40 +28,40 @@ namespace Microsoft.Extensions.DependencyInjection
     internal static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddSingletonFactory<T, TFactory>(this IServiceCollection collection)
-            where T : class where TFactory : class, IServiceFactory<T>
+            where T : class where TFactory : class, IServiceFactory
         {
             collection.AddTransient<TFactory>();
             return AddInternal<T, TFactory>(collection, p => p.GetRequiredService<TFactory>(), ServiceLifetime.Singleton);
         }
 
         public static IServiceCollection AddSingletonFactory<T, TFactory>(this IServiceCollection collection, TFactory factory)
-            where T : class where TFactory : class, IServiceFactory<T>
+            where T : class where TFactory : class, IServiceFactory
         {
             return AddInternal<T, TFactory>(collection, p => factory, ServiceLifetime.Singleton);
         }
 
         public static IServiceCollection AddTransientFactory<T, TFactory>(this IServiceCollection collection)
-            where T : class where TFactory : class, IServiceFactory<T>
+            where T : class where TFactory : class, IServiceFactory
         {
             collection.AddTransient<TFactory>();
             return AddInternal<T, TFactory>(collection, p => p.GetRequiredService<TFactory>(), ServiceLifetime.Transient);
         }
 
         public static IServiceCollection AddTransientFactory<T, TFactory>(this IServiceCollection collection, TFactory factory)
-            where T : class where TFactory : class, IServiceFactory<T>
+            where T : class where TFactory : class, IServiceFactory
         {
             return AddInternal<T, TFactory>(collection, p => factory, ServiceLifetime.Transient);
         }
 
         public static IServiceCollection AddScopedFactory<T, TFactory>(this IServiceCollection collection)
-            where T : class where TFactory : class, IServiceFactory<T>
+            where T : class where TFactory : class, IServiceFactory
         {
             collection.AddTransient<TFactory>();
             return AddInternal<T, TFactory>(collection, p => p.GetRequiredService<TFactory>(), ServiceLifetime.Scoped);
         }
 
         public static IServiceCollection AddScopedFactory<T, TFactory>(this IServiceCollection collection, TFactory factory)
-            where T : class where TFactory : class, IServiceFactory<T>
+            where T : class where TFactory : class, IServiceFactory
         {
             return AddInternal<T, TFactory>(collection, p => factory, ServiceLifetime.Scoped);
         }
@@ -67,12 +69,12 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection AddInternal<T, TFactory>(
             this IServiceCollection collection,
             Func<IServiceProvider, TFactory> factoryProvider,
-            ServiceLifetime lifetime) where T : class where TFactory : class, IServiceFactory<T>
+            ServiceLifetime lifetime) where T : class where TFactory : class, IServiceFactory
         {
             Func<IServiceProvider, object> factoryFunc = provider =>
             {
                 var factory = factoryProvider(provider);
-                return factory.Build();
+                return factory.Build<T>();
             };
             var descriptor = new ServiceDescriptor(
                 typeof(T), factoryFunc, lifetime);
@@ -80,15 +82,16 @@ namespace Microsoft.Extensions.DependencyInjection
             return collection;
         }
     }
-    public interface IServiceFactory<T> where T : class
+    public interface IServiceFactory
     {
-        T Build();
+        object Build<T>() where T : class;
     }
 
-    public class DbContextFactory : IServiceFactory<DataConnection>
+    public class DbContextFactory<T> : IServiceFactory
     {
         private readonly IDataProvider _dataProvider;
         private readonly DbContextOptions _dbContextOptions;
+        private static readonly ConcurrentDictionary<string, ConstructorInfo> _dbConstructDic = new ConcurrentDictionary<string, ConstructorInfo>();
 
         public DbContextFactory(IDataProvider dataProvider, DbContextOptions dbContextOptions)
         {
@@ -96,13 +99,68 @@ namespace Microsoft.Extensions.DependencyInjection
             _dbContextOptions = dbContextOptions;
         }
 
-        public DataConnection Build()
+        public object Build<T>() where T : class
         {
-            return new DataConnection(_dataProvider, _dbContextOptions.Name)
+            var type = typeof(T);
+            if (!type.IsGenericType)
             {
-                IsEnableLogTrace = _dbContextOptions.IsEnableLogTrace,
-                OnLogTrace = _dbContextOptions.OnLogTrace
-            };
+                return null;
+            }
+            var genericType = type.GetGenericArguments()[0];
+            Type contextType;
+            ConstructorInfo contextTypeConstr = null;
+            DbContext dbcontext = null;
+            switch (_dataProvider.Name)
+            {
+                case ProviderName.MySql:
+                    if (!_dbConstructDic.TryGetValue(ProviderName.MySql, out contextTypeConstr))
+                    {
+                        contextType = typeof(MysqlDbContext<>).MakeGenericType(genericType);
+                        contextTypeConstr = contextType.GetConstructor(new Type[] { typeof(String) });
+                        _dbConstructDic.TryAdd(ProviderName.MySql, contextTypeConstr);
+                    }
+                    break;
+                case ProviderName.SqlServer:
+                case ProviderName.SqlServer2008:
+                case ProviderName.SqlServer2000:
+                case ProviderName.SqlServer2012:
+                case ProviderName.SqlServer2014:
+                    if (!_dbConstructDic.TryGetValue(ProviderName.SqlServer, out contextTypeConstr))
+                    {
+                        contextType = typeof(SqlServerlDbContext<>).MakeGenericType(genericType);
+                        contextTypeConstr = contextType.GetConstructor(new Type[] { typeof(String) });
+                        _dbConstructDic.TryAdd(ProviderName.SqlServer, contextTypeConstr);
+                    }
+                    break;
+                case ProviderName.Oracle:
+                case ProviderName.OracleManaged:
+                case ProviderName.OracleNative:
+                    if (!_dbConstructDic.TryGetValue(ProviderName.Oracle, out contextTypeConstr))
+                    {
+                        contextType = typeof(OracleDbContext<>).MakeGenericType(genericType);
+                        contextTypeConstr = contextType.GetConstructor(new Type[] { typeof(String) });
+                        _dbConstructDic.TryAdd(ProviderName.Oracle, contextTypeConstr);
+                    }
+                    break;
+                case ProviderName.PostgreSQL:
+                case ProviderName.PostgreSQL92:
+                case ProviderName.PostgreSQL93:
+                    if (!_dbConstructDic.TryGetValue(ProviderName.PostgreSQL, out contextTypeConstr))
+                    {
+                        contextType = typeof(PostgreDbContext<>).MakeGenericType(genericType);
+                        contextTypeConstr = contextType.GetConstructor(new Type[] { typeof(String) });
+                        _dbConstructDic.TryAdd(ProviderName.PostgreSQL, contextTypeConstr);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (contextTypeConstr == null) return null;
+            dbcontext = contextTypeConstr.Invoke(new object[] { _dbContextOptions.Name }) as DbContext;
+            if (dbcontext == null) return null;
+            dbcontext.IsEnableLogTrace = _dbContextOptions.IsEnableLogTrace;
+            dbcontext.OnLogTrace = _dbContextOptions.OnLogTrace;
+            return dbcontext;
         }
     }
 
@@ -133,7 +191,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="contextLifetime">默认每次获取都是新的实例</param>
         /// <param name="optionsLifetime">默认每次获取都是新的实例</param>
         /// <returns></returns>
-        public static IServiceCollection AddMysqlEntitys<T>(this IServiceCollection serviceCollection, string mappingName,Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
+        public static IServiceCollection AddMysqlEntitys<T>(this IServiceCollection serviceCollection, string mappingName,Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : class 
         {
             if (serviceCollection == null)
             {
@@ -141,13 +199,9 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             serviceCollection.AddSingleton<IDataProvider>(new MySqlDataProvider());
             var dbOptions = new DbContextOptions(mappingName);
-            if (opsAction!=null)
-            {
-                opsAction(dbOptions);
-            }
+            opsAction?.Invoke(dbOptions);
             serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
-            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            serviceCollection.AddTransientFactory<DbContext<T>, DbContextFactory<T>>();
             return serviceCollection;
         }
 
@@ -161,22 +215,17 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="contextLifetime">默认每次获取都是新的实例</param>
         /// <param name="optionsLifetime">默认每次获取都是新的实例</param>
         /// <returns></returns>
-        public static IServiceCollection AddSqlServerEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
+        public static IServiceCollection AddSqlServerEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : class
         {
             if (serviceCollection == null)
             {
                 throw new ArgumentException("serviceCollection is null");
             }
             serviceCollection.AddSingleton<IDataProvider>(new SqlServerDataProvider(SqlServerVersion.v2008));
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             var dbOptions = new DbContextOptions(mappingName);
-            if (opsAction != null)
-            {
-                opsAction(dbOptions);
-            }
+            opsAction?.Invoke(dbOptions);
             serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
-            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            serviceCollection.AddTransientFactory<DbContext<T>, DbContextFactory<T>>();
             return serviceCollection;
         }
 
@@ -190,22 +239,17 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="contextLifetime">默认每次获取都是新的实例</param>
         /// <param name="optionsLifetime">默认每次获取都是新的实例</param>
         /// <returns></returns>
-        public static IServiceCollection AddOracleEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
+        public static IServiceCollection AddOracleEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : class
         {
             if (serviceCollection == null)
             {
                 throw new ArgumentException("serviceCollection is null");
             }
             serviceCollection.AddSingleton<IDataProvider>(new OracleDataProvider());
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             var dbOptions = new DbContextOptions(mappingName);
-            if (opsAction != null)
-            {
-                opsAction(dbOptions);
-            }
+            opsAction?.Invoke(dbOptions);
             serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
-            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            serviceCollection.AddTransientFactory<DbContext<T>, DbContextFactory<T>>();
             return serviceCollection;
         }
 
@@ -219,7 +263,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="contextLifetime"></param>
         /// <param name="optionsLifetime"></param>
         /// <returns></returns>
-        public static IServiceCollection AddPostgreSQLEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : IEntity
+        public static IServiceCollection AddPostgreSQLEntitys<T>(this IServiceCollection serviceCollection, string mappingName, Action<DbContextOptions> opsAction = null, ServiceLifetime contextLifetime = ServiceLifetime.Transient, ServiceLifetime optionsLifetime = ServiceLifetime.Transient) where T : class
         {
             if (serviceCollection == null)
             {
@@ -228,13 +272,9 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddSingleton<IDataProvider>(new PostgreSQLDataProvider());
             serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
             var dbOptions = new DbContextOptions(mappingName);
-            if (opsAction != null)
-            {
-                opsAction(dbOptions);
-            }
+            opsAction?.Invoke(dbOptions);
             serviceCollection.AddSingleton<DbContextOptions>(dbOptions);
-            serviceCollection.AddTransientFactory<DataConnection, DbContextFactory>();
-            serviceCollection.TryAdd(new ServiceDescriptor(typeof(T), typeof(T), contextLifetime));
+            serviceCollection.AddTransientFactory<DbContext<T>, DbContextFactory<T>>();
             return serviceCollection;
         }
 

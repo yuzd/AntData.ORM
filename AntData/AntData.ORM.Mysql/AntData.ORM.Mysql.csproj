@@ -29,6 +29,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="AntData.ORM.Mysql.csproj.migration_in_place_backup" />
+    <None Remove="AntData.ORM.Mysql.nuspec" />
+    <None Remove="Gruntfile.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="0.26.0" />
   </ItemGroup>
   

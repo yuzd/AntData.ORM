@@ -8,25 +8,28 @@
 #if !NETSTANDARD
 using System.Transactions;
 #endif
+using System.Collections;
+using System.Data;
+using AntData.ORM.Common;
 using AntData.ORM.DataProvider;
-
+using System;
 namespace AntData.ORM.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
-    using System.Threading.Tasks;
+
+    public abstract class DbContext : AntData.ORM.Data.DataConnection, IDataContext
+    {
+        public DbContext(string dbMappingName) : base(dbMappingName)
+        {
+        }
+    }
 
 
     /// <summary>
     /// 
     /// </summary>
-    public abstract class DbContext<T> : AntData.ORM.Data.DataConnection, IDataContext where T : class
+    public abstract class DbContext<T> : DbContext
     {
         protected abstract IDataProvider provider { get; }
-        //private static readonly IDataProvider provider = new SqlServerDataProvider(System.String.Empty, LinqToDB.DataProvider.SqlServer.SqlServerVersion.v2008);
         private readonly Lazy<T> _lazy = null;
         public T Tables
         {
@@ -56,12 +59,103 @@ namespace AntData.ORM.Data
 
                     throw;
                 }
-                return null;
+                return default(T);
             });
         }
 
 
 
+
+        #region Transaction
+
+        public void UseTransaction(System.Action<DbContext<T>> func)
+        {
+            using (var scope = ExecuteTransaction())
+            {
+                try
+                {
+                    func(this);
+                    scope.Commit();
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Action<DbContext<T>> func, System.Data.IsolationLevel isolationLevel)
+        {
+            using (var scope = ExecuteTransaction(isolationLevel))
+            {
+                try
+                {
+                    func(this);
+                    scope.Commit();
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Func<DbContext<T>,bool> func)
+        {
+            using (var scope = ExecuteTransaction())
+            {
+                try
+                {
+                    if (func(this))
+                    {
+                        scope.Commit();
+                    }
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Func<DbContext<T>,bool> func, System.Data.IsolationLevel isolationLevel)
+        {
+            using (var scope = ExecuteTransaction(isolationLevel))
+            {
+                try
+                {
+                    if (func(this))
+                    {
+                        scope.Commit();
+                    }
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+        #endregion
 
     }
 }

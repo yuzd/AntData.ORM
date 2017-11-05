@@ -163,3 +163,5 @@ packages/
 
 AntData/AntData.ORM/AntData.ORM.nuspec.core
 AntData/AntData.ORM/Gruntfile.core
+
+AntData/.vs/
