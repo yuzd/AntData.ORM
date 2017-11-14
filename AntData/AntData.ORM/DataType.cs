@@ -211,5 +211,14 @@ namespace AntData.ORM
 		/// Dictionary type for key-value pairs
 		/// </summary>
 		Dictionary,
-	}
+	    /// <summary>
+	    /// Json type utilized in postgres provider.
+	    /// </summary>
+	    Json,
+
+	    /// <summary>
+	    /// Binary type utilized postgres provider (jsonb).
+	    /// </summary>
+	    BinaryJson
+    }
 }

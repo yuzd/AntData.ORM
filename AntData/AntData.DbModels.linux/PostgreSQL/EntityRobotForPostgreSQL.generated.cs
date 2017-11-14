@@ -62,7 +62,7 @@ namespace DbModels.PostgreSQL
 		/// <summary>
 		/// Ãû×Ö
 		/// </summary>
-		[Column("name",                DataType=AntData.ORM.DataType.NVarChar,  Length=20, Comment="Ãû×Ö"),    Nullable]
+		[Column("name",                DataType=AntData.ORM.DataType.NVarChar,  Length=20, Comment="Ãû×Ö"), NotNull]
 		public string Name { get; set; } // character varying(20)
 
 		/// <summary>
@@ -141,6 +141,12 @@ namespace DbModels.PostgreSQL
 			get { return _DataChangeLastTime; }
 			set { _DataChangeLastTime = value; }
 		}
+
+		/// <summary>
+		/// json²âÊÔ
+		/// </summary>
+		[Column("attr",                DataType=AntData.ORM.DataType.Undefined, Comment="json²âÊÔ"),    Nullable]
+		public object Attr { get; set; } // json
 
 		#endregion
 

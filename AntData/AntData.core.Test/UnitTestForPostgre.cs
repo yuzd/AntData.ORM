@@ -763,5 +763,29 @@ namespace AntDataUnitTest
 
 
         }
+
+        [TestMethod]
+        public void TestMethod7_02()
+        {
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(new {Name = "a", Age = 12});
+            School s = new School
+            {
+                Address = "测试",
+                Name =  "ddddd",
+                Attr = json
+            };
+
+            var tid = DB.InsertWithIdentity<School,long>(s);
+
+            var newS = DB.Tables.Schools.FindByBk(tid);
+
+            Assert.Equals(json, newS.Attr.ToString());
+
+            DB.Tables.Schools.Where(r => r.Id.Equals(tid)).Set(r => r.Attr,
+                Newtonsoft.Json.JsonConvert.SerializeObject(new {Name = "ad", Age = 13})).Update();
+
+            DB.Tables.Schools.Delete(r => r.Id.Equals(tid));
+
+        }
     }
 }

@@ -94,8 +94,12 @@ namespace AntData.ORM.DataProvider
 		{
 			ReaderExpressions[new ReaderInfo { FieldType = typeof(string), DataTypeName = dataTypeName }] = expr;
 		}
+	    protected void SetCharFieldToType<T>(string dataTypeName, Expression<Func<IDataReader, int, string>> expr)
+	    {
+	        ReaderExpressions[new ReaderInfo { ToType = typeof(T), FieldType = typeof(string), DataTypeName = dataTypeName }] = expr;
+	    }
 
-		protected void SetField<TP,T>(Expression<Func<TP,int,T>> expr)
+        protected void SetField<TP,T>(Expression<Func<TP,int,T>> expr)
 		{
 			ReaderExpressions[new ReaderInfo { FieldType = typeof(T) }] = expr;
 		}
