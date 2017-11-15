@@ -983,8 +983,9 @@ namespace AntData.ORM.SqlProvider
 				var alias = GetTableAlias(ts);
 				BuildPhysicalTable(ts.Source, alias);
 			}
+		    
             //是否加nolock
-		    if (!isJoin && NeedUseNolock && Common.Configuration.Linq.UseNoLock)
+            if (SelectQuery.QueryType.Equals(QueryType.Select) && !isJoin && NeedUseNolock && Common.Configuration.Linq.UseNoLock)
 		    {
 		        StringBuilder.Append(" (NOLOCK) ");
 		    }

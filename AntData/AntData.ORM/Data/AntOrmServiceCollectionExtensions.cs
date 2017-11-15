@@ -99,7 +99,9 @@ namespace Microsoft.Extensions.DependencyInjection
             _dbContextOptions = dbContextOptions;
         }
 
+#pragma warning disable 693
         public object Build<T>() where T : class
+#pragma warning restore 693
         {
             var type = typeof(T);
             if (!type.IsGenericType)

@@ -45,6 +45,7 @@ namespace AntDataUnitTest
             }
             catch (Exception)
             {
+                Trace.Write(customerTraceInfo.SqlText + Environment.NewLine);
                 //ignore
             }
         }

@@ -19,5 +19,7 @@ namespace AntData.ORM.Common
         public string TableName { get; set; }
         public string ColumnName { get; set; }
         public ParameterDirection ParameterDirection { get; set; }
+
+        public IDbDataParameter DbDataParameter { get; set; }
     }
 }

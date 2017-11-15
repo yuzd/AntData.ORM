@@ -22,6 +22,20 @@ namespace AntData.ORM.Dao
     {
         protected static readonly ConcurrentDictionary<string, BaseDao> DaoCache = new ConcurrentDictionary<string, BaseDao>();
 
+
+        /// <summary>
+        /// 创建IDbDataParameter
+        /// </summary>
+        /// <param name="dbName"></param>
+        /// <param name="hints"></param>
+        /// <returns></returns>
+        public static IDbDataParameter CreateDbDataParameter(string dbName, IDictionary hints = null)
+        {
+            var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
+            return baseDao.CreateDbDataParameter(hints);
+        }
+
+
         /// <summary>
         /// 开启事物
         /// </summary>
@@ -47,7 +61,7 @@ namespace AntData.ORM.Dao
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var isNonQuery = false;
-            var dic = ConvertStatement(paras, out isNonQuery);
+            var dic = ConvertStatement(dbName, paras, out isNonQuery);
             if (dic != null && dic.Count > 0)
             {
                 if (hints != null && hints.Count > 0)
@@ -77,7 +91,7 @@ namespace AntData.ORM.Dao
 
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var isNonQuery = false;
-            var dic = ConvertStatement(paras, out isNonQuery);
+            var dic = ConvertStatement(dbName, paras, out isNonQuery);
             if (dic != null && dic.Count > 0)
             {
                 if (hints != null && hints.Count > 0)
@@ -107,7 +121,7 @@ namespace AntData.ORM.Dao
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var isNonQuery = false;
-            var dic = ConvertStatement(paras, out isNonQuery);
+            var dic = ConvertStatement(dbName, paras, out isNonQuery);
             if (dic != null && dic.Count > 0)
             {
                 if (hints != null && hints.Count > 0)
@@ -154,7 +168,7 @@ namespace AntData.ORM.Dao
         {
             var baseDao = DaoCache.GetOrAdd(dbName, BaseDaoFactory.CreateBaseDao(dbName));
             var isNonQuery = false;
-            var dic = ConvertStatement(paras, out isNonQuery);
+            var dic = ConvertStatement(dbName, paras, out isNonQuery);
             if (dic != null && dic.Count > 0)
             {
                 if (hints != null && hints.Count > 0)
@@ -173,10 +187,11 @@ namespace AntData.ORM.Dao
         /// <summary>
         /// 参数转换
         /// </summary>
+        /// <param name="dbName"></param>
         /// <param name="paras"></param>
         /// <param name="isNonQuery"></param>
         /// <returns></returns>
-        public static StatementParameterCollection ConvertStatement(Dictionary<string, CustomerParam> paras, out bool
+        public static StatementParameterCollection ConvertStatement(string dbName,Dictionary<string, CustomerParam> paras, out bool
             isNonQuery)
         {
             isNonQuery = false;
@@ -187,19 +202,20 @@ namespace AntData.ORM.Dao
                 {
                     if (item.Value.ParameterDirection.Equals(ParameterDirection.ReturnValue))
                     {
-                        dic.AddReturnParameter(item.Key, LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType));
+                        dic.AddReturnParameter(item.Key, item.Value.DbType>0? LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType) : item.Value.DbDataParameter.DbType);
                     }
                     else if (item.Value.ParameterDirection.Equals(ParameterDirection.Output))
                     {
                         if (!isNonQuery) isNonQuery = true;
-                        dic.AddOutParameter(item.Key, LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType));
+                        dic.AddOutParameter(item.Key, item.Value.DbType > 0 ? LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType) : item.Value.DbDataParameter.DbType);
                     }
                     else
                     {
-                        dic.AddInParameter(item.Key, LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType), item.Value.Value);
+                        dic.AddInParameter(item.Key, item.Value.DbType > 0 ? LinqEnumHelper.IntToEnum<DbType>(item.Value.DbType) : item.Value.DbDataParameter.DbType, item.Value.Value);
                     }
                     dic[item.Key].TableName = item.Value.TableName;
                     dic[item.Key].ColumnName = item.Value.ColumnName;
+                    dic[item.Key].DbDataParameter = item.Value.DbDataParameter;
                 }
                 return dic;
             }

@@ -80,6 +80,16 @@ namespace AntData.ORM.Dao
             return DatabaseBridge.Instance.BeginTransaction(statement);
         }
 
+        /// <summary>
+        /// 创建IDbDataParameter
+        /// </summary>
+        /// <param name="hints"></param>
+        /// <returns></returns>
+        public IDbDataParameter CreateDbDataParameter(IDictionary hints = null)
+        {
+            Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>CreateDbDataParameter", null, null, OperationType.Write).Single();
+            return DatabaseBridge.Instance.CreateDbDataParameter(statement);
+        }
         #region SelectDataReader VisitDataReader
 
         /// <summary>

@@ -73,6 +73,7 @@ namespace AntData.ORM.DbEngine
         public string ShardingValue { get; set; }
         public string TableName { get; set; }
         public string ColumnName { get; set; }
+        public IDbDataParameter DbDataParameter { get; set; }
 
     }
 }

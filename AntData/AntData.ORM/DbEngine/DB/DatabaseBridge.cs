@@ -46,6 +46,24 @@ namespace AntData.ORM.DbEngine.DB
         }
 
         /// <summary>
+        /// 创建IDbDataParameter
+        /// </summary>
+        /// <param name="statement"></param>
+        /// <returns></returns>
+        public IDbDataParameter CreateDbDataParameter(Statement statement)
+        {
+            try
+            {
+
+                var databases = DatabaseFactory.GetDatabasesByStatement(statement);
+                return HAFactory.GetInstance(statement.DatabaseSet).ExecuteWithHa(db => db.CreateDbDataParameter(statement), databases);
+            }
+            finally
+            {
+            }
+        }
+
+        /// <summary>
         /// 根据Statement,执行增删改操作
         /// </summary>
         /// <param name="statement"></param>

@@ -37,18 +37,6 @@ namespace AntData.ORM.DataProvider.Oracle
 
             if (identityField == null)
             	throw new SqlException("Identity field must be defined for '{0}'.", SelectQuery.Insert.Into.Name);
-
-            //var table = identityField.Table as SqlTable;
-            //      if (table ==null)
-            //      {
-            //          throw new SqlException("Identity field must have table attributer for '{0}'.", SelectQuery.Insert.Into.Name);
-            //      }
-            //      var attr = GetSequenceNameAttribute(table, false);
-            //if (attr == null)
-            //{
-            //          throw new SqlException("Identity field must have Sequence attributer for '{0}'.", SelectQuery.Insert.Into.Name);
-            //      }
-            //      StringBuilder.AppendLine(" SELECT {0}.CURRVAL  from dual ".Args(attr.SequenceName));
             AppendIndent().AppendLine(" RETURNING ");
             AppendIndent().Append("\t");
             BuildExpression(identityField, false, true);

@@ -43,10 +43,11 @@ namespace AntDataUnitTest
             {
                 string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
                     (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
-                Debug.Write(sql + Environment.NewLine);
+                Trace.Write(sql + Environment.NewLine);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Trace.Write(customerTraceInfo.SqlText + Environment.NewLine);
                 //ignore
             }
         }

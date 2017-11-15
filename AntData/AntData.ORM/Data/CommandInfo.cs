@@ -360,7 +360,9 @@ namespace AntData.ORM.Data
 
 			foreach (var parameter in parameters)
 			{
-                var p = new CustomerParam();  //p = dataConnection.Command.CreateParameter();
+			    var dbParameter = dataConnection.CreateParameter();
+                var p = new CustomerParam();
+			    p.DbDataParameter = dbParameter;
 				var dataType = parameter.DataType;
 				var value    = parameter.Value;
 			    p.TableName = parameter.TableName;
@@ -369,13 +371,12 @@ namespace AntData.ORM.Data
                 if (dataType == DataType.Undefined && value != null)
 					dataType = dataConnection.MappingSchema.GetDataType(value.GetType()).DataType;
 
-                //if (parameter.Direction != null) p.Direction = parameter.Direction.Value;
-                //if (parameter.Size      != null) p.Size      = parameter.Size.     Value;
+                if (parameter.Direction != null) dbParameter.Direction = parameter.Direction.Value;
+                if (parameter.Size != null) dbParameter.Size = parameter.Size.Value;
 
-				dataConnection.DataProvider.SetParameter(p, parameter.Name, dataType, value);
+                dataConnection.DataProvider.SetParameter(p.DbDataParameter, parameter.Name, dataType, value);
 
 			    p.ParameterName = parameter.Name;
-                p.DbType = DataTypeConvert.Convert(dataType);
                 result.Add(parameter.Name.StartsWith(dataConnection.DataProvider.ParameterSymbol) ? parameter.Name : dataConnection.DataProvider.ParameterSymbol + parameter.Name, p);
 				//dataConnection.Command.Parameters.Add(p);
 			}

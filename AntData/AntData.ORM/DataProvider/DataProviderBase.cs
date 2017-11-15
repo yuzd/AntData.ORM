@@ -277,58 +277,6 @@ namespace AntData.ORM.DataProvider
 			parameter.Value = value ?? DBNull.Value;
 		}
 
-        public virtual void SetParameter(CustomerParam parameter, string name, DataType dataType, object value)
-        {
-            switch (dataType)
-            {
-                case DataType.Char:
-                case DataType.NChar:
-                case DataType.VarChar:
-                case DataType.NVarChar:
-                case DataType.Text:
-                case DataType.NText:
-                    if (value is DateTimeOffset) value = ((DateTimeOffset)value).ToString("yyyy-MM-ddTHH:mm:ss.ffffff zzz");
-                    else if (value is DateTime)
-                    {
-                        var dt = (DateTime)value;
-                        value = dt.ToString(
-                            dt.Millisecond == 0
-                                ? dt.Hour == 0 && dt.Minute == 0 && dt.Second == 0
-                                    ? "yyyy-MM-dd"
-                                    : "yyyy-MM-ddTHH:mm:ss"
-                                : "yyyy-MM-ddTHH:mm:ss.fff");
-                    }
-                    else if (value is TimeSpan)
-                    {
-                        var ts = (TimeSpan)value;
-                        value = ts.ToString(
-                            ts.Days > 0
-                                ? ts.Milliseconds > 0
-                                    ? "d\\.hh\\:mm\\:ss\\.fff"
-                                    : "d\\.hh\\:mm\\:ss"
-                                : ts.Milliseconds > 0
-                                    ? "hh\\:mm\\:ss\\.fff"
-                                    : "hh\\:mm\\:ss");
-                    }
-                    break;
-                case DataType.Image:
-                case DataType.Binary:
-                case DataType.Blob:
-                case DataType.VarBinary:
-                    if (value is Binary) value = ((Binary)value).ToArray();
-                    break;
-                case DataType.Int64:
-                    if (value is TimeSpan) value = ((TimeSpan)value).Ticks;
-                    break;
-                case DataType.Xml:
-                    if (value is XDocument) value = value.ToString();
-                    else if (value is XmlDocument) value = ((XmlDocument)value).InnerXml;
-                    break;
-            }
-
-            parameter.ParameterName = name;
-            parameter.Value = value ?? DBNull.Value;
-        }
 		public virtual Type ConvertParameterType(Type type, DataType dataType)
 		{
 			switch (dataType)
@@ -360,7 +308,6 @@ namespace AntData.ORM.DataProvider
 		}
 
 		public abstract bool            IsCompatibleConnection(IDbConnection connection);
-		//public abstract ISchemaProvider GetSchemaProvider     ();
 
 		protected virtual void SetParameterType(IDbDataParameter parameter, DataType dataType)
 		{

@@ -41,7 +41,7 @@ namespace AntData.ORM.Data
             this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable;
             this.CustomerBeginTransaction = DalBridge.CustomerBeginTransaction;
-
+            this.CreateDbDataParameter = DalBridge.CreateDbDataParameter;
             #endregion
         }
 
@@ -63,7 +63,8 @@ namespace AntData.ORM.Data
             this.CustomerExecuteScalar = DalBridge.CustomerExecuteScalar;
             this.CustomerExecuteQuery = DalBridge.CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = DalBridge.CustomerExecuteQueryTable; 
-            this.CustomerBeginTransaction = DalBridge.CustomerBeginTransaction; 
+            this.CustomerBeginTransaction = DalBridge.CustomerBeginTransaction;
+	        this.CreateDbDataParameter = DalBridge.CreateDbDataParameter;
             #endregion
         }
 
@@ -78,7 +79,7 @@ namespace AntData.ORM.Data
 	    /// <param name="CustomerExecuteQuery">执行select 序列化成对象 </param>
 	    /// <param name="CustomerExecuteQueryTable">执行select 不走序列化 生成DataTable</param>
 	    /// <param name="CustomerBeginTransaction">执行事物</param>
-	    public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, List<IDataReader>> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable, Func<string, IDictionary, DataConnectionTransaction> CustomerBeginTransaction)
+	    public DataConnection([JetBrains.Annotations.NotNull] IDataProvider dataProvider, string dbMappingName, Func<string, string, Dictionary<string, CustomerParam>, IDictionary,bool, int> CustomerExecuteNonQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, object> CustomerExecuteScalar, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, List<IDataReader>> CustomerExecuteQuery, Func<string, string, Dictionary<string, CustomerParam>, IDictionary, bool, DataTable> CustomerExecuteQueryTable, Func<string, IDictionary, DataConnectionTransaction> CustomerBeginTransaction, Func<string, IDictionary, IDbDataParameter> CreateDbDataParameter)
         {
             if (dataProvider == null) throw new ArgumentNullException("dataProvider");
 
@@ -92,6 +93,7 @@ namespace AntData.ORM.Data
             this.CustomerExecuteQuery = CustomerExecuteQuery;
             this.CustomerExecuteQueryTable = CustomerExecuteQueryTable;
             this.CustomerBeginTransaction = CustomerBeginTransaction;
+            this.CreateDbDataParameter = CreateDbDataParameter;
         }
         #endregion
 
@@ -184,6 +186,7 @@ namespace AntData.ORM.Data
         /// 事物
         /// </summary>
         private Func<string, IDictionary, DataConnectionTransaction> CustomerBeginTransaction { get; set; }
+        private Func<string, IDictionary, IDbDataParameter> CreateDbDataParameter { get; set; }
 
 
         #endregion
@@ -473,6 +476,21 @@ namespace AntData.ORM.Data
             ConnectionWrapper = result.DataConnection;
             return result;
         }
+
+        /// <summary>
+        /// 获取IDbDataParameter
+        /// </summary>
+        /// <returns></returns>
+	    internal IDbDataParameter CreateParameter()
+	    {
+	        var dic = new Dictionary<string, object>();
+
+	        dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
+	        dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
+	        var result = CreateDbDataParameter(ConnectionString, dic);
+	        return result;
+	        
+	    }
         #endregion
 
 

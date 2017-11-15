@@ -82,22 +82,6 @@ namespace AntData.ORM.DataProvider.SqlServer
 
 		#endregion
 
-		#region CreateDataConnection
-
-		public static DataConnection CreateDataConnection(string connectionString, SqlServerVersion version = SqlServerVersion.v2008)
-		{
-			switch (version)
-			{
-				case SqlServerVersion.v2000 : return new DataConnection(_sqlServerDataProvider2000, connectionString);
-				case SqlServerVersion.v2005 : return new DataConnection(_sqlServerDataProvider2005, connectionString);
-				case SqlServerVersion.v2012 : return new DataConnection(_sqlServerDataProvider2012, connectionString);
-			}
-
-			return new DataConnection(_sqlServerDataProvider2008, connectionString);
-		}
-
-
-		#endregion
 
 		#region BulkCopy
 

@@ -138,25 +138,9 @@ namespace AntData.ORM.Linq
 
 					if (query == null)
 					{
-						if (Configuration.Linq.GenerateExpressionTest)
-						{
-							var testFile = new ExpressionTestGenerator().GenerateSource(expr);
-						}
+					    query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
 
-						try
-						{
-							query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
-						}
-						catch (Exception ex)
-						{
-							if (!Configuration.Linq.GenerateExpressionTest)
-							{
-							}
-
-							throw;
-						}
-
-						if (!query.DoNotChache)
+                        if (!query.DoNotChache)
 						{
 							query.Next = _first;
 							_first = query;

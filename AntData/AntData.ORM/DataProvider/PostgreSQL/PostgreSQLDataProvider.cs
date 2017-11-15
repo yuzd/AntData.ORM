@@ -65,7 +65,6 @@ namespace AntData.ORM.DataProvider.PostgreSQL
         Type _npgsqlDate;
         Type _npgsqlDateTime;
 
-        CommandBehavior _commandBehavior = CommandBehavior.Default;
 
         protected override void OnConnectionTypeCreated(Type connectionType)
         {

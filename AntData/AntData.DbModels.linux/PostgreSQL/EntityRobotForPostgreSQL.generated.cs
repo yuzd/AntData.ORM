@@ -145,7 +145,7 @@ namespace DbModels.PostgreSQL
 		/// <summary>
 		/// json≤‚ ‘
 		/// </summary>
-		[Column("attr",                DataType=AntData.ORM.DataType.Undefined, Comment="json≤‚ ‘"),    Nullable]
+		[Column("attr",                DataType=AntData.ORM.DataType.Json,      Comment="json≤‚ ‘"),    Nullable]
 		public object Attr { get; set; } // json
 
 		#endregion

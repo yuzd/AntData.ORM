@@ -189,6 +189,8 @@ namespace AntData.ORM.Data
 #endif
 		public static DataParameter Create        (string name, BitArray       value) { return new DataParameter { DataType = DataType.BitArray,       Name = name, Value = value, }; }
 		public static DataParameter Create        (string name, Dictionary<string,string> value) { return new DataParameter { DataType = DataType.Dictionary,     Name = name, Value = value, }; }
-	}
+	    public static DataParameter Json(string name, string value) { return new DataParameter { DataType = DataType.Json, Name = name, Value = value, }; }
+	    public static DataParameter BinaryJson(string name, string value) { return new DataParameter { DataType = DataType.BinaryJson, Name = name, Value = value, }; }
+    }
 }
 #pragma warning restore CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute

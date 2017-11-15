@@ -13,6 +13,8 @@ namespace AntData.ORM.DataProvider
 		protected DynamicDataProviderBase(string name, MappingSchema mappingSchema)
 			: base(name, mappingSchema)
 		{
+		    GetConnectionType();
+
 		}
 
 		protected abstract string ConnectionTypeName { get; }

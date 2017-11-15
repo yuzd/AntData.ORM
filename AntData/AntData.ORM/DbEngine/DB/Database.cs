@@ -162,6 +162,14 @@ namespace AntData.ORM.DbEngine.DB
             return new ConnectionWrapper(connection, disposeInnerConnection);
         }
 
+        #region IDbDataParameter
+        public IDbDataParameter CreateDbDataParameter(Statement statement)
+        {
+            DbCommand command = m_DatabaseProvider.CreateCommand();
+            return command.CreateParameter();
+        } 
+        #endregion
+
         #region Transactions
         bool _closeTransaction;
         public IDbTransaction Transactions { get; internal set; }
@@ -261,61 +269,19 @@ namespace AntData.ORM.DbEngine.DB
             command.CommandText = statement.StatementText;
             command.CommandType = statement.StatementType == StatementType.Sql ? CommandType.Text : CommandType.StoredProcedure;
             command.CommandTimeout = statement.Timeout;
-            String providerName = m_DatabaseProvider.GetType().Name;
-
             foreach (var p in statement.Parameters)
             {
-                if (p.ExtendType == 1)
+                var parameter = p.DbDataParameter;// command.CreateParameter();
+                if (parameter == null)
                 {
-                    var parameter = (SqlParameter)command.CreateParameter();
+                    parameter = command.CreateParameter();
                     parameter.ParameterName = m_DatabaseProvider.CreateParameterName(p.Name);
-                    parameter.SqlDbType = (SqlDbType)p.ExtendTypeValue;
-
-                    if (!String.IsNullOrEmpty(p.TypeName))
-                        parameter.TypeName = p.TypeName;
+                    parameter.DbType = p.DbType;
                     parameter.Size = p.Size;
                     parameter.Value = p.Value ?? DBNull.Value;
                     parameter.Direction = p.Direction;
-                    parameter.IsNullable = p.IsNullable;
-                    command.Parameters.Add(parameter);
                 }
-                else
-                {
-                    if (p.DbType == DbType.Time && providerName == "SqlDatabaseProvider")
-                    {
-                        var parameter = (SqlParameter)command.CreateParameter();
-                        parameter.ParameterName = m_DatabaseProvider.CreateParameterName(p.Name);
-                        parameter.SqlDbType = SqlDbType.Time;
-                        parameter.Size = p.Size;
-                        parameter.Value = p.Value ?? DBNull.Value;
-                        parameter.Direction = p.Direction;
-                        parameter.IsNullable = p.IsNullable;
-                        command.Parameters.Add(parameter);
-                    }
-                    else
-                    {
-                        var parameter = command.CreateParameter();
-                        parameter.ParameterName = m_DatabaseProvider.CreateParameterName(p.Name);
-                        parameter.DbType = p.DbType;
-                        parameter.Size = p.Size;
-                        parameter.Value = p.Value ?? DBNull.Value;
-                        parameter.Direction = p.Direction;
-                        parameter.IsNullable = p.IsNullable;
-
-#if !NETSTANDARD
-                        if (providerName.Equals("MySqlDatabaseProvider"))
-                        {
-                            command.Parameters.Insert(-1, parameter);   //work around for legacy mysql driver versions
-                        }
-                        else
-                        {
-                            command.Parameters.Add(parameter);
-                        }
-#else
-                        command.Parameters.Add(parameter);
-#endif
-                    }
-                }
+                command.Parameters.Add(parameter);
             }
 
             return command;

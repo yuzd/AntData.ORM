@@ -184,9 +184,9 @@ namespace AntData.ORM.Data
 		}
 
         CustomerParam AddParameter(ICollection<IDbDataParameter> parms, string name, SqlParameter parm)
-		{
-		   
+        {
             var p = new CustomerParam();
+            p.DbDataParameter = CreateParameter();
 			var dataType = parm.DataType;
 
 			if (dataType == DataType.Undefined)
@@ -197,12 +197,11 @@ namespace AntData.ORM.Data
 						parm.SystemType).DataType;
 			}
 
-			DataProvider.SetParameter(p, name, dataType, parm.Value);
-		    p.DbType = DataTypeConvert.Convert(dataType);
+			DataProvider.SetParameter(p.DbDataParameter, name, dataType, parm.Value);
 		    p.TableName = parm.TableName;
 		    p.ColumnName = parm.CoumnName;
 		    return p;
-		;}
+		}
 
 		#endregion
 

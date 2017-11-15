@@ -29,7 +29,6 @@ namespace AntData.ORM.DataProvider
 		bool?              IsDBNullAllowed       (IDataReader reader, int idx);
 		void               SetParameter          (IDbDataParameter parameter, string name, DataType dataType, object value);
 
-        void SetParameter(CustomerParam parameter, string name, DataType dataType, object value);
 		Type               ConvertParameterType  (Type type, DataType dataType);
 		bool               IsCompatibleConnection(IDbConnection connection);
 

@@ -45,6 +45,7 @@ namespace AntDataUnitTest
             }
             catch (Exception)
             {
+                Trace.Write(customerTraceInfo.SqlText + Environment.NewLine);
                 //ignore
             }
         }
@@ -779,7 +780,7 @@ namespace AntDataUnitTest
 
             var newS = DB.Tables.Schools.FindByBk(tid);
 
-            Assert.Equals(json, newS.Attr.ToString());
+            Assert.AreEqual(json, newS.Attr.ToString());
 
             DB.Tables.Schools.Where(r => r.Id.Equals(tid)).Set(r => r.Attr,
                 Newtonsoft.Json.JsonConvert.SerializeObject(new {Name = "ad", Age = 13})).Update();
