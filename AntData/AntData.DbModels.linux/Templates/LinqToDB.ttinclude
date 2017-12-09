@@ -141,6 +141,7 @@ void GenerateTypesFromMetadata()
 	foreach (var t in Tables.Values.OrderBy(tbl => tbl.IsProviderSpecific).ThenBy(tbl=> tbl.TypeName))
 	{
 		if(t.Columns.Values.Count == 0) continue;
+		t.TypeName += EntitySuffix??string.Empty;//给Entity加上自定义的后缀
 		var tName = t.TypeName;
 		var UseNormalName = false;
 		if(ShardingTables.ContainsKey(t.TableName))
@@ -442,7 +443,7 @@ void GenerateTypesFromMetadata()
 					if (key.AssociationType == AssociationType.OneToMany)
 						key.Type = string.Format(OneToManyAssociationType, key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName));
 					else
-						key.Type = key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName);
+						key.Type = key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName)+ (EntitySuffix??string.Empty);
 
 					var aa = new Attribute("Association");
 

@@ -24,6 +24,7 @@ string   DatabaseName             = null;
 string   DataContextName          = null;
 string   BaseDataContextClass     = null;
 string   BaseEntityClass          = null;
+string   EntitySuffix             = null;
 string   OneToManyAssociationType = "IEnumerable<{0}>";
 
 bool     GenerateDatabaseName     = false;
