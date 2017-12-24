@@ -158,7 +158,7 @@ namespace AntData.ORM.Data
 
                     throw;
                 }
-                return null;
+                return default(T);
             });
         }
 
