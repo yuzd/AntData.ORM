@@ -351,7 +351,7 @@ namespace AntData.ORM.Data
         /// <param name="Params">执行参数</param>
         /// <param name="isWrite">默认读</param>
         /// <returns></returns>
-		object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
+        internal object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)

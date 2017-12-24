@@ -18,9 +18,103 @@ namespace AntData.ORM.Data
 
     public abstract class DbContext : AntData.ORM.Data.DataConnection, IDataContext
     {
+        protected abstract IDataProvider provider { get; }
         public DbContext(string dbMappingName) : base(dbMappingName)
         {
+            
         }
+
+
+        #region Transaction
+
+        public void UseTransaction(System.Action<DbContext> func)
+        {
+            using (var scope = ExecuteTransaction())
+            {
+                try
+                {
+                    func(this);
+                    scope.Commit();
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Action<DbContext> func, System.Data.IsolationLevel isolationLevel)
+        {
+            using (var scope = ExecuteTransaction(isolationLevel))
+            {
+                try
+                {
+                    func(this);
+                    scope.Commit();
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Func<DbContext, bool> func)
+        {
+            using (var scope = ExecuteTransaction())
+            {
+                try
+                {
+                    if (func(this))
+                    {
+                        scope.Commit();
+                    }
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+
+        public void UseTransaction(System.Func<DbContext, bool> func, System.Data.IsolationLevel isolationLevel)
+        {
+            using (var scope = ExecuteTransaction(isolationLevel))
+            {
+                try
+                {
+                    if (func(this))
+                    {
+                        scope.Commit();
+                    }
+                }
+                catch (Exception)
+                {
+                    scope.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    Close();
+                }
+            }
+        }
+        #endregion
     }
 
 
@@ -29,7 +123,7 @@ namespace AntData.ORM.Data
     /// </summary>
     public abstract class DbContext<T> : DbContext
     {
-        protected abstract IDataProvider provider { get; }
+      
         private readonly Lazy<T> _lazy = null;
         public T Tables
         {
