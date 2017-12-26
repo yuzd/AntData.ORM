@@ -24,7 +24,7 @@ namespace AntData.ORM.Data
         protected abstract IDataProvider provider { get; }
         public DbContext(string dbMappingName) : base(dbMappingName)
         {
-
+            base.DataProvider = provider;
         }
 
 
@@ -32,88 +32,85 @@ namespace AntData.ORM.Data
 
         public void UseTransaction(System.Action<DbContext> func)
         {
-            using (var scope = ExecuteTransaction())
+            using (var scope = new System.Transactions.TransactionScope())
             {
-                try
-                {
-                    func(this);
-                    scope.Commit();
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
-                }
+                func(this);
+                scope.Complete();
             }
         }
-
-        public void UseTransaction(System.Action<DbContext> func, System.Data.IsolationLevel isolationLevel)
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
+        public void UseTransaction(System.Action<DbContext> func, TransactionScopeOption scopeOption)
         {
-            using (var scope = ExecuteTransaction(isolationLevel))
+            using (var scope = new System.Transactions.TransactionScope(scopeOption))
             {
-                try
-                {
-                    func(this);
-                    scope.Commit();
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
-                }
+                func(this);
+                scope.Complete();
             }
         }
 
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
+        /// <param name="options">TransactionOptions</param>
+        public void UseTransaction(System.Action<DbContext> func, TransactionScopeOption scopeOption, TransactionOptions options)
+        {
+            using (var scope = new System.Transactions.TransactionScope(scopeOption, options))
+            {
+                func(this);
+                scope.Complete();
+            }
+        }
+
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
         public void UseTransaction(System.Func<DbContext, bool> func)
         {
-            using (var scope = ExecuteTransaction())
+            using (var scope = new System.Transactions.TransactionScope())
             {
-                try
+                if (func(this))
                 {
-                    if (func(this))
-                    {
-                        scope.Commit();
-                    }
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
+                    scope.Complete();
                 }
             }
         }
 
-        public void UseTransaction(System.Func<DbContext, bool> func, System.Data.IsolationLevel isolationLevel)
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
+        public void UseTransaction(System.Func<DbContext, bool> func, TransactionScopeOption scopeOption)
         {
-            using (var scope = ExecuteTransaction(isolationLevel))
+            using (var scope = new System.Transactions.TransactionScope(scopeOption))
             {
-                try
+                if (func(this))
                 {
-                    if (func(this))
-                    {
-                        scope.Commit();
-                    }
+                    scope.Complete();
                 }
-                catch (Exception)
+            }
+        }
+
+        /// <summary>
+        /// 使用事物 在事物里面的代码都是走master
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="scopeOption">TransactionScopeOption</param>
+        /// <param name="options">TransactionOptions</param>
+        public void UseTransaction(System.Func<DbContext, bool> func, TransactionScopeOption scopeOption, TransactionOptions options)
+        {
+            using (var scope = new System.Transactions.TransactionScope(scopeOption, options))
+            {
+                if (func(this))
                 {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
+                    scope.Complete();
                 }
             }
         }
@@ -135,9 +132,8 @@ namespace AntData.ORM.Data
         }
 
         public DbContext(string dbMappingName):base(dbMappingName)
-
         {
-            base.DataProvider = provider;
+           
 #if DEBUG
             //AntData.ORM.Common.Configuration.Linq.GenerateExpressionTest = true;
             AntData.ORM.Common.Configuration.Linq.AllowMultipleQuery = true;

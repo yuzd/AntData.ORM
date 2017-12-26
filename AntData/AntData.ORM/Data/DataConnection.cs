@@ -301,7 +301,7 @@ namespace AntData.ORM.Data
         /// <param name="Params">执行参数</param>
         /// <param name="isWrite">默认写</param>
         /// <returns></returns>
-        internal int ExecuteNonQuery(string sqlString, Dictionary<string, CustomerParam> Params,bool isWrite = true)
+        public int ExecuteNonQuery(string sqlString, Dictionary<string, CustomerParam> Params,bool isWrite = true)
 		{
 
             var dic = new Dictionary<string, object>();
@@ -351,7 +351,7 @@ namespace AntData.ORM.Data
         /// <param name="Params">执行参数</param>
         /// <param name="isWrite">默认读</param>
         /// <returns></returns>
-        internal object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
+        public object ExecuteScalar(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
@@ -388,7 +388,7 @@ namespace AntData.ORM.Data
         /// <param name="Params">执行参数</param>
         /// <param name="isWrite">默认读</param>
         /// <returns></returns>
-		internal IList<IDataReader> ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
+        public IList<IDataReader> ExecuteReader(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
 		{
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
@@ -421,7 +421,7 @@ namespace AntData.ORM.Data
 
         }
 
-	   
+
         /// <summary>
         /// 
         /// </summary>
@@ -429,7 +429,7 @@ namespace AntData.ORM.Data
         /// <param name="Params">执行参数</param>
         /// <param name="isWrite">默认读</param>
         /// <returns></returns>
-        internal DataTable ExecuteDataTable(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
+        public DataTable ExecuteDataTable(string sqlString, Dictionary<string, CustomerParam> Params, bool isWrite = false)
         {
             var dic = new Dictionary<string, object>();
             if (this.CommandTimeout > 0)
