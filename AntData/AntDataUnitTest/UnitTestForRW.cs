@@ -11,11 +11,11 @@ namespace AntDataUnitTest
     [TestClass]
     public class UnitTestForRW
     {
-        private static MysqlDbContext<Entitys> DB
+        private static MysqlDbContext<TestormEntitys> DB
         {
             get
             {
-                var db = new MysqlDbContext<Entitys>("testormrw");
+                var db = new MysqlDbContext<TestormEntitys>("testormrw");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;

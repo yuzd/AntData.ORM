@@ -5,7 +5,7 @@
 <#@ include file="DataModel.ttinclude" #>
 <#
 	if (BaseDataContextClass == null)
-		BaseDataContextClass = "LinqToDB.Data.DataConnection";
+		BaseDataContextClass = "AntData.ORM.Data.DataConnection";
 #>
 <#+
 Action BeforeGenerateLinqToDBModel = () => {};
@@ -22,7 +22,6 @@ bool GenerateDbTypes        = false;
 bool GenerateSchemaAsType   = false;
 bool GenerateFkByTableName   = true;
 bool GenerateProcedures   = false;
-
 bool IsOracle   = false;
 
 string SchemaNameSuffix          = "Schema";
@@ -70,6 +69,7 @@ void GenerateTypesFromMetadata()
 	Model.Usings.Add("System.Linq");
 	Model.Usings.Add("AntData.ORM");
 	Model.Usings.Add("AntData.ORM.Mapping");
+	Model.Usings.Add("AntData.ORM.Data");
 	Model.Usings.Add("AntData.ORM.Linq");
 	Model.Usings.Add("System.Collections.Generic");
 	if (NamespaceName == null)
@@ -106,14 +106,18 @@ void GenerateTypesFromMetadata()
 		var body = new List<string>();
 		body.Add("this.con = con;");
 
-	    DataContextObject.Members.Add(new Field("IDataContext", "con")
+	    DataContextObject.Members.Add(new Field("DataConnection", "con")
 	    {
 	        AccessModifier = AccessModifier.Private,
 	        IsReadonly = true
 	    });
-		
+		DataContextObject.Members.Add(new Property(
+				"DataConnection",
+				"DbContext",
+				new[] {"this.con"},
+				null));
 		DataContextObject.Members.Add(new Method(null, "IQueryable<T> Get<T>", null, new List<string>{"return this.con.GetTable<T>();"}) { AfterSignature = { " where T : class" }  });
-		DataContextObject.Members.Add(new Method(null, DataContextObject.Name, new[] { "IDataContext con" }, body) {  });
+		DataContextObject.Members.Add(new Method(null, DataContextObject.Name, new[] { "DataConnection con" }, body) {  });
 		
 	}
 
@@ -137,6 +141,7 @@ void GenerateTypesFromMetadata()
 	foreach (var t in Tables.Values.OrderBy(tbl => tbl.IsProviderSpecific).ThenBy(tbl=> tbl.TypeName))
 	{
 		if(t.Columns.Values.Count == 0) continue;
+		t.TypeName += EntitySuffix??string.Empty;//给Entity加上自定义的后缀
 		var tName = t.TypeName;
 		var UseNormalName = false;
 		if(ShardingTables.ContainsKey(t.TableName))
@@ -202,8 +207,10 @@ void GenerateTypesFromMetadata()
 		}
 
 		var tableAttrs = new List<string>();
-
-		if (DatabaseName != null) tableAttrs.Add("Database=" + '"' + DatabaseName + '"');
+		if (DatabaseName != null)
+		{
+			tableAttrs.Add("Database=" + '"' + DatabaseName + '"');
+		}
 		if (t.Schema     != null) tableAttrs.Add("Schema="   + '"' + t.Schema     + '"');
 		if (!string.IsNullOrEmpty(t.Description )) tableAttrs.Add("Comment="   + '"' + t.Description.Replace("\r","").Replace("\n","").Replace("\r\n","").Trim()  + '"');
 
@@ -436,7 +443,7 @@ void GenerateTypesFromMetadata()
 					if (key.AssociationType == AssociationType.OneToMany)
 						key.Type = string.Format(OneToManyAssociationType, key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName));
 					else
-						key.Type = key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName);
+						key.Type = key.OtherTable.TypePrefix + ToPascalCase(key.OtherTable.TypeName)+ (EntitySuffix??string.Empty);
 
 					var aa = new Attribute("Association");
 

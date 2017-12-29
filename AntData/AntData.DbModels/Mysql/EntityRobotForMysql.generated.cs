@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using AntData.ORM;
+using AntData.ORM.Data;
 using AntData.ORM.Linq;
 using AntData.ORM.Mapping;
 
@@ -14,7 +15,7 @@ namespace DbModels.Mysql
 	/// Data Source    : localhost
 	/// Server Version : 5.6.26-log
 	/// </summary>
-	public partial class Entitys : IEntity
+	public partial class TestormEntitys : IEntity
 	{
 		/// <summary>
 		/// »À‘±
@@ -27,7 +28,12 @@ namespace DbModels.Mysql
 		public IQueryable<SchoolName>  SchoolName  { get { return this.Get<SchoolName>(); } }
 		public IQueryable<school_name> school_name { get { return this.Get<school_name>(); } }
 
-		private readonly IDataContext con;
+		private readonly DataConnection con;
+
+		public DataConnection DbContext
+		{
+			get { return this.con; }
+		}
 
 		public IQueryable<T> Get<T>()
 			 where T : class
@@ -35,7 +41,7 @@ namespace DbModels.Mysql
 			return this.con.GetTable<T>();
 		}
 
-		public Entitys(IDataContext con)
+		public TestormEntitys(DataConnection con)
 		{
 			this.con = con;
 		}

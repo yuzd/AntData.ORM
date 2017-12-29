@@ -24,6 +24,7 @@ string   DatabaseName             = null;
 string   DataContextName          = null;
 string   BaseDataContextClass     = null;
 string   BaseEntityClass          = null;
+string   EntitySuffix             = null;
 string   OneToManyAssociationType = "IEnumerable<{0}>";
 
 bool     GenerateDatabaseName     = false;
@@ -59,7 +60,7 @@ void LoadServerMetadata(DataConnection dataConnection)
 		DatabaseName = db.Database;
 
     if (DataContextName == null)
-        DataContextObject.Name = DataContextName = "Entitys";//db.Database + "DB";
+        DataContextObject.Name = DataContextName = ToPascalCase(db.Database) + "Entitys";
 
 	DataContextObject.Comment.Add("/ <summary>");
 	DataContextObject.Comment.Add("/ Database       : " + db.Database);
@@ -123,7 +124,9 @@ void LoadServerMetadata(DataConnection dataConnection)
 		.Where(t => t.table != null));
 
 	foreach (var t in tables)
-		Tables.Add(t.key, t.table);
+	{
+		if(!Tables.ContainsKey(t.key))Tables.Add(t.key, t.table);
+	}
 
 	var keys =
 	(
@@ -150,7 +153,9 @@ void LoadServerMetadata(DataConnection dataConnection)
 
 	foreach (var key in keys)
 	{
-		key.t.table.ForeignKeys.Add(key.KeyName, key.key);
+		key.t.table.ForeignKeys.Add(
+			key.k.OtherTable.IsDefaultSchema ? key.KeyName : key.k.OtherTable.SchemaName + "." + key.KeyName,
+			key.key);
 
 		if (key.k.BackReference != null)
 			key.key.BackReference = keys.First(k => k.k == key.k.BackReference).key;

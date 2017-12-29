@@ -164,3 +164,8 @@ packages/
 AntData/AntData.ORM/AntData.ORM.nuspec.core
 AntData/AntData.ORM/Gruntfile.core
 AntData/.vs/AntData.linux/v15/sqlite3/storage.ide
+AntData/.vs/AntData.linux/v15/Server/sqlite3/db.lock
+AntData/.vs/AntData.linux/v15/Server/sqlite3/storage.ide
+AntData/.vs/AntData.linux/v15/sqlite3/db.lock
+AntData/.vs/AntData/v15/Server/sqlite3/db.lock
+AntData/.vs/AntData/v15/Server/sqlite3/storage.ide

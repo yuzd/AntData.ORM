@@ -11,6 +11,7 @@
     IsCompactColumns = false;
     BaseDataContextClass = "IEntity";
     BaseEntityClass = "BaseEntity";
+	EntitySuffix = "";
 	LoadMySqlMetadata("localhost","28747", "testorm", "root", "123456");
 	//LoadMySqlMetadata("localhost","3306", "DBName", "DbUserName", "DbPassword");
 
