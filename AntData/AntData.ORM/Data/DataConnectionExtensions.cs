@@ -399,7 +399,10 @@ namespace AntData.ORM.Data
         {
             return new CommandInfo(connection, sql, parameters).ExecuteScalar();
         }
-
+	    public static int ExecuteNonQuery(this DataConnection connection, string sql, params DataParameter[] parameters)
+	    {
+	        return new CommandInfo(connection, sql, parameters).ExecuteNonQuery();
+	    }
         /// <summary>
         /// 带一个参数执行sql语句返回单个结果
         /// </summary>

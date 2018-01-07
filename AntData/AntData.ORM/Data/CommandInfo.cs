@@ -245,6 +245,16 @@ namespace AntData.ORM.Data
 
             return DataConnection.ExecuteScalar(CommandText, param);
         }
+
+	    public int ExecuteNonQuery()
+	    {
+	        DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
+	        Dictionary<string, CustomerParam> param = new Dictionary<string, CustomerParam>();
+	        if (Parameters != null && Parameters.Length > 0)
+	            param = SetParameters(DataConnection, Parameters);
+
+	        return DataConnection.ExecuteNonQuery(CommandText, param);
+	    }
         public long ExcuteSharding()
 	    {
             DataConnection.InitCommand(CommandType, CommandText, Parameters, null);
