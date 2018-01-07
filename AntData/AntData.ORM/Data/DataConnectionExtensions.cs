@@ -394,6 +394,12 @@ namespace AntData.ORM.Data
 			return new CommandInfo(connection, sql, parameters).Execute<T>();
 		}
 
+
+        public static object ExecuteScalar(this DataConnection connection, string sql, params DataParameter[] parameters)
+        {
+            return new CommandInfo(connection, sql, parameters).ExecuteScalar();
+        }
+
         /// <summary>
         /// 带一个参数执行sql语句返回单个结果
         /// </summary>

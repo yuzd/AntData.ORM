@@ -855,6 +855,12 @@ namespace AntDataUnitTest
             var p = DB.Tables.People.Where(r => r.Age.Equals(1)).ToList();
 
         }
-       
+        [TestMethod]
+        public void TestMethod7_07()
+        {
+            var sql = "insert into school (name,datachange_lasttime) values (@name,now());select last_insert_id()";
+            var res3 = DB.ExecuteScalar(sql,new DataParameter {Name = "name",Value="dddddd"});
+
+        }
     }
 }
