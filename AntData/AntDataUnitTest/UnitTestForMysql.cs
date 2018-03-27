@@ -852,7 +852,14 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod7_06()
         {
-            var p = DB.Tables.People.Where(r => r.Age.Equals(1)).ToList();
+           
+            var query = DB.Tables.People.Where(r => (from p in DB.Tables.People
+                                                    where p.Age.Equals(18)
+                                                    group p by p.Name into g
+                                                    select g.Max(gg => gg.Id))
+                                                .Contains(r.Id)).ToList();
+
+           // var p1 = DB.Tables.People.FirstOrDefault(rr=>rr.Id.Equals(DB.Tables.People.Where(r => r.Age.Equals(18)).Max(t => t.Id))) ;
 
         }
         [TestMethod]
