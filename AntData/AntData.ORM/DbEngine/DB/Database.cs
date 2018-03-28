@@ -4,7 +4,6 @@ using System.Configuration;
 #endif
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
@@ -112,7 +111,6 @@ namespace AntData.ORM.DbEngine.DB
             AllInOneKey = connectionStringName;
             m_DatabaseProvider = databaseProvider;
             LoadActualConnectionString();
-            _closeTransaction = false;
         }
 
         /// <summary>
@@ -171,14 +169,10 @@ namespace AntData.ORM.DbEngine.DB
         #endregion
 
         #region Transactions
-        bool _closeTransaction;
-        public IDbTransaction Transactions { get; internal set; }
+        
+        
         public DataConnectionTransaction BeginTransaction(Statement statement)
         {
-            // If transaction is open, we dispose it, it will rollback all changes.
-            //
-            if (Transactions != null)
-                Transactions.Dispose();
 
             // Create new transaction object.
             DbConnection connection = null;
@@ -194,6 +188,7 @@ namespace AntData.ORM.DbEngine.DB
                 throw;
             }
 
+            IDbTransaction Transactions;
             if (statement.Hints != null && statement.Hints.Contains(DALExtStatementConstant.ISOLATION_LEVEL))
             {
                 var level = (System.Data.IsolationLevel)statement.Hints[DALExtStatementConstant.ISOLATION_LEVEL];
@@ -204,41 +199,10 @@ namespace AntData.ORM.DbEngine.DB
                 Transactions = connection.BeginTransaction();
             }
 
-
-            _closeTransaction = true;
-
-            return new DataConnectionTransaction(new ConnectionWrapper(connection, this));
+            return new DataConnectionTransaction(new ConnectionWrapper(connection, Transactions));
         }
 
-        public void CommitTransaction()
-        {
-            if (Transactions != null)
-            {
-                Transactions.Commit();
-
-                if (_closeTransaction)
-                {
-                    Transactions.Dispose();
-                    Transactions = null;
-
-                }
-            }
-        }
-
-        public void RollbackTransaction()
-        {
-            if (Transactions != null)
-            {
-                Transactions.Rollback();
-
-                if (_closeTransaction)
-                {
-                    Transactions.Dispose();
-                    Transactions = null;
-
-                }
-            }
-        }
+       
 
         #endregion
 
@@ -373,7 +337,7 @@ namespace AntData.ORM.DbEngine.DB
                         command.Connection = wrapper.Connection;
                         if (trans_wrapper != null)
                         {
-                            command.Transaction = trans_wrapper.Database.Transactions;
+                            command.Transaction = trans_wrapper.GetTransaction();
                         }
                         try
                         {
@@ -425,7 +389,7 @@ namespace AntData.ORM.DbEngine.DB
                         command.Connection = wrapper.Connection;
                         if (trans_wrapper!=null)
                         {
-                            command.Transaction = trans_wrapper.Database.Transactions;
+                            command.Transaction = trans_wrapper.GetTransaction();
                         }
 
                         try
@@ -476,7 +440,7 @@ namespace AntData.ORM.DbEngine.DB
                         command.Connection = wrapper.Connection;
                         if (trans_wrapper != null)
                         {
-                            command.Transaction = trans_wrapper.Database.Transactions;
+                            command.Transaction = trans_wrapper.GetTransaction();
                         }
                         try
                         {
@@ -549,7 +513,7 @@ namespace AntData.ORM.DbEngine.DB
                         command.Connection = wrapper.Connection;
                         if (trans_wrapper != null)
                         {
-                            command.Transaction = trans_wrapper.Database.Transactions;
+                            command.Transaction = trans_wrapper.GetTransaction();
                         }
                         try
                         {
@@ -602,7 +566,7 @@ namespace AntData.ORM.DbEngine.DB
                         command.Connection = wrapper.Connection;
                         if (trans_wrapper != null)
                         {
-                            command.Transaction = trans_wrapper.Database.Transactions;
+                            command.Transaction = trans_wrapper.GetTransaction();
                         }
                         try
                         {
@@ -665,7 +629,7 @@ namespace AntData.ORM.DbEngine.DB
                     {
                         if (trans_wrapper != null)
                         {
-                            command.Transaction = trans_wrapper.Database.Transactions;
+                            command.Transaction = trans_wrapper.GetTransaction();
                         }
                         command.Connection = wrapper.Connection;
                         try

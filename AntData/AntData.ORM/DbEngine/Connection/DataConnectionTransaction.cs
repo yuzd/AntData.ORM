@@ -7,16 +7,10 @@
 //-----------------------------------------------------------------------
 
 using System.Data;
-using System.Data.Common;
-using AntData.ORM.DbEngine.DB;
 
 namespace AntData.ORM.DbEngine.Connection
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
 
     /// <summary>
@@ -24,6 +18,7 @@ namespace AntData.ORM.DbEngine.Connection
     /// </summary>
     public class DataConnectionTransaction : IDisposable
     {
+
         public DataConnectionTransaction(ConnectionWrapper dataConnection)
         {
             if (dataConnection == null) throw new ArgumentNullException("dataConnection");
@@ -35,22 +30,25 @@ namespace AntData.ORM.DbEngine.Connection
 
         bool _disposeTransaction = true;
 
+        public IDbTransaction Transactions { get; internal set; }
+        
+
         public void Commit()
         {
-            DataConnection.Database.CommitTransaction();
+            DataConnection.CommitTransaction();
             _disposeTransaction = false;
         }
 
         public void Rollback()
         {
-            DataConnection.Database.RollbackTransaction();
+            DataConnection.RollbackTransaction();
             _disposeTransaction = false;
         }
 
         public void Dispose()
         {
             if (_disposeTransaction)
-                DataConnection.Database.RollbackTransaction();
+                DataConnection.RollbackTransaction();
 
             DataConnection.Dispose(true,true);
         }

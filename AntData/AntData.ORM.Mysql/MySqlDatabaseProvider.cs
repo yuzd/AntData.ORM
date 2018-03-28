@@ -6,19 +6,13 @@
 // <summary></summary>
 //-----------------------------------------------------------------------
 
-using MySql.Data.MySqlClient;
-using System;
-using System.Data;
-using System.Data.Common;
 using AntData.ORM.DbEngine.Providers;
+using MySql.Data.MySqlClient;
+using System.Data.Common;
 
 namespace AntData.ORM.Mysql
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     /// <summary>
     /// MySql Server 数据库提供者实现
     /// </summary>

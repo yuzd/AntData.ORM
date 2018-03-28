@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using AntData.ORM;
+﻿using AntData.ORM;
 using AntData.ORM.Data;
-using AntData.ORM.DataProvider.MySql;
 using AntData.ORM.Linq;
 using AntData.ORM.Mapping;
 using DbModels.Mysql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AntDataUnitTest
 {
@@ -22,6 +21,17 @@ namespace AntDataUnitTest
             get
             {
                 var db = new MysqlDbContext<TestormEntitys>("testorm");
+                db.IsEnableLogTrace = true;
+                db.OnLogTrace = OnCustomerTraceConnection;
+                return db;
+            }
+        }
+
+        private static MysqlDbContext<TestormEntitys> DB2
+        {
+            get
+            {
+                var db = new MysqlDbContext<TestormEntitys>("testorm1");
                 db.IsEnableLogTrace = true;
                 db.OnLogTrace = OnCustomerTraceConnection;
                 return db;
@@ -741,20 +751,70 @@ namespace AntDataUnitTest
         }
 
         [TestMethod]
-        public void TestMethod6_09()
+        public async Task TestMethod6_09()
         {
+            var taskList = new List<Task>();
+            for (int i = 0; i < 100; i++)
+            {
+                var task = new Task(() =>
+                {
+                    Person p = new Person
+                    {
+                        Age = 27,
+                        Name = "tteee"
+                    };
+
+                    try
+                    {
+                        DB.UseTransaction((con) =>
+                        {
+                            con.Insert(p);
+
+                            con.Insert(p);
+
+
+                            int count = 100;
+                            TestInOtherDb(con, ref count);
+
+                            return true;
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex.Message);
+                    }
+                });
+                task.Start();
+                taskList.Add(task);
+
+            }
+
+            await Task.WhenAll(taskList);
+        }
+
+        private void TestInOtherDb(DbContext<TestormEntitys> con,ref int count)
+        {
+            var personfirst = con.Tables.People.Where(r => r.Id > 1).FirstOrDefault();
+
+            var schoolFirst = con.Tables.Schools.Where(r => r.Id > 1).FirstOrDefault();
+
             Person p = new Person
             {
                 Age = 27,
+                Name = "tteee"
             };
+            con.InsertWithIdentity(p);
 
-            DB.UseTransaction((con) =>
+            con.Insert(p);
+
+            p.Name = "dadadada";
+            con.Update(p);
+            count--;
+            if (count < 1)
             {
-                con.Tables.Schools.Where(r => r.Id == 1).Set(r => r.Address, "no update1").Update();
-                con.Insert(p);
-            });
-
-
+                return;
+            }
+            TestInOtherDb(con,ref count);
         }
         [Sql.Expression("MONTH({0})", ServerSideOnly = true)]
         public static int ByMonth(DateTime date)

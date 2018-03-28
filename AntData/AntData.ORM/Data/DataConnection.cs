@@ -1,28 +1,22 @@
-﻿using System;
+﻿using AntData.ORM.Dao;
+using AntData.ORM.Dao.Common;
+using AntData.ORM.DbEngine.Connection;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using AntData.ORM.DbEngine.Configuration;
-using AntData.ORM.Dao;
-using AntData.ORM.Dao.Common;
-using AntData.ORM.DbEngine.Connection;
-using JetBrains.Annotations;
 
 namespace AntData.ORM.Data
 {
-	using System.Text;
 
-	using Common;
-	using DataProvider;
+    using Common;
+    using DataProvider;
 
-	using Mapping;
+    using Mapping;
 
-	public partial class DataConnection
+    public partial class DataConnection
 	{
         static DataConnection()
         {

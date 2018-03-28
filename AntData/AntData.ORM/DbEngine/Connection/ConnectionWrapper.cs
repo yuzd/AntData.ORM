@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Data;
 using System.Data.Common;
-using AntData.ORM.DbEngine.DB;
 
 namespace AntData.ORM.DbEngine.Connection
 {
@@ -16,7 +16,11 @@ namespace AntData.ORM.DbEngine.Connection
         /// 真正的数据库链接
         /// </summary>
         private readonly DbConnection m_Connection;
-        private readonly Database m_dataBase;
+
+        /// <summary>
+        /// DbTransaction
+        /// </summary>
+        private  IDbTransaction m_dbTransaction;
 
         /// <summary>
         /// 是否释放链接
@@ -48,14 +52,14 @@ namespace AntData.ORM.DbEngine.Connection
             DBName = connection.Database;
             DataSource = connection.DataSource;
         }
-        public ConnectionWrapper(DbConnection connection, Database database)
+        public ConnectionWrapper(DbConnection connection, IDbTransaction dbTransaction)
         {
             m_Connection = connection;
-            m_dataBase = database;
             m_DisposeConnection = false;
             m_Disposed = false;
             DBName = connection.Database;
             DataSource = connection.DataSource;
+            m_dbTransaction = dbTransaction;
         }
         /// <summary>
         /// 数据库链接
@@ -65,9 +69,33 @@ namespace AntData.ORM.DbEngine.Connection
             get { return m_Connection; }
         }
 
-        public Database Database
+
+        public void CommitTransaction()
         {
-            get { return m_dataBase; }
+            if (m_dbTransaction != null)
+            {
+                m_dbTransaction.Commit();
+
+            }
+        }
+
+        public void RollbackTransaction()
+        {
+            if (m_dbTransaction != null)
+            {
+                m_dbTransaction.Rollback();
+
+            }
+        }
+
+        public IDbTransaction GetTransaction()
+        {
+            if (m_dbTransaction != null)
+            {
+                return m_dbTransaction;
+            }
+
+            return null;
         }
         #region IDisposable Members
 
@@ -94,10 +122,10 @@ namespace AntData.ORM.DbEngine.Connection
             if (isDisposing && (m_DisposeConnection || endTranse))
             {
                 m_Connection.Dispose();
-                if (Database != null && Database.Transactions != null)
+                if (m_dbTransaction != null)
                 {
-                    Database.Transactions.Dispose();
-                    Database.Transactions = null;
+                    m_dbTransaction.Dispose();
+                    m_dbTransaction = null;
                 }
             }
 

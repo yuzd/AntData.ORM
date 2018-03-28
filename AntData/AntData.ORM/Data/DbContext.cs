@@ -8,9 +8,6 @@
 #if !NETSTANDARD
 using System.Transactions;
 #endif
-using System.Collections;
-using System.Data;
-using AntData.ORM.Common;
 using AntData.ORM.DataProvider;
 using System;
 namespace AntData.ORM.Data
