@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using AntData.ORM;
+﻿using AntData.ORM;
 using AntData.ORM.Data;
 using AntData.ORM.Linq;
 using AntData.ORM.Mapping;
 using DbModels.PostgreSQL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MySql.Data.MySqlClient;
 using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AntDataUnitTest
 {
@@ -694,9 +693,9 @@ namespace AntDataUnitTest
         [TestMethod]
         public void TestMethod6_06()
         {
-            AntData.ORM.Common.Configuration.Linq.CheckNullForNotEquals = false;
+            AntData.ORM.Common.Configuration.Linq.CompareNullsAsValues = false;
             var p1 = DB.Tables.People.Where(r => r.SchoolId == null || r.SchoolId.Value != 1).ToList();
-            AntData.ORM.Common.Configuration.Linq.CheckNullForNotEquals = true;
+            AntData.ORM.Common.Configuration.Linq.CompareNullsAsValues = true;
             var p2 = DB.Tables.People.Where(r => r.SchoolId != 1).ToList();
             Assert.AreEqual(p1.Count, p2.Count);
         }

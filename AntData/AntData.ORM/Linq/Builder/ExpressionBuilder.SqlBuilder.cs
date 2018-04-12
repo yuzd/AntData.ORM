@@ -14,8 +14,8 @@ using AntData.ORM.Data;
 
 namespace AntData.ORM.Linq.Builder
 {
-	using Common;
 	using AntData.ORM.Expressions;
+	using Common;
 	using Extensions;
 	using Mapping;
 	using Reflection;
@@ -23,29 +23,29 @@ namespace AntData.ORM.Linq.Builder
 
 	partial class ExpressionBuilder
 	{
-        #region Build Where
-        public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, string condition, bool checkForSubQuery, bool enforceHaving = false, ConstantExpression whereObj = null)
-        {
-            sequence.SelectQuery.Where.SearchCondition.Conditions.Add(new SelectQuery.Condition (false, condition ));
-            if (whereObj != null && whereObj.Value!=null)
-            {
-                var properties = whereObj.Value.GetType().GetCanReadPropertyInfo();
-                foreach (var p in properties)
-                {
-                    if (CurrentSqlParameters.Select(r=>r.SqlParameter).Any(r=>!string.IsNullOrEmpty(r.Name) && r.Name.Equals(p.Name)))
-                    {
-                        continue;
-                    }
-                    CurrentSqlParameters.Add(new ParameterAccessor
-                    {
-                        SqlParameter = new SqlParameter(p.PropertyType, p.Name, p.FastGetValue(whereObj.Value))
-                    });
-                }
+		#region Build Where
+		public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, string condition, bool checkForSubQuery, bool enforceHaving = false, ConstantExpression whereObj = null)
+		{
+			sequence.SelectQuery.Where.SearchCondition.Conditions.Add(new SelectQuery.Condition (false, condition ));
+			if (whereObj != null && whereObj.Value!=null)
+			{
+				var properties = whereObj.Value.GetType().GetCanReadPropertyInfo();
+				foreach (var p in properties)
+				{
+					if (CurrentSqlParameters.Select(r=>r.SqlParameter).Any(r=>!string.IsNullOrEmpty(r.Name) && r.Name.Equals(p.Name)))
+					{
+						continue;
+					}
+					CurrentSqlParameters.Add(new ParameterAccessor
+					{
+						SqlParameter = new SqlParameter(p.PropertyType, p.Name, p.FastGetValue(whereObj.Value))
+					});
+				}
 
-            }
-            return sequence;
-        }
-        public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, LambdaExpression condition, bool checkForSubQuery, bool enforceHaving = false)
+			}
+			return sequence;
+		}
+		public IBuildContext BuildWhere(IBuildContext parent, IBuildContext sequence, LambdaExpression condition, bool checkForSubQuery, bool enforceHaving = false)
 		{
 			var prevParent = sequence.Parent;
 			var ctx        = new ExpressionContext(parent, sequence, condition);
@@ -1067,8 +1067,8 @@ namespace AntData.ORM.Linq.Builder
 
 							if (l != null)
 							{
-							    result = l.Body.Unwrap().Find(ex => IsServerSideOnly(ex)) != null;
-                            }
+								result = l.Body.Unwrap().Find(ex => IsServerSideOnly(ex)) != null;
+							}
 							else
 							{
 								var attr = GetExpressionAttribute(e.Method);
@@ -1107,16 +1107,16 @@ namespace AntData.ORM.Linq.Builder
 			return false;
 		}
 
-        #endregion
+		#endregion
 
-        #region CanBeConstant
+		#region CanBeConstant
 
-        //Expression _lastExpr1;
-        //bool _lastResult1;
+		//Expression _lastExpr1;
+		//bool _lastResult1;
 
-        bool CanBeConstant(Expression expr)
+		bool CanBeConstant(Expression expr)
 		{
-            return false;
+			return false;
 			//if (_lastExpr1 == expr)
 			//	return _lastResult1;
 
@@ -1385,7 +1385,7 @@ namespace AntData.ORM.Linq.Builder
 						else if (e.Method == ReflectionHelper.Functions.String.Like11) predicate = ConvertLikePredicate(context, e);
 						else if (e.Method == ReflectionHelper.Functions.String.Like12) predicate = ConvertLikePredicate(context, e);
 #endif
-                        else if (e.Method == ReflectionHelper.Functions.String.Like21) predicate = ConvertLikePredicate(context, e);
+						else if (e.Method == ReflectionHelper.Functions.String.Like21) predicate = ConvertLikePredicate(context, e);
 						else if (e.Method == ReflectionHelper.Functions.String.Like22) predicate = ConvertLikePredicate(context, e);
 
 						if (predicate != null)
@@ -1463,8 +1463,8 @@ namespace AntData.ORM.Linq.Builder
 
 		Expression AddEqualTrue(Expression expr)
 		{
-            return Equal(MappingSchema, Expression.Constant(true), expr);
-        }
+			return Equal(MappingSchema, Expression.Constant(true), expr);
+		}
 
 		#region ConvertCompare
 
@@ -1658,16 +1658,25 @@ namespace AntData.ORM.Linq.Builder
 							return null;
 
 						ISqlExpression l, r;
-
+						var ce = MappingSchema.GetConverter(type, typeof(DataParameter), false);
+						SqlValue sqlvalue;
+						if (ce != null)
+						{
+							sqlvalue = new SqlValue(ce.ConvertValueToParameter(origValue).Value);
+						}
+						else
+						{
+							sqlvalue = MappingSchema.GetSqlValue(type, mapValue);
+						}
 						if (left.NodeType == ExpressionType.Convert)
 						{
 							l = ConvertToSql(context, operand);
-							r = MappingSchema.GetSqlValue(type, mapValue);
+							r = sqlvalue;
 						}
 						else
 						{
 							r = ConvertToSql(context, operand);
-							l = MappingSchema.GetSqlValue(type, mapValue);
+							l = sqlvalue;
 						}
 
 						return Convert(context, new SelectQuery.Predicate.ExprExpr(l, op, r));
@@ -2047,11 +2056,11 @@ namespace AntData.ORM.Linq.Builder
 			if (a is SqlParameter)
 			{
 				var p  = (SqlParameter)a;
-			    var indexItem = CurrentSqlParameters.Select((item, index)=>item.SqlParameter == p ? new {Index = index, Pm = item} : null).First(r => r !=null);
-			    var ep = indexItem.Pm;//(from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
+				var indexItem = CurrentSqlParameters.Select((item, index)=>item.SqlParameter == p ? new {Index = index, Pm = item} : null).First(r => r !=null);
+				var ep = indexItem.Pm;//(from pm in CurrentSqlParameters where pm.SqlParameter == p select pm).First();
 
 
-                ep = new ParameterAccessor
+				ep = new ParameterAccessor
 				{
 					Expression   = ep.Expression,
 					Accessor     = ep.Accessor,
@@ -2063,8 +2072,8 @@ namespace AntData.ORM.Linq.Builder
 						IsQueryParameter = !DataContextInfo.DataContext.InlineParameters
 					},
 				};
-			    CurrentSqlParameters.RemoveAt(indexItem.Index);
-                CurrentSqlParameters.Add(ep);
+				CurrentSqlParameters.RemoveAt(indexItem.Index);
+				CurrentSqlParameters.Add(ep);
 
 				return new SelectQuery.Predicate.Like(o, false, ep.SqlParameter, new SqlValue('~'));
 			}
@@ -2264,229 +2273,229 @@ namespace AntData.ORM.Linq.Builder
 			return ConvertPredicate(context, expr);
 		}
 
-        #endregion
+		#endregion
 
-        #endregion
+		#endregion
 
-        #region Search Condition Builder
+		#region Search Condition Builder
 
-	    void BuildSearchCondition(IBuildContext context, Expression expression, List<SelectQuery.Condition> conditions)
-	    {
-	        switch (expression.NodeType)
-	        {
-	            case ExpressionType.And:
-	            case ExpressionType.AndAlso:
-	            {
-	                var e = (BinaryExpression)expression;
+		void BuildSearchCondition(IBuildContext context, Expression expression, List<SelectQuery.Condition> conditions)
+		{
+			switch (expression.NodeType)
+			{
+				case ExpressionType.And:
+				case ExpressionType.AndAlso:
+				{
+					var e = (BinaryExpression)expression;
 
-	                BuildSearchCondition(context, e.Left, conditions);
-	                BuildSearchCondition(context, e.Right, conditions);
+					BuildSearchCondition(context, e.Left, conditions);
+					BuildSearchCondition(context, e.Right, conditions);
 
-	                break;
-	            }
+					break;
+				}
 
-	            case ExpressionType.Extension:
-	            {
-	                var e = expression as BinaryAggregateExpression;
-	                if (e != null)
-	                {
+				case ExpressionType.Extension:
+				{
+					var e = expression as BinaryAggregateExpression;
+					if (e != null)
+					{
 
-	                    var aggregateCondition = new SelectQuery.SearchCondition();
-	                    var isOr = e.AggregateType == ExpressionType.Or || e.AggregateType == ExpressionType.OrElse;
+						var aggregateCondition = new SelectQuery.SearchCondition();
+						var isOr = e.AggregateType == ExpressionType.Or || e.AggregateType == ExpressionType.OrElse;
 
-	                    foreach (var expr in e.Expressions)
-	                    {
-	                        var currentItems = new SelectQuery.SearchCondition();
-	                        BuildSearchCondition(context, expr, currentItems.Conditions);
+						foreach (var expr in e.Expressions)
+						{
+							var currentItems = new SelectQuery.SearchCondition();
+							BuildSearchCondition(context, expr, currentItems.Conditions);
 
-	                        if (aggregateCondition.Precedence != currentItems.Precedence)
-	                        {
-	                            aggregateCondition.Conditions.Add(new SelectQuery.Condition(false, currentItems, isOr));
-	                        }
-	                        else
-	                        {
-	                            if (isOr)
-	                                foreach (var c in currentItems.Conditions)
-	                                    c.IsOr = true;
+							if (aggregateCondition.Precedence != currentItems.Precedence)
+							{
+								aggregateCondition.Conditions.Add(new SelectQuery.Condition(false, currentItems, isOr));
+							}
+							else
+							{
+								if (isOr)
+									foreach (var c in currentItems.Conditions)
+										c.IsOr = true;
 
-	                            aggregateCondition.Conditions.AddRange(currentItems.Conditions);
-	                        }
-	                    }
+								aggregateCondition.Conditions.AddRange(currentItems.Conditions);
+							}
+						}
 
-	                    conditions.Add(new SelectQuery.Condition(false, aggregateCondition));
-	                }
+						conditions.Add(new SelectQuery.Condition(false, aggregateCondition));
+					}
 
-	                break;
-	            }
+					break;
+				}
 
-	            case ExpressionType.Or:
-	            case ExpressionType.OrElse:
-	            {
-	                var e = (BinaryExpression)expression;
-	                var orCondition = new SelectQuery.SearchCondition();
+				case ExpressionType.Or:
+				case ExpressionType.OrElse:
+				{
+					var e = (BinaryExpression)expression;
+					var orCondition = new SelectQuery.SearchCondition();
 
-	                BuildSearchCondition(context, e.Left, orCondition.Conditions);
-	                orCondition.Conditions[orCondition.Conditions.Count - 1].IsOr = true;
-	                BuildSearchCondition(context, e.Right, orCondition.Conditions);
+					BuildSearchCondition(context, e.Left, orCondition.Conditions);
+					orCondition.Conditions[orCondition.Conditions.Count - 1].IsOr = true;
+					BuildSearchCondition(context, e.Right, orCondition.Conditions);
 
-	                conditions.Add(new SelectQuery.Condition(false, orCondition));
+					conditions.Add(new SelectQuery.Condition(false, orCondition));
 
-	                break;
-	            }
+					break;
+				}
 
-	            case ExpressionType.Not:
-	            {
-	                var e = expression as UnaryExpression;
-	                var notCondition = new SelectQuery.SearchCondition();
+				case ExpressionType.Not:
+				{
+					var e = expression as UnaryExpression;
+					var notCondition = new SelectQuery.SearchCondition();
 
-	                BuildSearchCondition(context, e.Operand, notCondition.Conditions);
+					BuildSearchCondition(context, e.Operand, notCondition.Conditions);
 
-	                if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SelectQuery.Predicate.NotExpr)
-	                {
-	                    var p = notCondition.Conditions[0].Predicate as SelectQuery.Predicate.NotExpr;
-	                    p.IsNot = !p.IsNot;
+					if (notCondition.Conditions.Count == 1 && notCondition.Conditions[0].Predicate is SelectQuery.Predicate.NotExpr)
+					{
+						var p = notCondition.Conditions[0].Predicate as SelectQuery.Predicate.NotExpr;
+						p.IsNot = !p.IsNot;
 
-	                    var checkIsNull = CheckIsNull(notCondition.Conditions[0].Predicate, true);
+						var checkIsNull = CheckIsNull(notCondition.Conditions[0].Predicate, true);
 
-	                    conditions.Add(checkIsNull ?? notCondition.Conditions[0]);
-	                }
-	                else
-	                {
-	                    var checkIsNull = CheckIsNull(notCondition.Conditions[0].Predicate, true);
+						conditions.Add(checkIsNull ?? notCondition.Conditions[0]);
+					}
+					else
+					{
+						var checkIsNull = CheckIsNull(notCondition.Conditions[0].Predicate, true);
 
-	                    conditions.Add(checkIsNull ?? new SelectQuery.Condition(true, notCondition));
-	                }
+						conditions.Add(checkIsNull ?? new SelectQuery.Condition(true, notCondition));
+					}
 
-	                break;
-	            }
+					break;
+				}
 
-	            case ExpressionType.Equal:
-	            {
-	                if (expression.Type == typeof(bool))
-	                {
-	                    var e = (BinaryExpression)expression;
+				case ExpressionType.Equal:
+				{
+					if (expression.Type == typeof(bool))
+					{
+						var e = (BinaryExpression)expression;
 
-	                    Expression ce = null, ee = null;
+						Expression ce = null, ee = null;
 
-	                    if (e.Left.NodeType == ExpressionType.Constant) { ce = e.Left; ee = e.Right; }
-	                    else if (e.Right.NodeType == ExpressionType.Constant) { ce = e.Right; ee = e.Left; }
+						if (e.Left.NodeType == ExpressionType.Constant) { ce = e.Left; ee = e.Right; }
+						else if (e.Right.NodeType == ExpressionType.Constant) { ce = e.Right; ee = e.Left; }
 
-	                    if (ce != null)
-	                    {
-	                        var value = ((ConstantExpression)ce).Value;
+						if (ce != null)
+						{
+							var value = ((ConstantExpression)ce).Value;
 
-	                        if (value is bool && (bool)value == false)
-	                        {
-	                            BuildSearchCondition(context, Expression.Not(ee), conditions);
-	                            return;
-	                        }
-	                    }
-	                }
+							if (value is bool && (bool)value == false)
+							{
+								BuildSearchCondition(context, Expression.Not(ee), conditions);
+								return;
+							}
+						}
+					}
 
-	                goto default;
-	            }
+					goto default;
+				}
 
-	            default:
-	                var predicate = ConvertPredicate(context, expression);
+				default:
+					var predicate = ConvertPredicate(context, expression);
 
-	                if (predicate is SelectQuery.Predicate.Expr)
-	                {
-	                    var expr = ((SelectQuery.Predicate.Expr)predicate).Expr1;
+					if (predicate is SelectQuery.Predicate.Expr)
+					{
+						var expr = ((SelectQuery.Predicate.Expr)predicate).Expr1;
 
-	                    if (expr.ElementType == QueryElementType.SearchCondition)
-	                    {
-	                        var sc = (SelectQuery.SearchCondition)expr;
+						if (expr.ElementType == QueryElementType.SearchCondition)
+						{
+							var sc = (SelectQuery.SearchCondition)expr;
 
-	                        if (sc.Conditions.Count == 1)
-	                        {
-	                            conditions.Add(sc.Conditions[0]);
-	                            break;
-	                        }
-	                    }
-	                }
+							if (sc.Conditions.Count == 1)
+							{
+								conditions.Add(sc.Conditions[0]);
+								break;
+							}
+						}
+					}
 
-	                conditions.Add(CheckIsNull(predicate, false) ?? new SelectQuery.Condition(false, predicate));
+					conditions.Add(CheckIsNull(predicate, false) ?? new SelectQuery.Condition(false, predicate));
 
-	                break;
-	        }
-	    }
-	    static SelectQuery.Condition CheckIsNull(ISqlPredicate predicate, bool isNot)
-	    {
-	        if (Configuration.Linq.CheckNullForNotEquals == false)
-	            return null;
+					break;
+			}
+		}
+		static SelectQuery.Condition CheckIsNull(ISqlPredicate predicate, bool isNot)
+		{
+			if (Configuration.Linq.CompareNullsAsValues == false)
+				return null;
 
-	        var inList = predicate as SelectQuery.Predicate.InList;
+			var inList = predicate as SelectQuery.Predicate.InList;
 
-	        if (predicate is SelectQuery.SearchCondition)
-	        {
-	            var sc = (SelectQuery.SearchCondition)predicate;
+			if (predicate is SelectQuery.SearchCondition)
+			{
+				var sc = (SelectQuery.SearchCondition)predicate;
 
-	            inList = new QueryVisitor()
-                    .Find(sc, _ => _.ElementType == QueryElementType.InListPredicate) as SelectQuery.Predicate.InList;
+				inList = new QueryVisitor()
+					.Find(sc, _ => _.ElementType == QueryElementType.InListPredicate) as SelectQuery.Predicate.InList;
 
-	            if (inList != null)
-	            {
-	                isNot = new QueryVisitor().Find(sc, _ =>
-	                {
-	                    var condition = _ as SelectQuery.Condition;
-	                    return condition != null && condition.IsNot;
-	                }) != null;
-	            }
-	        }
+				if (inList != null)
+				{
+					isNot = new QueryVisitor().Find(sc, _ =>
+					{
+						var condition = _ as SelectQuery.Condition;
+						return condition != null && condition.IsNot;
+					}) != null;
+				}
+			}
 
-	        if (predicate.CanBeNull && predicate is SelectQuery.Predicate.ExprExpr || inList != null)
-	        {
-	            var exprExpr = predicate as SelectQuery.Predicate.ExprExpr;
+			if (predicate.CanBeNull && predicate is SelectQuery.Predicate.ExprExpr || inList != null)
+			{
+				var exprExpr = predicate as SelectQuery.Predicate.ExprExpr;
 
-	            if (exprExpr != null &&
-	                (
-	                    exprExpr.Operator == SelectQuery.Predicate.Operator.NotEqual && isNot == false ||
-	                    exprExpr.Operator == SelectQuery.Predicate.Operator.Equal && isNot == true
-	                ) ||
-	                inList != null && inList.IsNot || isNot)
-	            {
-	                var expr1 = exprExpr != null ? exprExpr.Expr1 : inList.Expr1;
-	                var expr2 = exprExpr != null ? exprExpr.Expr2 : null;
+				if (exprExpr != null &&
+					(
+						exprExpr.Operator == SelectQuery.Predicate.Operator.NotEqual && isNot == false ||
+						exprExpr.Operator == SelectQuery.Predicate.Operator.Equal && isNot == true
+					) ||
+					inList != null && inList.IsNot || isNot)
+				{
+					var expr1 = exprExpr != null ? exprExpr.Expr1 : inList.Expr1;
+					var expr2 = exprExpr != null ? exprExpr.Expr2 : null;
 
-	                var nullValue1 = new QueryVisitor().Find(expr1, _ => _ is IValueContainer);
-	                var nullValue2 = expr2 != null ? new QueryVisitor().Find(expr2, _ => _ is IValueContainer) : null;
+					var nullValue1 = new QueryVisitor().Find(expr1, _ => _ is IValueContainer);
+					var nullValue2 = expr2 != null ? new QueryVisitor().Find(expr2, _ => _ is IValueContainer) : null;
 
-	                var hasNullValue =
-	                    nullValue1 != null && ((IValueContainer)nullValue1).Value == null
-	                    || nullValue2 != null && ((IValueContainer)nullValue2).Value == null;
+					var hasNullValue =
+						nullValue1 != null && ((IValueContainer)nullValue1).Value == null
+						|| nullValue2 != null && ((IValueContainer)nullValue2).Value == null;
 
-	                if (!hasNullValue)
-	                {
-	                    var expr1IsField = expr1.CanBeNull && new QueryVisitor().Find(expr1, _ => _.ElementType == QueryElementType.SqlField) != null;
-	                    var expr2IsField = expr2 != null && expr2.CanBeNull && new QueryVisitor().Find(expr2, _ => _.ElementType == QueryElementType.SqlField) != null;
+					if (!hasNullValue)
+					{
+						var expr1IsField = expr1.CanBeNull && new QueryVisitor().Find(expr1, _ => _.ElementType == QueryElementType.SqlField) != null;
+						var expr2IsField = expr2 != null && expr2.CanBeNull && new QueryVisitor().Find(expr2, _ => _.ElementType == QueryElementType.SqlField) != null;
 
-	                    var nullableField = expr1IsField
-	                        ? expr1
-	                        : expr2IsField ? expr2 : null;
+						var nullableField = expr1IsField
+							? expr1
+							: expr2IsField ? expr2 : null;
 
-	                    if (nullableField != null)
-	                    {
-	                        var checkNullPredicate = new SelectQuery.Predicate.IsNull(nullableField, false);
+						if (nullableField != null)
+						{
+							var checkNullPredicate = new SelectQuery.Predicate.IsNull(nullableField, false);
 
-	                        var orCondition = new SelectQuery.SearchCondition(
-	                            new SelectQuery.Condition(false, checkNullPredicate),
-	                            new SelectQuery.Condition(isNot && inList == null, predicate));
+							var orCondition = new SelectQuery.SearchCondition(
+								new SelectQuery.Condition(false, checkNullPredicate),
+								new SelectQuery.Condition(isNot && inList == null, predicate));
 
-	                        orCondition.Conditions[0].IsOr = true;
+							orCondition.Conditions[0].IsOr = true;
 
-	                        return new SelectQuery.Condition(false, orCondition);
-	                    }
-	                }
-	            }
-	        }
+							return new SelectQuery.Condition(false, orCondition);
+						}
+					}
+				}
+			}
 
-	        return null;
-	    }
-        #endregion
+			return null;
+		}
+		#endregion
 
-        #region CanBeTranslatedToSql
+		#region CanBeTranslatedToSql
 
-        bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
+		bool CanBeTranslatedToSql(IBuildContext context, Expression expr, bool canBeCompiled)
 		{
 			List<Expression> ignoredMembers = null;
 
@@ -2601,7 +2610,7 @@ namespace AntData.ORM.Linq.Builder
 
 		public IBuildContext GetContext([JetBrains.Annotations.NotNull] IBuildContext current, Expression expression)
 		{
-			var root = expression.GetRootObject();
+			var root = expression.GetRootObject(MappingSchema);
 
 			for (; current != null; current = current.Parent)
 				if (current.IsExpression(root, 0, RequestFor.Root).Result)

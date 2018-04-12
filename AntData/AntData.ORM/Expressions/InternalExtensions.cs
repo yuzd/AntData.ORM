@@ -1,15 +1,15 @@
-﻿using System;
+﻿using AntData.ORM.Linq.Builder;
+using AntData.ORM.Mapping;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using AntData.ORM.Linq.Builder;
-using AntData.ORM.Mapping;
 
 namespace AntData.ORM.Expressions
 {
-	using Linq;
 	using AntData.ORM.Extensions;
+	using Linq;
 
 	static class InternalExtensions
 	{
@@ -790,35 +790,35 @@ namespace AntData.ORM.Expressions
 			return accessors;
 		}
 
-		public static Expression GetRootObject(this Expression expr)
+		public static Expression GetRootObject(this Expression expr, MappingSchema mapping)
 		{
 			if (expr == null)
 				return null;
 
 			switch (expr.NodeType)
 			{
-				case ExpressionType.Call         :
-					{
-						var e = (MethodCallExpression)expr;
+				case ExpressionType.Call:
+				{
+					var e = (MethodCallExpression)expr;
 
-						if (e.Object != null)
-							return GetRootObject(e.Object);
+					if (e.Object != null)
+						return GetRootObject(e.Object, mapping);
 
-						if (e.Arguments != null && e.Arguments.Count > 0 && e.IsQueryable())
-							return GetRootObject(e.Arguments[0]);
+					if (e.Arguments != null && e.Arguments.Count > 0 && (e.IsQueryable() || e.IsAggregate(mapping) || e.IsAssociation(mapping) || e.Method.IsSqlPropertyMethodEx()))
+						return GetRootObject(e.Arguments[0], mapping);
 
-						break;
-					}
+					break;
+				}
 
-				case ExpressionType.MemberAccess :
-					{
-						var e = (MemberExpression)expr;
+				case ExpressionType.MemberAccess:
+				{
+					var e = (MemberExpression)expr;
 
-						if (e.Expression != null)
-							return GetRootObject(e.Expression.Unwrap());
+					if (e.Expression != null)
+						return GetRootObject(e.Expression.Unwrap(), mapping);
 
-						break;
-					}
+					break;
+				}
 			}
 
 			return expr;
@@ -900,8 +900,13 @@ namespace AntData.ORM.Expressions
 
 	        return false;
 	    }
+	
+		public static bool IsAssociation(this MethodCallExpression method, MappingSchema mappingSchema)
+	    {
+	        return mappingSchema.GetAttribute<AssociationAttribute>(method.Method.DeclaringType, method.Method) != null;
+	    }
 
-        static Expression FindLevel(Expression expression, int level, ref int current)
+        static Expression FindLevel(Expression expression, MappingSchema mapping, int level, ref int current)
 		{
 			switch (expression.NodeType)
 			{
@@ -913,44 +918,47 @@ namespace AntData.ORM.Expressions
 						if (expr == null && call.IsQueryable() && call.Arguments.Count > 0)
 							expr = call.Arguments[0];
 
-						if (expr != null)
-						{
-							var ex = FindLevel(expr, level, ref current);
+					    if (expr == null && (call.IsQueryable() || call.IsAggregate(mapping) || call.IsAssociation(mapping) || call.Method.IsSqlPropertyMethodEx()) && call.Arguments.Count > 0)
+					        expr = call.Arguments[0];
 
-							if (level == current)
-								return ex;
+					    if (expr != null)
+					    {
+					        var ex = FindLevel(expr, mapping, level, ref current);
 
-							current++;
-						}
+					        if (level == current)
+					            return ex;
 
-						break;
+					        current++;
+					    }
+                        break;
 					}
 
 				case ExpressionType.MemberAccess:
 					{
-						var e = ((MemberExpression)expression);
+					    var e = ((MemberExpression)expression);
 
-						if (e.Expression != null)
-						{
-							var expr = FindLevel(e.Expression.Unwrap(), level, ref current);
+					    if (e.Expression != null)
+					    {
+					        var expr = FindLevel(e.Expression.Unwrap(), mapping, level, ref current);
 
-							if (level == current)
-								return expr;
+					        if (level == current)
+					            return expr;
 
-							current++;
-						}
+					        current++;
+					    }
 
-						break;
+
+                        break;
 					}
 			}
 
 			return expression;
 		}
 
-		public static Expression GetLevelExpression(this Expression expression, int level)
+		public static Expression GetLevelExpression(this Expression expression, MappingSchema mapping, int level)
 		{
 			var current = 0;
-			var expr    = FindLevel(expression, level, ref current);
+			var expr    = FindLevel(expression, mapping,level, ref current);
 
 			if (expr == null || current != level)
 				throw new InvalidOperationException();

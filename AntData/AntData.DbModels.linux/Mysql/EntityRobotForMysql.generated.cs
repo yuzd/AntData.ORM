@@ -17,16 +17,26 @@ namespace DbModels.Mysql
 	/// </summary>
 	public partial class TestormEntitys : IEntity
 	{
+		public IQueryable<ChildDistrict> ChildDistrict { get { return this.Get<ChildDistrict>(); } }
+		public IQueryable<District>      Districts     { get { return this.Get<District>(); } }
+		/// <summary>
+		/// import
+		/// </summary>
+		public IQueryable<Import>        Imports       { get { return this.Get<Import>(); } }
+		/// <summary>
+		/// ORM
+		/// </summary>
+		public IQueryable<Orm>           Orms          { get { return this.Get<Orm>(); } }
 		/// <summary>
 		/// 人员
 		/// </summary>
-		public IQueryable<Person>      People      { get { return this.Get<Person>(); } }
+		public IQueryable<Person>        People        { get { return this.Get<Person>(); } }
 		/// <summary>
 		/// 学校
 		/// </summary>
-		public IQueryable<School>      Schools     { get { return this.Get<School>(); } }
-		public IQueryable<SchoolName>  SchoolName  { get { return this.Get<SchoolName>(); } }
-		public IQueryable<school_name> school_name { get { return this.Get<school_name>(); } }
+		public IQueryable<School>        Schools       { get { return this.Get<School>(); } }
+		public IQueryable<SchoolName>    SchoolName    { get { return this.Get<SchoolName>(); } }
+		public IQueryable<school_name>   school_name   { get { return this.Get<school_name>(); } }
 
 		private readonly DataConnection con;
 
@@ -45,6 +55,116 @@ namespace DbModels.Mysql
 		{
 			this.con = con;
 		}
+	}
+
+	[Table("child_district")]
+	public partial class ChildDistrict : BaseEntity
+	{
+		#region Column
+
+		/// <summary>
+		/// 主键
+		/// </summary>
+		[Column("Tid",                 DataType=AntData.ORM.DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
+		public long Tid { get; set; } // bigint(20)
+
+		/// <summary>
+		/// 名称
+		/// </summary>
+		[Column("Name",                DataType=AntData.ORM.DataType.VarChar,  Length=30, Comment="名称"), Nullable]
+		public string Name { get; set; } // varchar(30)
+
+		/// <summary>
+		/// Code
+		/// </summary>
+		[Column("Code",                DataType=AntData.ORM.DataType.VarChar,  Length=30, Comment="Code"), Nullable]
+		public string Code { get; set; } // varchar(30)
+
+		/// <summary>
+		/// 更新时间
+		/// </summary>
+		[Column("DataChange_LastTime", DataType=AntData.ORM.DataType.DateTime, Comment="更新时间"), Nullable]
+		public DateTime? DataChangeLastTime { get; set; } // datetime
+
+		#endregion
+	}
+
+	[Table("district")]
+	public partial class District : BaseEntity
+	{
+		#region Column
+
+		/// <summary>
+		/// 主键
+		/// </summary>
+		[Column("Tid",                 DataType=AntData.ORM.DataType.Int64,    Comment="主键"), PrimaryKey, Identity]
+		public long Tid { get; set; } // bigint(20)
+
+		/// <summary>
+		/// 区域名称
+		/// </summary>
+		[Column("Name",                DataType=AntData.ORM.DataType.VarChar,  Length=30, Comment="区域名称"), Nullable]
+		public string Name { get; set; } // varchar(30)
+
+		/// <summary>
+		/// 区域Code
+		/// </summary>
+		[Column("Code",                DataType=AntData.ORM.DataType.VarChar,  Length=30, Comment="区域Code"), Nullable]
+		public string Code { get; set; } // varchar(30)
+
+		/// <summary>
+		/// 更新时间
+		/// </summary>
+		[Column("DataChange_LastTime", DataType=AntData.ORM.DataType.DateTime, Comment="更新时间"), Nullable]
+		public DateTime? DataChangeLastTime { get; set; } // datetime
+
+		#endregion
+	}
+
+	/// <summary>
+	/// import
+	/// </summary>
+	[Table(Comment="import", Name="import")]
+	public partial class Import : BaseEntity
+	{
+		#region Column
+
+		/// <summary>
+		/// 主键
+		/// </summary>
+		[Column("Id",    DataType=AntData.ORM.DataType.Int64,   Comment="主键"), PrimaryKey, Identity]
+		public long Id { get; set; } // bigint(20)
+
+		/// <summary>
+		/// 标签
+		/// </summary>
+		[Column("Label", DataType=AntData.ORM.DataType.VarChar, Length=20, Comment="标签"), Nullable]
+		public string Label { get; set; } // varchar(20)
+
+		#endregion
+	}
+
+	/// <summary>
+	/// ORM
+	/// </summary>
+	[Table(Comment="ORM", Name="orm")]
+	public partial class Orm : BaseEntity
+	{
+		#region Column
+
+		/// <summary>
+		/// 主键
+		/// </summary>
+		[Column("Id",    DataType=AntData.ORM.DataType.Int64,   Comment="主键"), PrimaryKey, Identity]
+		public long Id { get; set; } // bigint(20)
+
+		/// <summary>
+		/// 标签
+		/// </summary>
+		[Column("Label", DataType=AntData.ORM.DataType.VarChar, Length=20, Comment="标签"), Nullable]
+		public string Label { get; set; } // varchar(20)
+
+		#endregion
 	}
 
 	/// <summary>
@@ -205,6 +325,54 @@ namespace DbModels.Mysql
 
 	public static partial class TableExtensions
 	{
+		public static ChildDistrict FindByBk(this IQueryable<ChildDistrict> table, long Tid)
+		{
+			return table.FirstOrDefault(t =>
+				t.Tid == Tid);
+		}
+
+		public static async Task<ChildDistrict> FindByBkAsync(this IQueryable<ChildDistrict> table, long Tid)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Tid == Tid);
+		}
+
+		public static District FindByBk(this IQueryable<District> table, long Tid)
+		{
+			return table.FirstOrDefault(t =>
+				t.Tid == Tid);
+		}
+
+		public static async Task<District> FindByBkAsync(this IQueryable<District> table, long Tid)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Tid == Tid);
+		}
+
+		public static Import FindByBk(this IQueryable<Import> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static async Task<Import> FindByBkAsync(this IQueryable<Import> table, long Id)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Id == Id);
+		}
+
+		public static Orm FindByBk(this IQueryable<Orm> table, long Id)
+		{
+			return table.FirstOrDefault(t =>
+				t.Id == Id);
+		}
+
+		public static async Task<Orm> FindByBkAsync(this IQueryable<Orm> table, long Id)
+		{
+			return await table.FirstOrDefaultAsync(t =>
+				t.Id == Id);
+		}
+
 		public static Person FindByBk(this IQueryable<Person> table, long Id)
 		{
 			return table.FirstOrDefault(t =>

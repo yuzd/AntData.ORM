@@ -6,11 +6,11 @@ using System.Reflection;
 
 namespace AntData.ORM.Linq.Builder
 {
-	using Extensions;
-	using AntData.ORM.Expressions;
-	using SqlQuery;
+    using AntData.ORM.Expressions;
+    using Extensions;
+    using SqlQuery;
 
-	class UpdateBuilder : MethodCallBuilder
+    class UpdateBuilder : MethodCallBuilder
 	{
 		#region Update
 
@@ -266,7 +266,7 @@ namespace AntData.ORM.Linq.Builder
 			while (ext.NodeType == ExpressionType.Convert || ext.NodeType == ExpressionType.ConvertChecked)
 				ext = ((UnaryExpression)ext).Operand;
 
-			if (ext.NodeType != ExpressionType.MemberAccess || ext.GetRootObject() != extract.Parameters[0])
+			if (ext.NodeType != ExpressionType.MemberAccess || ext.GetRootObject(builder.MappingSchema) != extract.Parameters[0])
 				throw new LinqException("Member expression expected for the 'Set' statement.");
 
 			var body   = (MemberExpression)ext;
@@ -329,7 +329,7 @@ namespace AntData.ORM.Linq.Builder
 			while (ext.NodeType == ExpressionType.Convert || ext.NodeType == ExpressionType.ConvertChecked)
 				ext = ((UnaryExpression)ext).Operand;
 
-			if (ext.NodeType != ExpressionType.MemberAccess || ext.GetRootObject() != extract.Parameters[0])
+			if (ext.NodeType != ExpressionType.MemberAccess || ext.GetRootObject(builder.MappingSchema) != extract.Parameters[0])
 				throw new LinqException("Member expression expected for the 'Set' statement.");
 
 			var body   = (MemberExpression)ext;

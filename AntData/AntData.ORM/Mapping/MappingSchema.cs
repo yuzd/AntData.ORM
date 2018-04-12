@@ -280,8 +280,9 @@ namespace AntData.ORM.Mapping
 
 			return (Func<TFrom,TTo>)li.Delegate;
 		}
+       
 
-		public void SetConvertExpression(
+        public void SetConvertExpression(
 			[JetBrains.Annotations.NotNull] Type fromType,
 			[JetBrains.Annotations.NotNull] Type toType,
 			[JetBrains.Annotations.NotNull] LambdaExpression expr,
@@ -353,7 +354,7 @@ namespace AntData.ORM.Mapping
 			return expr;
 		}
 
-		ConvertInfo.LambdaInfo GetConverter(Type from, Type to, bool create)
+	    internal ConvertInfo.LambdaInfo GetConverter(Type from, Type to, bool create)
 		{
 			for (var i = 0; i < Schemas.Length; i++)
 			{
@@ -654,6 +655,20 @@ namespace AntData.ORM.Mapping
 						list.Add(a);
 
 			return list.Concat(attrs.Where(a => string.IsNullOrEmpty(configGetter(a)))).ToArray();
+		}
+		/// <summary>
+		/// Gets attribute of specified type, associated with specified type member.
+		/// </summary>
+		/// <typeparam name="T">Attribute type.</typeparam>
+		/// <param name="type">Member's owner type.</param>
+		/// <param name="memberInfo">Attribute owner member.</param>
+		/// <param name="inherit">If <c>true</c> - include inherited attribute.</param>
+		/// <returns>First found attribute of specified type or <c>null</c>, if no attributes found.</returns>
+		public T GetAttribute<T>(Type type, MemberInfo memberInfo, bool inherit = true)
+			where T : Attribute
+		{
+			var attrs = GetAttributes<T>(type, memberInfo, inherit);
+			return attrs.Length == 0 ? null : attrs[0];
 		}
 
 		public T GetAttribute<T>(Type type, Func<T,string> configGetter, bool inherit = true)

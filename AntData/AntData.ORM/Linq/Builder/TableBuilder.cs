@@ -7,9 +7,9 @@ using System.Reflection;
 
 namespace AntData.ORM.Linq.Builder
 {
+	using AntData.ORM.Expressions;
 	using Common;
 	using Extensions;
-	using AntData.ORM.Expressions;
 	using Mapping;
 	using Reflection;
 	using SqlQuery;
@@ -47,6 +47,13 @@ namespace AntData.ORM.Linq.Builder
 
 						if (attr != null)
 							return action(5, null);
+
+						if (mc.IsAssociation(builder.MappingSchema))
+						{
+							var parentContext = builder.GetContext(buildInfo.Parent, expression);
+							if (parentContext != null)
+							    return action(4, parentContext);
+                        }
 
 						break;
 					}
@@ -783,7 +790,7 @@ namespace AntData.ORM.Linq.Builder
 							var isTable =
 								table       != null &&
 								table.Field == null &&
-								(expression == null || expression.GetLevelExpression(table.Level) == expression);
+								(expression == null || expression.GetLevelExpression(Builder.MappingSchema, table.Level) == expression);
 
 							return new IsExpressionResult(isTable, isTable ? table.Table : null);
 						}
@@ -793,7 +800,7 @@ namespace AntData.ORM.Linq.Builder
 							if (expression == null)
 								return IsExpressionResult.False;
 
-							var levelExpression = expression.GetLevelExpression(level);
+							var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
 							switch (levelExpression.NodeType)
 							{
@@ -817,7 +824,7 @@ namespace AntData.ORM.Linq.Builder
 									table       != null &&
 									table.Table is AssociatedTableContext &&
 									table.Field == null &&
-									(expression == null || expression.GetLevelExpression(table.Level) == expression);
+									(expression == null || expression.GetLevelExpression(Builder.MappingSchema, table.Level) == expression);
 
 								return new IsExpressionResult(isat, isat ? table.Table : null);
 							}
@@ -946,48 +953,53 @@ namespace AntData.ORM.Linq.Builder
 					return this;
 				}
 
-				if (EntityDescriptor.Associations.Count > 0)
-				{
-					var levelExpression = expression.GetLevelExpression(level);
+			    //				if (EntityDescriptor.Associations.Count > 0)
+			    {
 
-					if (buildInfo != null && buildInfo.IsSubQuery)
-					{
-						if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess)
-						{
-							var tableLevel  = GetAssociation(expression, level);
-							var association = (AssociatedTableContext)tableLevel.Table;
+			        if (buildInfo != null && buildInfo.IsSubQuery)
+			        {
+			            var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
+			            if (levelExpression == expression && expression.NodeType == ExpressionType.MemberAccess || expression.NodeType == ExpressionType.Call)
+			            {
+			                var tableLevel = GetAssociation(expression, level);
+			                var association = (AssociatedTableContext)tableLevel.Table;
 
-							if (association.IsList)
-							{
-								var ma     = (MemberExpression)buildInfo.Expression;
-								var atype  = typeof(AssociationHelper<>).MakeGenericType(association.ObjectType);
-								var helper = (IAssociationHelper)Activator.CreateInstance(atype);
-								var expr   = helper.GetExpression(ma.Expression, association);
+			                if (association.IsList)
+			                {
+			                    var ma = expression.NodeType == ExpressionType.MemberAccess
+			                        ? ((MemberExpression)buildInfo.Expression).Expression
+			                        : expression.NodeType == ExpressionType.Call
+			                            ? ((MethodCallExpression)buildInfo.Expression).Arguments[0]
+			                            : buildInfo.Expression.GetRootObject(Builder.MappingSchema);
 
-								buildInfo.IsAssociationBuilt = true;
+			                    var atype = typeof(AssociationHelper<>).MakeGenericType(association.ObjectType);
+			                    var helper = (IAssociationHelper)Activator.CreateInstance(atype);
+			                    var expr = helper.GetExpression(ma, association);
 
-								if (tableLevel.IsNew || buildInfo.CopyTable)
-									association.ParentAssociationJoin.IsWeak = true;
+			                    buildInfo.IsAssociationBuilt = true;
 
-								return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
-							}
-						}
-						else
-						{
-							var association = GetAssociation(levelExpression, level);
-							((AssociatedTableContext)association.Table).ParentAssociationJoin.IsWeak = false;
+			                    if (tableLevel.IsNew || buildInfo.CopyTable)
+			                        association.ParentAssociationJoin.IsWeak = true;
 
-//							var paj         = ((AssociatedTableContext)association.Table).ParentAssociationJoin;
-//
-//							paj.IsWeak = paj.IsWeak && buildInfo.CopyTable;
+			                    return Builder.BuildSequence(new BuildInfo(buildInfo, expr));
+			                }
+			            }
+			            else
+			            {
+			                var association = GetAssociation(levelExpression, level);
+			                ((AssociatedTableContext)association.Table).ParentAssociationJoin.IsWeak = false;
 
-							return association.Table.GetContext(expression, level + 1, buildInfo);
-						}
-					}
-				}
+			                //							var paj         = ((AssociatedTableContext)association.Table).ParentAssociationJoin;
+			                //
+			                //							paj.IsWeak = paj.IsWeak && buildInfo.CopyTable;
 
-				throw new InvalidOperationException();
-			}
+			                return association.Table.GetContext(expression, level + 1, buildInfo);
+			            }
+			        }
+			    }
+
+			    throw new InvalidOperationException();
+            }
 
 			#endregion
 
@@ -1097,7 +1109,7 @@ namespace AntData.ORM.Linq.Builder
 						}
 					}
 
-					var levelExpression = expression.GetLevelExpression(level);
+					var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
 					if (levelExpression.NodeType == ExpressionType.MemberAccess)
 					{
@@ -1207,7 +1219,7 @@ namespace AntData.ORM.Linq.Builder
 			    if (expression == null)
 			        return new TableLevel { Table = this };
 
-			    var levelExpression = expression.GetLevelExpression(level);
+			    var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
 			    TableLevel result = null;
 
@@ -1234,58 +1246,79 @@ namespace AntData.ORM.Linq.Builder
 
 			TableLevel GetAssociation(Expression expression, int level)
 			{
-				var objectMapper    = EntityDescriptor;
-				var levelExpression = expression.GetLevelExpression(level);
-				var inheritance     =
-					(
-						from m in InheritanceMapping
-						let om = Builder.MappingSchema.GetEntityDescriptor(m.Type)
-						where om.Associations.Count > 0
-						select om
-					).ToList();
+                var objectMapper = EntityDescriptor;
+                var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
+                var inheritance =
+                    (
+                        from m in objectMapper.InheritanceMapping
+                        let om = Builder.MappingSchema.GetEntityDescriptor(m.Type)
+                        where om.Associations.Count > 0
+                        select om
+                    ).ToList();
 
-				if (objectMapper.Associations.Count > 0 || inheritance.Count > 0)
-				{
-					if (levelExpression.NodeType == ExpressionType.MemberAccess)
-					{
-						var memberExpression = (MemberExpression)levelExpression;
-						var isNew = false;
+                AssociatedTableContext tableAssociation = null;
+                var isNew = false;
 
-						AssociatedTableContext tableAssociation;
+                if (levelExpression.NodeType == ExpressionType.Call)
+                {
+                    var mc = (MethodCallExpression)levelExpression;
+                    var aa = Builder.MappingSchema.GetAttribute<AssociationAttribute>(mc.Method.DeclaringType, mc.Method, a => a.Configuration);
 
-						if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
-						{
-							var q =
-								from a in objectMapper.Associations.Concat(inheritance.SelectMany(om => om.Associations))
-								where a.MemberInfo.EqualsTo(memberExpression.Member)
-								select new AssociatedTableContext(Builder, this, a) { Parent = Parent };
+                    if (aa != null)
+                        tableAssociation = new AssociatedTableContext(
+                                Builder,
+                                this,
+                                new AssociationDescriptor(
+                                    EntityDescriptor.ObjectType,
+                                    mc.Method,
+                                    aa.GetThisKeys(),
+                                    aa.GetOtherKeys(),
+                                    aa.ExpressionPredicate,
+                                    aa.Predicate,
+                                    aa.Storage,
+                                    aa.CanBeNull))
+                        { Parent = Parent };
 
-							tableAssociation = q.FirstOrDefault();
+                    isNew = true;
+                }
 
-							isNew = true;
+                if (tableAssociation == null && levelExpression.NodeType == ExpressionType.MemberAccess && objectMapper.Associations.Count > 0 || inheritance.Count > 0)
+                {
 
-							_associations.Add(memberExpression.Member, tableAssociation);
-						}
+                    var memberExpression = (MemberExpression)levelExpression;
 
-						if (tableAssociation != null)
-						{
-							if (levelExpression == expression)
-								return new TableLevel { Table = tableAssociation, Level = level, IsNew = isNew };
+                    if (!_associations.TryGetValue(memberExpression.Member, out tableAssociation))
+                    {
+                        var q =
+                            from a in objectMapper.Associations.Concat(inheritance.SelectMany(om => om.Associations))
+                            where a.MemberInfo.EqualsTo(memberExpression.Member)
+                            select new AssociatedTableContext(Builder, this, a) { Parent = Parent };
 
-							var al = tableAssociation.GetAssociation(expression, level + 1);
+                        tableAssociation = q.FirstOrDefault();
 
-							if (al != null)
-								return al;
+                        isNew = true;
 
-							var field = tableAssociation.GetField(expression, level + 1, false);
+                        _associations.Add(memberExpression.Member, tableAssociation);
+                    }
+                }
 
-							return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1, IsNew = isNew };
-						}
-					}
-				}
+                if (tableAssociation != null)
+                {
+                    if (levelExpression == expression)
+                        return new TableLevel { Table = tableAssociation, Level = level, IsNew = isNew };
 
-				return null;
-			}
+                    var al = tableAssociation.GetAssociation(expression, level + 1);
+
+                    if (al != null)
+                        return al;
+
+                    var field = tableAssociation.GetField(expression, level + 1, false);
+
+                    return new TableLevel { Table = tableAssociation, Field = field, Level = field == null ? level : level + 1, IsNew = isNew };
+                }
+
+                return null;
+            }
 
 			#endregion
 		}

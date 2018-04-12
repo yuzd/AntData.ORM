@@ -4,12 +4,11 @@ using System.Linq;
 
 namespace AntData.ORM.Mapping
 {
-	using System.Threading;
-
 	using Common;
 	using Extensions;
 	using Linq;
 	using Reflection;
+	using System.Threading;
 
 	public class EntityDescriptor
 	{
@@ -84,7 +83,7 @@ namespace AntData.ORM.Mapping
 				if (aa != null)
 				{
 					Associations.Add(new AssociationDescriptor(
-						TypeAccessor.Type, member.MemberInfo, aa.GetThisKeys(), aa.GetOtherKeys(), aa.Storage, aa.CanBeNull));
+						TypeAccessor.Type, member.MemberInfo, aa.GetThisKeys(), aa.GetOtherKeys(),aa.ExpressionPredicate,aa.Predicate, aa.Storage, aa.CanBeNull));
 					continue;
 				}
 

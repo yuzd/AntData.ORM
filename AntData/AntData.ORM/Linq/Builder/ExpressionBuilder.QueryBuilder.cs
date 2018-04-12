@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AntData.ORM.Mapping;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -6,14 +7,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
-using AntData.ORM.Mapping;
 
 namespace AntData.ORM.Linq.Builder
 {
 	using AntData.ORM.Expressions;
 	using Extensions;
 
-    partial class ExpressionBuilder
+	partial class ExpressionBuilder
     {
         #region BuildExpression
 
@@ -532,7 +532,7 @@ namespace AntData.ORM.Linq.Builder
                 {
                     case ExpressionType.MemberAccess:
                         {
-                            var root = e.GetRootObject();
+                            var root = e.GetRootObject(mappingSchema);
 
                             if (root != null &&
                                 root.NodeType == ExpressionType.Parameter &&
@@ -609,7 +609,7 @@ namespace AntData.ORM.Linq.Builder
             //
             expression = expression.Transform(e =>
             {
-                var root = e.GetRootObject();
+                var root = e.GetRootObject(MappingSchema);
 
                 if (root != null &&
                     root.NodeType == ExpressionType.Parameter &&

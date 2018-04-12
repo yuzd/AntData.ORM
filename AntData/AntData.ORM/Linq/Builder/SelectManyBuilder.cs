@@ -199,7 +199,7 @@ namespace AntData.ORM.Linq.Builder
                 if (expression == null)
                     return Collection.BuildExpression(expression, level, enforceServerSide);
 
-                var root = expression.GetRootObject();
+                var root = expression.GetRootObject(Builder.MappingSchema);
 
                 if (root == Lambda.Parameters[0])
                     return base.BuildExpression(expression, level, enforceServerSide);
@@ -222,7 +222,7 @@ namespace AntData.ORM.Linq.Builder
                     if (expression == null)
                         return Collection.ConvertToIndex(expression, level, flags);
 
-                    var root = expression.GetRootObject();
+                    var root = expression.GetRootObject(Builder.MappingSchema);
 
                     if (root != Lambda.Parameters[0])
                         return Collection.ConvertToIndex(expression, level, flags);
@@ -238,7 +238,7 @@ namespace AntData.ORM.Linq.Builder
                     if (expression == null)
                         return Collection.ConvertToSql(expression, level, flags);
 
-                    var root = expression.GetRootObject();
+                    var root = expression.GetRootObject(Builder.MappingSchema);
 
                     if (root != Lambda.Parameters[0])
                         return Collection.ConvertToSql(expression, level, flags);
@@ -254,7 +254,7 @@ namespace AntData.ORM.Linq.Builder
                     if (expression == null)
                         return Collection.GetContext(expression, level, buildInfo);
 
-                    var root = expression.GetRootObject();
+                    var root = expression.GetRootObject(Builder.MappingSchema);
 
                     if (root != Lambda.Parameters[0])
                         return Collection.GetContext(expression, level, buildInfo);
@@ -270,7 +270,7 @@ namespace AntData.ORM.Linq.Builder
                     if (expression == null)
                         return Collection.IsExpression(expression, level, requestFlag);
 
-                    var root = expression.GetRootObject();
+                    var root = expression.GetRootObject(Builder.MappingSchema);
 
                     if (root != Lambda.Parameters[0])
                         return Collection.IsExpression(expression, level, requestFlag);

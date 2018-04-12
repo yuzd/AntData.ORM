@@ -1,3 +1,5 @@
+using AntData.ORM.Expressions;
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -9,11 +11,9 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 
-using JetBrains.Annotations;
-
 namespace AntData.ORM.Extensions
 {
-    public static class ReflectionExtensions
+	public static class ReflectionExtensions
     {
         #region NETFX_CORE specific
 
@@ -472,8 +472,25 @@ namespace AntData.ORM.Extensions
             return memberInfo.MemberType == MemberTypes.Method;
 #endif
         }
+	    public static MemberInfo[] GetStaticMembersEx(this Type type, string name)
+	    {
+		    return type.GetMember(name, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+	    }
+		private static readonly MemberInfo SQLPropertyMethod = MemberHelper.MethodOf(() => Sql.Property<string>(null, null)).GetGenericMethodDefinition();
 
-        public static object[] GetCustomAttributesEx(this MemberInfo memberInfo, Type attributeType, bool inherit)
+	    /// <summary>
+	    /// Determines whether member info represent a Sql.Property method.
+	    /// </summary>
+	    /// <param name="memberInfo">The member information.</param>
+	    /// <returns>
+	    ///   <c>true</c> if member info is Sql.Property method; otherwise, <c>false</c>.
+	    /// </returns>
+	    public static bool IsSqlPropertyMethodEx(this MemberInfo memberInfo)
+	    {
+		    return memberInfo is MethodInfo methodCall && methodCall.IsGenericMethod &&
+		           methodCall.GetGenericMethodDefinition() == SQLPropertyMethod;
+	    }
+		public static object[] GetCustomAttributesEx(this MemberInfo memberInfo, Type attributeType, bool inherit)
         {
 #if NETFX_CORE || NETSTANDARD
             return memberInfo.GetCustomAttributes(attributeType, inherit).Cast<object>().ToArray();

@@ -1,11 +1,9 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Globalization;
 using System.Reflection;
-
-using JetBrains.Annotations;
-
 using PN = AntData.ORM.ProviderName;
 
 // ReSharper disable CheckNamespace
@@ -18,7 +16,7 @@ namespace AntData.ORM
 	using Linq;
 	using SqlQuery;
 #pragma warning disable CS3021 // Type or member does not need a CLSCompliant attribute because the assembly does not have a CLSCompliant attribute
-    [PublicAPI]
+	[PublicAPI]
     public static partial class Sql
     {
         #region Common Functions
@@ -126,12 +124,23 @@ namespace AntData.ORM
         {
             return value != null && (value.Value.CompareTo(low) < 0 || value.Value.CompareTo(high) > 0);
         }
+	    /// <summary>
+	    /// Allows access to entity property via name. Property can be dynamic or non-dynamic.
+	    /// </summary>
+	    /// <typeparam name="T">Property type.</typeparam>
+	    /// <param name="entity">The entity.</param>
+	    /// <param name="propertyName">Name of the property.</param>
+	    /// <returns></returns>
+	    /// <exception cref="LinqException">'Property' is only server-side method.</exception>
+	    public static T Property<T>(object entity, string propertyName)
+	    {
+		    throw new LinqException("'Property' is only server-side method.");
+	    }
+		#endregion
 
-        #endregion
+		#region Guid Functions
 
-        #region Guid Functions
-
-        [Sql.Function(PN.Oracle, "Sys_Guid", ServerSideOnly = true)]
+		[Sql.Function(PN.Oracle, "Sys_Guid", ServerSideOnly = true)]
         [Sql.Function(PN.Firebird, "Gen_Uuid", ServerSideOnly = true)]
         [Sql.Function(PN.MySql, "Uuid", ServerSideOnly = true)]
         [Sql.Expression(PN.Sybase, "NewID(1)", ServerSideOnly = true)]

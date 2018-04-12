@@ -34,7 +34,7 @@ namespace AntData.ORM.Linq.Builder
 					case ConvertFlags.Key   :
 					case ConvertFlags.All   :
 						{
-							var root = expression.GetRootObject();
+							var root = expression.GetRootObject(Builder.MappingSchema);
 
 							if (root.NodeType == ExpressionType.Parameter)
 							{
@@ -79,7 +79,7 @@ namespace AntData.ORM.Linq.Builder
 				case RequestFor.Field       :
 				case RequestFor.Expression  :
 					{
-						var levelExpression = expression.GetLevelExpression(level);
+						var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
 						return ReferenceEquals(levelExpression, expression) ?
 							Sequence.IsExpression(null,       0,         requestFlag) :

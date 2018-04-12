@@ -5,8 +5,8 @@ using System.Linq.Expressions;
 
 namespace AntData.ORM.Linq.Builder
 {
-	using Common;
 	using AntData.ORM.Expressions;
+	using Common;
 	using SqlQuery;
 
 	class JoinBuilder : MethodCallBuilder
@@ -429,7 +429,7 @@ namespace AntData.ORM.Linq.Builder
 					}
 					else
 					{
-						var levelExpression = expression.GetLevelExpression(level);
+						var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
 						if (levelExpression.NodeType == ExpressionType.MemberAccess)
 						{

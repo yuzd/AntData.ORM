@@ -1,17 +1,15 @@
-﻿using System;
+﻿using AntData.ORM.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
-
-using AntData.ORM.Common;
 
 namespace AntData.ORM.Linq.Builder
 {
-	using AntData.ORM.Expressions;
-	using Extensions;
-	using SqlQuery;
+    using AntData.ORM.Expressions;
+    using Extensions;
+    using SqlQuery;
 
 
     // This class implements double functionality (scalar and member type selects)
@@ -125,7 +123,7 @@ namespace AntData.ORM.Linq.Builder
                 return _rootExpression;
             }
 
-            var levelExpression = expression.GetLevelExpression(level);
+            var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
             if (IsScalar)
             {
@@ -290,7 +288,7 @@ namespace AntData.ORM.Linq.Builder
                         {
                             if (Body.NodeType != ExpressionType.Parameter && level == 0)
                             {
-                                var levelExpression = expression.GetLevelExpression( level);
+                                var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                                 if (levelExpression != expression)
                                     if (flags != ConvertFlags.Field && IsExpression(expression, level, RequestFor.Field).Result)
@@ -330,7 +328,7 @@ namespace AntData.ORM.Linq.Builder
                     case ConvertFlags.Key:
                     case ConvertFlags.Field:
                         {
-                            var levelExpression = expression.GetLevelExpression( level);
+                            var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                             switch (levelExpression.NodeType)
                             {
@@ -548,7 +546,7 @@ namespace AntData.ORM.Linq.Builder
                                 return idx;
                             }
 
-                            var levelExpression = expression.GetLevelExpression( level);
+                            var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                             switch (levelExpression.NodeType)
                             {
@@ -695,7 +693,7 @@ namespace AntData.ORM.Linq.Builder
                                 return new IsExpressionResult(requestFlag == RequestFor.Object);
                             }
 
-                            var levelExpression = expression.GetLevelExpression( level);
+                            var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                             switch (levelExpression.NodeType)
                             {
@@ -797,7 +795,7 @@ namespace AntData.ORM.Linq.Builder
             }
             else
             {
-                var levelExpression = expression.GetLevelExpression( level);
+                var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                 switch (levelExpression.NodeType)
                 {
@@ -901,7 +899,7 @@ namespace AntData.ORM.Linq.Builder
                         action(sequence, expression, 1);
                 }
 
-                var levelExpression = expression.GetLevelExpression( level);
+                var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                 if (!ReferenceEquals(levelExpression, expression))
                 {
@@ -926,11 +924,11 @@ namespace AntData.ORM.Linq.Builder
             }
             else
             {
-                var root = Body.GetRootObject();
+                var root = Body.GetRootObject(Builder.MappingSchema);
 
                 if (root.NodeType == ExpressionType.Parameter)
                 {
-                    var levelExpression = expression.GetLevelExpression( level - 1);
+                    var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level - 1);
                     var newExpression = GetExpression(expression, levelExpression, Body);
 
                     return action(this, newExpression, 0);
@@ -1001,11 +999,11 @@ namespace AntData.ORM.Linq.Builder
 
             if (IsScalar)
             {
-                root = expression.GetRootObject();
+                root = expression.GetRootObject(Builder.MappingSchema);
             }
             else
             {
-                var levelExpression = expression.GetLevelExpression(level);
+                var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                 switch (levelExpression.NodeType)
                 {
@@ -1013,7 +1011,7 @@ namespace AntData.ORM.Linq.Builder
                         {
                             var memberExpression = Members[((MemberExpression)levelExpression).Member];
 
-                            root = memberExpression.GetRootObject();
+                            root = memberExpression.GetRootObject(Builder.MappingSchema);
 
                             if (root.NodeType != ExpressionType.Parameter)
                                 return null;
@@ -1023,7 +1021,7 @@ namespace AntData.ORM.Linq.Builder
 
                     case ExpressionType.Parameter:
                         {
-                            root = expression.GetRootObject();
+                            root = expression.GetRootObject(Builder.MappingSchema);
                             break;
                         }
                 }
@@ -1056,14 +1054,14 @@ namespace AntData.ORM.Linq.Builder
 
         Expression GetMemberExpression(Expression newExpression, Expression expression, int level)
         {
-            var levelExpresion = expression.GetLevelExpression( level);
+            var levelExpresion = expression.GetLevelExpression(Builder.MappingSchema, level);
 
             switch (newExpression.NodeType)
             {
                 case ExpressionType.New:
                 case ExpressionType.MemberInit: break;
                 default:
-                    var le = expression.GetLevelExpression(level - 1);
+                    var le = expression.GetLevelExpression(Builder.MappingSchema, level - 1);
                     return GetExpression(expression, le, newExpression);
             }
 

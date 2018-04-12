@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AntData.ORM.Mapping;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -6,16 +7,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using AntData.ORM.Mapping;
 
 namespace AntData.ORM.Linq.Builder
 {
+	using AntData.ORM.Expressions;
 	using Common;
 	using Extensions;
-	using AntData.ORM.Expressions;
 	using SqlQuery;
 
-    class GroupByBuilder : MethodCallBuilder
+	class GroupByBuilder : MethodCallBuilder
     {
         #region Builder Methods
 
@@ -380,7 +380,7 @@ namespace AntData.ORM.Linq.Builder
 
                 if (level != 0)
                 {
-                    var levelExpression = expression.GetLevelExpression(level);
+                    var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                     if (levelExpression.NodeType == ExpressionType.MemberAccess)
                     {
@@ -549,7 +549,7 @@ namespace AntData.ORM.Linq.Builder
 
                         case ExpressionType.MemberAccess:
                             {
-                                var levelExpression = expression.GetLevelExpression(level);
+                                var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                                 if (levelExpression.NodeType == ExpressionType.MemberAccess)
                                 {
@@ -606,7 +606,7 @@ namespace AntData.ORM.Linq.Builder
             {
                 if (level != 0)
                 {
-                    var levelExpression = expression.GetLevelExpression( level);
+                    var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                     if (levelExpression.NodeType == ExpressionType.MemberAccess)
                     {
@@ -698,7 +698,7 @@ namespace AntData.ORM.Linq.Builder
 
                 if (level != 0)
                 {
-                    var levelExpression = expression.GetLevelExpression(level);
+                    var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
                     if (levelExpression.NodeType == ExpressionType.MemberAccess)
                     {

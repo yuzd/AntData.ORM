@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using AntData.ORM.DbEngine.Configuration;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 
 namespace AntData.ORM.Common
 {
@@ -75,7 +74,7 @@ namespace AntData.ORM.Common
 			/// SELECT Value FROM MyEntity WHERE Value IS NULL OR Value != 10
 			/// </example>
 			/// </summary>
-			public static bool CheckNullForNotEquals = false;
+			public static bool CompareNullsAsValues = false;
             /// <summary>
             /// 设置全局 插入是否忽略null字段
             /// </summary>
