@@ -28,7 +28,7 @@ Postgre：Install-Package AntData.Core.Postgre
 
 QQ Group ：433685124
 
-[如何配置tt模板自动生成entity以及常见的问题](http://www.cnblogs.com/yudongdong/p/6421312.html)
+[如何配置tt模板自动生成entity以及常见的问题(文章末尾会有最新的tt文件包)](http://www.cnblogs.com/yudongdong/p/6421312.html)
 
 
 # DEMO
@@ -355,6 +355,7 @@ DB.Delete(entity);
 
 ```
 
+
 # 5.Tran
 ```csharp
 Person p = new Person
@@ -377,3 +378,14 @@ DB.UseTransaction(con =>
 
 # 7.Sharding By DB And Sharding By Table
 Please see unit test
+
+# 8.我就是喜欢纯写sql,怎么整
+```csharp
+//提供了Query方法执行查询sql(select)   
+//例如悲观锁的select也是可以通过写sql来实现的  ====更多例子可以参考上面的 [1.2 SqlQuery章节]
+var currentOrderId = DB.Query<currentOrderId>("select * from current_order_id where Tid = 1 for update;").FirstOrDefault();
+
+//Execute方法是为了执行sql(insert update delete)
+var count= DB.Execute("update person where name='yuzd'");//count是执行sql受影响的条数
+
+```
