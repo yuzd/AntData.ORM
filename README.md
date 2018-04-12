@@ -28,7 +28,7 @@ Postgre：Install-Package AntData.Core.Postgre
 
 QQ Group ：433685124
 
-[How to use CodeGen to auto Create Db models](http://www.cnblogs.com/yudongdong/p/6421312.html)
+[如何配置tt模板自动生成entity以及常见的问题](http://www.cnblogs.com/yudongdong/p/6421312.html)
 
 
 # DEMO
@@ -38,7 +38,7 @@ QQ Group ：433685124
 # Instance  DbContext
 
 ```csharp
-
+//使用DB这个对象一定要确保每次都是一个新的实例 例如像下面的这种写法是安全的
 private static DbContext<Entitys> DB
  {
         get
@@ -58,16 +58,19 @@ private static void OnCustomerTraceConnection(CustomerTraceInfo customerTraceInf
 {
 	try
 	{
+		//因为是防止sql注入的 所以SqlText指的orm给你生成的sql。CustomerParams是执行值传给数据库驱动的参数 
 		string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
 				(current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
 		Debug.Write(sql + Environment.NewLine);
 	}
 	catch (Exception)
 	{
-		//ignore
+		//ignore 有可能会失败
+		Debug.Write(sql + Environment.NewLine);
 	}
 }
 
+//netcore2的建议大家去netcore2分支下载对应的demo
 ```
 
 
@@ -303,13 +306,30 @@ DB.Insert(p);
 ```csharp
 //update specified column
 DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set(r => r.Age, 10).Update() ;
+//下面这种例如你是传一个字段名称和值就完成更新的话能派上用场
 DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set2<Person, int?>("Age", 20).Update() ;
+//分开多次
+var updateQuery = DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set(r => r.Age, 10);
+if(XXXX){
+  updateQuery=updateQuery.Set(r => r.Name, 'xxx'); //切记多次的情况要覆盖updateQuery
+}
+updateQuery.Update();
 
-
-//update  by  entity
+//update  by  entity 
 var entity = DB.Tables.People.FirstOrDefault();
 entity.DataChangeLastTime = DateTime.Now;
-DB.Update(entity);
+DB.Update(entity);//注意这样的话是会根据entity的主键来更新所有的字段的
+
+//第一个参数代表条件 第二个参数是要组织你想要更新的字段和对应的值
+//如果People有100个字段 只想要更新其中的2个字段
+DB.Tables.People.Update(o => o.Name == "yuzd", o => new People { Age = o.Age + 1,Name = "yuzd2"});
+对应的sql--->update person set age = age+1,name = 'yuzd2' where name ='yuzd'
+如果是DB.Tables.People.Update(o => o.Name == "yuzd", o => new People { Age = o.Age + 1});
+那么对应的sql --->update person set age = age+1 where name ='yuzd'
+
+DB.Tables.People.Where(r => r.Name.Equals("yuzd")).Set(r => r.Age, y=>y.Age+1).Update();
+对应的sql--->update person set age = age+1 where name ='yuzd'
+
 
 //bulkupdate 【sqlserver only】
 var allPerson = DB.Tables.People.ToList();
