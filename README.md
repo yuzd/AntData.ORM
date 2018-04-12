@@ -361,10 +361,12 @@ Person p = new Person
 {
     Age = 27
 };
-           
+
+
 DB.UseTransaction(con =>
 {
-    con.Tables.Schools.Where(r=>r.Name.Equals("上海大学")).Set(r=>r.Address,"no update").Update();
+     //注意在Transaction使用的时候 一定要用 con 不要用外层的DB对象 
+    con.Tables.Schools.Where(r=>r.Name.Equals("上海大学")).Set(r=>r.Address,"no update").Update();
     con.Insert(p);
     return true;
 });
