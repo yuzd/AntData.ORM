@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace AntData.ORM.Common
 {
-    public static class Configuration
+	public static class Configuration
     {
         public static bool IsStructIsScalarType = true;
         public static bool AvoidSpecificDataProviderAPI;
@@ -99,8 +99,10 @@ namespace AntData.ORM.Common
             /// </summary>
 		    public static bool UseNoLock = false;
 
+	        public static bool DisableQueryCache =false;
 
-        }
+
+		}
 
         public static class LinqService
         {

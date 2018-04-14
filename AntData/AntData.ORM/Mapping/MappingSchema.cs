@@ -18,14 +18,14 @@ using System.Xml;
 
 namespace AntData.ORM.Mapping
 {
-	using Common;
-	using Expressions;
-	using Extensions;
-	using Metadata;
-	using SqlProvider;
-	using SqlQuery;
+    using Common;
+    using Expressions;
+    using Extensions;
+    using Metadata;
+    using SqlProvider;
+    using SqlQuery;
 
-	[PublicAPI]
+    [PublicAPI]
 	public class MappingSchema
 	{
 		#region Init
@@ -1058,7 +1058,11 @@ namespace AntData.ORM.Mapping
 		#endregion
 
 		#region EntityDescriptor
-
+		/// <summary>
+		/// Gets or sets action, called when the EntityDescriptor is created.
+		/// Could be used to adjust created descriptor before use.
+		/// </summary>
+		public Action<MappingSchema, IEntityChangeDescriptor> EntityDescriptorCreatedCallback { get; set; }
 		//ConcurrentDictionary<Type,EntityDescriptor> _entityDescriptors;
 
 		public EntityDescriptor GetEntityDescriptor(Type type)

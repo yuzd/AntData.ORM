@@ -248,15 +248,16 @@ namespace AntData.ORM.Mapping
 
         public EntityDescriptor GetEntityDescriptor(MappingSchema mappingSchema, Type type)
         {
-            EntityDescriptor ed;
+			if (!_entityDescriptors.TryGetValue(type, out var ed))
+		        ed = _entityDescriptors.GetOrAdd(type, key =>
+		        {
+			        var edNew = new EntityDescriptor(mappingSchema, key);
+			        mappingSchema.EntityDescriptorCreatedCallback?.Invoke(mappingSchema, edNew);
+			        return edNew;
+		        });
 
-            if (!_entityDescriptors.TryGetValue(type, out ed))
-            {
-                ed = _entityDescriptors.GetOrAdd(type, new EntityDescriptor(mappingSchema, type));
-            }
-
-            return ed;
-        }
+	        return ed;
+		}
 
         /// <summary>
         ///     Enumerate types for cached <see cref="EntityDescriptor" />s

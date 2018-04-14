@@ -19,9 +19,21 @@ namespace AntData.ORM.Linq.Builder
 		#region TableBuilder
 
 		int ISequenceBuilder.BuildCounter { get; set; }
-
-		static T Find<T>(ExpressionBuilder builder, BuildInfo buildInfo, Func<int,IBuildContext,T> action)
+		enum BuildContextType
 		{
+			None,
+			TableConstant,
+			GetTableMethod,
+			MemberAccess,
+			Association,
+			TableFunctionAttribute,
+			AsCteMethod,
+			CteConstant
+		}
+		static BuildContextType FindBuildContext(ExpressionBuilder builder, BuildInfo buildInfo, out IBuildContext parentContext)
+		{
+			parentContext = null;
+
 			var expression = buildInfo.Expression;
 
 			switch (expression.NodeType)
@@ -29,8 +41,11 @@ namespace AntData.ORM.Linq.Builder
 				case ExpressionType.Constant:
 					{
 						var c = (ConstantExpression)expression;
+
 						if (c.Value is IQueryable)
-							return action(1, null);
+						{
+							return BuildContextType.TableConstant;
+						}
 
 						break;
 					}
@@ -39,21 +54,28 @@ namespace AntData.ORM.Linq.Builder
 					{
 						var mc = (MethodCallExpression)expression;
 
-						if (mc.Method.Name == "GetTable")
-							if (typeof(ITable<>).IsSameOrParentOf(expression.Type))
-								return action(2, null);
+						switch (mc.Method.Name)
+						{
+							case "GetTable":
+								if (typeof(ITable<>).IsSameOrParentOf(expression.Type))
+									return BuildContextType.GetTableMethod;
+								break;
+
+							case "AsCte":
+								return BuildContextType.AsCteMethod;
+						}
 
 						var attr = builder.GetTableFunctionAttribute(mc.Method);
 
 						if (attr != null)
-							return action(5, null);
+							return BuildContextType.TableFunctionAttribute;
 
 						if (mc.IsAssociation(builder.MappingSchema))
 						{
-							var parentContext = builder.GetContext(buildInfo.Parent, expression);
+							parentContext = builder.GetContext(buildInfo.Parent, expression);
 							if (parentContext != null)
-							    return action(4, parentContext);
-                        }
+								return BuildContextType.Association;
+						}
 
 						break;
 					}
@@ -61,15 +83,15 @@ namespace AntData.ORM.Linq.Builder
 				case ExpressionType.MemberAccess:
 
 					if (typeof(ITable<>).IsSameOrParentOf(expression.Type))
-						return action(3, null);
+						return BuildContextType.MemberAccess;
 
 					// Looking for association.
 					//
 					if (buildInfo.IsSubQuery && buildInfo.SelectQuery.From.Tables.Count == 0)
 					{
-						var ctx = builder.GetContext(buildInfo.Parent, expression);
-						if (ctx != null)
-							return action(4, ctx);
+						parentContext = builder.GetContext(buildInfo.Parent, expression);
+						if (parentContext != null)
+							return BuildContextType.Association;
 					}
 
 					break;
@@ -78,39 +100,39 @@ namespace AntData.ORM.Linq.Builder
 					{
 						if (buildInfo.IsSubQuery && buildInfo.SelectQuery.From.Tables.Count == 0)
 						{
-							var ctx = builder.GetContext(buildInfo.Parent, expression);
-							if (ctx != null)
-								return action(4, ctx);
+							parentContext = builder.GetContext(buildInfo.Parent, expression);
+							if (parentContext != null)
+								return BuildContextType.Association;
 						}
 
 						break;
 					}
 			}
 
-			return action(0, null);
+			return BuildContextType.None;
 		}
+
 
 		public bool CanBuild(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			return Find(builder, buildInfo, (n,_) => n > 0);
+			return FindBuildContext(builder, buildInfo, out var _) != BuildContextType.None;
 		}
 
 		public IBuildContext BuildSequence(ExpressionBuilder builder, BuildInfo buildInfo)
 		{
-			return Find(builder, buildInfo, (n,ctx) =>
-			{
-				switch (n)
-				{
-					case 0 : return null;
-					case 1 : return new TableContext(builder, buildInfo, ((IQueryable)((ConstantExpression)buildInfo.Expression).Value).ElementType);
-					case 2 :
-					case 3 : return new TableContext(builder, buildInfo, buildInfo.Expression.Type.GetGenericArgumentsEx()[0]);
-					case 4 : return ctx.GetContext(buildInfo.Expression, 0, buildInfo);
-					case 5 : return new TableContext(builder, buildInfo);
-				}
+			var type = FindBuildContext(builder, buildInfo, out var parentContext);
 
-				throw new InvalidOperationException();
-			});
+			switch (type)
+			{
+				case BuildContextType.None: return null;
+				case BuildContextType.TableConstant: return new TableContext(builder, buildInfo, ((IQueryable)buildInfo.Expression.EvaluateExpression()).ElementType);
+				case BuildContextType.GetTableMethod:
+				case BuildContextType.MemberAccess: return new TableContext(builder, buildInfo, buildInfo.Expression.Type.GetGenericArgumentsEx()[0]);
+				case BuildContextType.Association: return parentContext.GetContext(buildInfo.Expression, 0, buildInfo);
+				case BuildContextType.TableFunctionAttribute: return new TableContext(builder, buildInfo);
+			}
+
+			throw new InvalidOperationException();
 		}
 
 		public SequenceConvertInfo Convert(ExpressionBuilder builder, BuildInfo buildInfo, ParameterExpression param)
@@ -216,7 +238,7 @@ namespace AntData.ORM.Linq.Builder
 
 			public List<InheritanceMapping> InheritanceMapping;
 
-			protected void Init()
+			protected void Init(bool applyFilters = true)
 			{
 				Builder.Contexts.Add(this);
 
@@ -224,7 +246,7 @@ namespace AntData.ORM.Linq.Builder
 
 				// Original table is a parent.
 				//
-				if (ObjectType != OriginalType)
+				if (applyFilters && ObjectType != OriginalType)
 				{
 					var predicate = Builder.MakeIsPredicate(this, OriginalType);
 
@@ -1216,33 +1238,35 @@ namespace AntData.ORM.Linq.Builder
 
 			TableLevel FindTable(Expression expression, int level, bool throwException, bool throwExceptionForNull =false)
 			{
-			    if (expression == null)
-			        return new TableLevel { Table = this };
+				if (expression == null)
+					return new TableLevel { Table = this };
 
-			    var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
+				var levelExpression = expression.GetLevelExpression(Builder.MappingSchema, level);
 
-			    TableLevel result = null;
+				TableLevel result = null;
 
-			    switch (levelExpression.NodeType)
-			    {
-			        case ExpressionType.MemberAccess:
-			        case ExpressionType.Parameter:
-			        {
-			            var field = GetField(expression, level, throwException);
+				switch (levelExpression.NodeType)
+				{
+					case ExpressionType.MemberAccess:
+					case ExpressionType.Parameter:
+					{
+						var field = GetField(expression, level, throwException);
 
-			            if (field != null || (level == 0 && levelExpression == expression))
-			                return new TableLevel { Table = this, Field = field, Level = level };
+						if (field != null || (level == 0 && levelExpression == expression))
+							return new TableLevel { Table = this, Field = field, Level = level };
 
-			            result = GetAssociation(expression, level);
-			            break;
-			        }
-			    }
+						goto case ExpressionType.Call;
+					}
+					case ExpressionType.Call:
+						result = GetAssociation(expression, level);
+						break;
+				}
 
-			    if (throwExceptionForNull && result == null)
-			        throw new LinqException("Expression '{0}' ({1}) is not a table.".Args(expression, levelExpression));
+				if (throwExceptionForNull && result == null)
+					throw new LinqException($"Expression '{expression}' ({levelExpression}) is not a table.");
 
-			    return result;
-            }
+				return result;
+			}
 
 			TableLevel GetAssociation(Expression expression, int level)
 			{
@@ -1333,7 +1357,8 @@ namespace AntData.ORM.Linq.Builder
 			public readonly SelectQuery.JoinedTable  ParentAssociationJoin;
 			public readonly AssociationDescriptor    Association;
 			public readonly bool                     IsList;
-
+			public int RegularConditionCount;
+			public LambdaExpression ExpressionPredicate;
 			public override IBuildContext Parent
 			{
 				get { return ParentAssociation.Parent; }
@@ -1356,6 +1381,7 @@ namespace AntData.ORM.Linq.Builder
 				OriginalType     = type;
 				ObjectType       = GetObjectType();
 				EntityDescriptor = Builder.MappingSchema.GetEntityDescriptor(ObjectType);
+				InheritanceMapping = EntityDescriptor.InheritanceMapping;
 				SqlTable         = new SqlTable(builder.MappingSchema, ObjectType);
 
 				var psrc = parent.SelectQuery.From[parent.SqlTable];
@@ -1387,8 +1413,25 @@ namespace AntData.ORM.Linq.Builder
 
 					join.JoinedTable.Condition.Conditions.Add(new SelectQuery.Condition(false, predicate));
 				}
+				if (ObjectType != OriginalType)
+				{
+					var predicate = Builder.MakeIsPredicate(this, OriginalType);
 
-				Init();
+					if (predicate.GetType() != typeof(SelectQuery.Predicate.Expr))
+						join.JoinedTable.Condition.Conditions.Add(new SelectQuery.Condition(false, predicate));
+				}
+				RegularConditionCount = join.JoinedTable.Condition.Conditions.Count;
+				ExpressionPredicate = Association.GetPredicate(parent.ObjectType, ObjectType);
+				if (ExpressionPredicate != null)
+				{
+					var expr = Builder.ConvertExpression(ExpressionPredicate.Body.Unwrap());
+
+					Builder.BuildSearchCondition(
+						new ExpressionContext(null, new IBuildContext[] { parent, this }, ExpressionPredicate),
+						expr,
+						join.JoinedTable.Condition.Conditions);
+				}
+				Init(false);
 			}
 
 			protected override Expression ProcessExpression(Expression expression)
@@ -1413,7 +1456,7 @@ namespace AntData.ORM.Linq.Builder
 
 					foreach (var key in keys)
 					{
-						var index2  = ConvertToParentIndex(key.Index, null);
+						var index2 = ConvertToParentIndex(key.Index, null);
 
 						Expression e = Expression.Call(
 							ExpressionBuilder.DataReaderParam,

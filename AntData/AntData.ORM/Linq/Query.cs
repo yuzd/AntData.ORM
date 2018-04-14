@@ -1,22 +1,22 @@
-﻿using System;
+﻿using AntData.ORM.Reflection;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using AntData.ORM.Reflection;
 
 namespace AntData.ORM.Linq
 {
-	using Builder;
-	using Data;
-	using Common;
-	using Extensions;
 	using AntData.ORM.Expressions;
+	using Builder;
+	using Common;
+	using Data;
+	using Extensions;
 	using Mapping;
-	using SqlQuery;
 	using SqlProvider;
+	using SqlQuery;
 
 	abstract class Query
 	{
@@ -32,13 +32,15 @@ namespace AntData.ORM.Linq
 		public Expression       Expression;
 		public MappingSchema    MappingSchema;
 		public SqlProviderFlags SqlProviderFlags;
+		public  string ConfigurationID;
 
-		public bool Compare(string contextID, MappingSchema mappingSchema, Expression expr)
+		public bool Compare(IDataContextInfo dataContext,  Expression expr)
 		{
 			return
-				ContextID.Length == contextID.Length &&
-				ContextID        == contextID        &&
-				MappingSchema    == mappingSchema    &&
+				ContextID.Length == dataContext.ContextID.Length &&
+				ContextID == dataContext.ContextID &&
+				ConfigurationID.Length == dataContext.MappingSchema.ConfigurationID.Length &&
+				ConfigurationID == dataContext.MappingSchema.ConfigurationID && //区分不同的db
 				Expression.EqualsTo(expr, _queryableAccessorDic);
 		}
 
@@ -67,16 +69,35 @@ namespace AntData.ORM.Linq
 		}
 
 		#endregion
+
+		#region Cache Support
+
+		internal static readonly ConcurrentBag<Action> CacheCleaners = new ConcurrentBag<Action>();
+
+		/// <summary>
+		/// Clears query caches for all typed queries.
+		/// </summary>
+		public static void ClearCaches()
+		{
+			// ConcurrentBag has thread safe enumerator
+			foreach (var cleaner in CacheCleaners)
+			{
+				cleaner();
+			}
+		}
+
+		#endregion
 	}
 
 	class Query<T> : Query
 	{
-		#region Init
+        #region Init
 
-		public Query()
+        public Query()
 		{
 			GetIEnumerable = MakeEnumerable;
-		}
+		    DoNotCache = NoLinqCache.IsNoCache;
+        }
 
 		public override void Init(IBuildContext parseContext, List<ParameterAccessor> sqlParameters)
 		{
@@ -91,6 +112,7 @@ namespace AntData.ORM.Linq
 			SqlProviderFlags = parseContext.Builder.DataContextInfo.SqlProviderFlags;
 			SqlOptimizer     = parseContext.Builder.DataContextInfo.GetSqlOptimizer();
 			Expression       = parseContext.Builder.OriginalExpression;
+			ConfigurationID = parseContext.Builder.MappingSchema.ConfigurationID;
 		}
 
 		void ClearParameters()
@@ -117,74 +139,134 @@ namespace AntData.ORM.Linq
 			yield return ConvertTo<T>.From(GetElement(qc, dci, expr, ps));
 		}
 
-		#endregion
+        #endregion
 
-		#region GetInfo
+        #region GetInfo
+	    public bool DoNotCache;
 
-		static          Query<T> _first;
-		static readonly object   _sync = new object();
+        static readonly List<Query<T>> _orderedCache;
 
-		const int CacheSize = 100;
+	    /// <summary>
+	    /// LINQ query cache version. Changed when query added or removed from cache.
+	    /// Not changed when cache reordered.
+	    /// </summary>
+	    static int _cacheVersion;
+	    /// <summary>
+	    /// LINQ query cache synchronization object.
+	    /// </summary>
+	    static readonly object _sync;
 
-		public static Query<T> GetQuery(IDataContextInfo dataContextInfo, Expression expr)
+	    /// <summary>
+	    /// LINQ query cache size (per entity type).
+	    /// </summary>
+	    const int CacheSize = 100;
+
+	    static Query()
+	    {
+	        _sync = new object();
+	        _orderedCache = new List<Query<T>>(CacheSize);
+
+	        CacheCleaners.Add(ClearCache);
+	    }
+
+	    /// <summary>
+	    /// Empties LINQ query cache for <typeparamref name="T"/> entity type.
+	    /// </summary>
+	    public static void ClearCache()
+	    {
+	        if (_orderedCache.Count != 0)
+	            lock (_sync)
+	            {
+	                if (_orderedCache.Count != 0)
+	                    _cacheVersion++;
+
+	                _orderedCache.Clear();
+	            }
+	    }
+
+	    static Query<T> CreateQuery(IDataContextInfo dataContext, Expression expr)
+	    {
+	        try
+	        {
+	           var query = new ExpressionBuilder(new Query<T>(), dataContext, expr, null).Build<T>();
+	            return query;
+	        }
+	        catch (Exception)
+	        {
+
+	            throw;
+	        }
+
+	    }
+        public static Query<T> GetQuery(IDataContextInfo dataContextInfo, Expression expr)
 		{
-			var query = FindQuery(dataContextInfo, expr);
+		    if (Configuration.Linq.DisableQueryCache)
+		        return CreateQuery(dataContextInfo, expr);
 
-			if (query == null)
-			{
-				lock (_sync)
-				{
-					query = FindQuery(dataContextInfo, expr);
+            var query = FindQuery(dataContextInfo, expr);
 
-					if (query == null)
-					{
-					    query = new ExpressionBuilder(new Query<T>(), dataContextInfo, expr, null).Build<T>();
+		    if (query == null)
+		    {
+		        var oldVersion = _cacheVersion;
+		        query = CreateQuery(dataContextInfo, expr);
 
-                        if (!query.DoNotChache)
-						{
-							query.Next = _first;
-							_first = query;
-						}
-					}
-				}
-			}
+		        // move lock as far as possible, because this method called a lot
+		        if (!query.DoNotCache)
+		            lock (_sync)
+		            {
+		                if (oldVersion == _cacheVersion || FindQuery(dataContextInfo, expr) == null)
+		                {
+		                    if (_orderedCache.Count == CacheSize)
+		                        _orderedCache.RemoveAt(CacheSize - 1);
 
-			return query;
-		}
+		                    _orderedCache.Insert(0, query);
+		                    _cacheVersion++;
+		                }
+		            }
+		    }
+
+		    return query;
+        }
 
 		static Query<T> FindQuery(IDataContextInfo dataContextInfo, Expression expr)
 		{
-			Query<T> prev = null;
-			var      n    = 0;
+		    Query<T>[] queries;
 
-			for (var query = _first; query != null; query = query.Next)
-			{
-				if (query.Compare(dataContextInfo.ContextID, dataContextInfo.MappingSchema, expr))
-				{
-					if (prev != null)
-					{
-						lock (_sync)
-						{
-							prev.Next  = query.Next;
-							query.Next = _first;
-							_first     = query;
-						}
-					}
+		    // create thread-safe copy
+		    lock (_sync)
+		        queries = _orderedCache.ToArray();
 
-					return query;
-				}
+		    foreach (var query in queries)
+		    {
+		        if (query.Compare(dataContextInfo, expr))
+		        {
+		            // move found query up in cache
+		            lock (_sync)
+		            {
+		                var oldIndex = _orderedCache.IndexOf(query);
+		                if (oldIndex > 0)
+		                {
+		                    var prev = _orderedCache[oldIndex - 1];
+		                    _orderedCache[oldIndex - 1] = query;
+		                    _orderedCache[oldIndex] = prev;
+		                }
+		                else if (oldIndex == -1)
+		                {
+		                    // query were evicted from cache - readd it
+		                    if (_orderedCache.Count == CacheSize)
+		                        _orderedCache.RemoveAt(CacheSize - 1);
 
-				if (n++ >= CacheSize)
-				{
-					query.Next = null;
-					return null;
-				}
+		                    _orderedCache.Insert(0, query);
+		                    _cacheVersion++;
+		                }
+		            }
 
-				prev = query;
-			}
+		            return query;
+		        }
+		    }
 
-			return null;
-		}
+		    return null;
+        }
 
 		#endregion
 

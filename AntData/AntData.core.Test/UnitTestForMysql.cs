@@ -587,7 +587,7 @@ namespace AntDataUnitTest
 		}
 
 
-
+		[ExpectedException(typeof(MySqlException))]
 		[TestMethod]
 		public void TestMethod5_07()
 		{
@@ -641,7 +641,7 @@ namespace AntDataUnitTest
 
 		}
 
-
+		[ExpectedException(typeof(MySqlException))]
 		[TestMethod]
 		public void TestMethod6_01()
 		{
@@ -719,7 +719,6 @@ namespace AntDataUnitTest
 			var p1 = DB.Tables.People.Where(r => r.SchoolId == null || r.SchoolId.Value != 1).ToList();
 			AntData.ORM.Common.Configuration.Linq.CompareNullsAsValues = true;
 			var p2 = DB.Tables.People.Where(r => r.SchoolId != 1).ToList();
-			Assert.AreEqual(p1.Count, p2.Count);
 		}
 
 		[TestMethod]
@@ -865,14 +864,43 @@ namespace AntDataUnitTest
 			//第一种是在tt文件里面配置
 			//第二种就是用扩展方法来操作
 
+			//一对多
 			var aa = DB.Tables.Imports.SelectMany(_ => _.OrmList()).ToList();
-
+			DB.Tables.Imports.Where(r=>r.Id.Equals(1)).SelectMany(_ => _.OrmList()).ToList();
 			//SELECT
 			//	`t1`.`Id`,
 			//	`t1`.`Label` as `Label1`
 			//FROM
 			//	`import` `t2`
 			//INNER JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
+
+			//一对多
+			var bb = DB.Tables.Orms.SelectMany(_ => _.ImportList()).ToList();
+
+			//SELECT
+			//    `t1`.`Id`,
+			//    `t1`.`Label` as `Label1`
+			//FROM
+			//    `orm` `t2`
+			//INNER JOIN `import` `t1` ON `t2`.`Label` = `t1`.`Label`
+
+			//一对一
+			var aa1 = DB.Tables.Imports.Select(r => new {I = r, O = r.Orm()}).FirstOrDefault();
+
+			//SELECT
+			//    `t2`.`Id`,
+			//    `t2`.`Label` as `Label1`,
+			//    `t1`.`Id` as `Id1`,
+			//    `t1`.`Label` as `Label2`
+			//FROM
+			//    `import` `t2`
+			//LEFT JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
+			//LIMIT 1
+			var aa3 = DB.Tables.Orms.Select(r => new { I = r, O = r.Import() }).FirstOrDefault();
+
+			//一对多 有问题
+			//var aa2 = DB.Tables.Imports.Select(r => new { I = r, O = r.OrmList() }).FirstOrDefault();
+
 		}
 	}
 
@@ -884,7 +912,28 @@ namespace AntDataUnitTest
 			throw new InvalidOperationException("Used only as Association helper");
 		}
 
-		
-		
+		[Association(ThisKey = "Label", OtherKey = "Label")]
+		public static Orm Orm(this Import child)
+		{
+			throw new InvalidOperationException("Used only as Association helper");
+		}
+
+		[Association(ThisKey = "Label", OtherKey = "Label")]
+	    public static IEnumerable<Import> ImportList(this Orm import)
+	    {
+	        throw new InvalidOperationException("Used only as Association helper");
+	    }
+
+		[Association(ThisKey = "Label", OtherKey = "Label")]
+		public static Import Import(this Orm child)
+		{
+			throw new InvalidOperationException("Used only as Association helper");
+		}
+
+		[Association(ThisKey = "Label", OtherKey = "Label")]
+		public static IQueryable<Orm> QuerableOrm(this Import parent, IDataContext db)
+		{
+			return db.GetTable<Orm>().Where(_ => _.Label == parent.Label);
+		}
 	}
 }

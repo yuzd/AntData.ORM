@@ -215,8 +215,16 @@ namespace AntData.ORM.Linq.Builder
 
                             break;
                         }
+	                    if (ce.IsAssociation(MappingSchema))
+	                    {
+		                    var ctx = GetContext(context, ce);
+		                    if (ctx == null)
+			                    throw new InvalidOperationException();
 
-                        if ((_buildMultipleQueryExpressions == null || !_buildMultipleQueryExpressions.Contains(ce)) && IsSubQuery(context, ce))
+		                    return new TransformInfo(ctx.BuildExpression(ce, 0, enforceServerSide));
+	                    }
+
+						if ((_buildMultipleQueryExpressions == null || !_buildMultipleQueryExpressions.Contains(ce)) && IsSubQuery(context, ce))
                         {
                             if (IsMultipleQuery(ce))
                                 return new TransformInfo(BuildMultipleQuery(context, ce, enforceServerSide));

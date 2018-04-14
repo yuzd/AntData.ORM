@@ -3,11 +3,15 @@ using System.Linq.Expressions;
 
 namespace AntData.ORM.Linq.Builder
 {
-	using AntData.ORM.Expressions;
-	using SqlQuery;
+    using AntData.ORM.Expressions;
+    using SqlQuery;
 
-	class ExpressionContext : SequenceContextBase
+    class ExpressionContext : SequenceContextBase
 	{
+		public ExpressionContext(IBuildContext parent, IBuildContext[] sequences, LambdaExpression lambda)
+			: base(parent, sequences, lambda)
+		{
+		}
 		public ExpressionContext(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
 			: base(parent, sequence, lambda)
 		{

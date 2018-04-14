@@ -1,32 +1,37 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace AntData.ORM.Linq.Builder
 {
-	using SqlQuery;
+    using SqlQuery;
 
-	abstract class SequenceContextBase : IBuildContext
+    abstract class SequenceContextBase : IBuildContext
 	{
-		protected SequenceContextBase(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
-		{
-			Parent      = parent;
-			Sequence    = sequence;
-			Builder     = sequence.Builder;
-			Lambda      = lambda;
-			SelectQuery = sequence.SelectQuery;
+	    protected SequenceContextBase(IBuildContext parent, IBuildContext[] sequences, LambdaExpression lambda)
+	    {
+	        Parent = parent;
+	        Sequences = sequences;
+	        Builder = sequences[0].Builder;
+	        Lambda = lambda;
+	        SelectQuery = sequences[0].SelectQuery;
 
-			Sequence.Parent = this;
+	        Sequence.Parent = this;
 
-			Builder.Contexts.Add(this);
-		}
+	        Builder.Contexts.Add(this);
+	    }
+
+	    protected SequenceContextBase(IBuildContext parent, IBuildContext sequence, LambdaExpression lambda)
+	        : this(parent, new[] { sequence }, lambda)
+	    {
+	    }
 
 #if DEBUG
-		public string _sqlQueryText { get { return SelectQuery == null ? "" : SelectQuery.SqlText; } }
+        public string _sqlQueryText { get { return SelectQuery == null ? "" : SelectQuery.SqlText; } }
 #endif
 
 		public IBuildContext     Parent      { get; set; }
-		public IBuildContext     Sequence    { get; set; }
-		public ExpressionBuilder Builder     { get; set; }
+	    public IBuildContext[] Sequences { get; set; }
+        public IBuildContext     Sequence => Sequences[0];
+        public ExpressionBuilder Builder     { get; set; }
 		public LambdaExpression  Lambda      { get; set; }
 		public SelectQuery       SelectQuery { get; set; }
 

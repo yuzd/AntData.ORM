@@ -983,7 +983,30 @@ namespace AntData.ORM.Expressions
 
 			return 0;
 		}
+		public static object EvaluateExpression(this Expression expr)
+		{
+			switch (expr.NodeType)
+			{
+				case ExpressionType.Constant:
+					return ((ConstantExpression)expr).Value;
 
+				case ExpressionType.MemberAccess:
+				{
+					var member = (MemberExpression)expr;
+
+					if (member.Member.IsFieldEx())
+						return ((FieldInfo)member.Member).GetValue(member.Expression.EvaluateExpression());
+
+					if (member.Member.IsPropertyEx())
+						return ((PropertyInfo)member.Member).GetValue(member.Expression.EvaluateExpression(), null);
+
+					break;
+				}
+			}
+
+			var value = Expression.Lambda(expr).Compile().DynamicInvoke();
+			return value;
+		}
 		#endregion
 	}
 }

@@ -397,7 +397,7 @@ namespace AntData.ORM.Linq.Builder
 			}
 		}
 
-		Expression ConvertExpression(Expression expression)
+		internal Expression ConvertExpression(Expression expression)
 		{
 			return expression.Transform(e =>
 			{
@@ -2279,7 +2279,7 @@ namespace AntData.ORM.Linq.Builder
 
 		#region Search Condition Builder
 
-		void BuildSearchCondition(IBuildContext context, Expression expression, List<SelectQuery.Condition> conditions)
+		internal void BuildSearchCondition(IBuildContext context, Expression expression, List<SelectQuery.Condition> conditions)
 		{
 			switch (expression.NodeType)
 			{
