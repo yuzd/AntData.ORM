@@ -389,3 +389,156 @@ var currentOrderId = DB.Query<currentOrderId>("select * from current_order_id wh
 var count= DB.Execute("update person where name='yuzd'");//count是执行sql受影响的条数
 
 ```
+
+# 9.常用的配置数据源方法
+1 代码配置(netfx和netcore都适用)
+```csharp
+//配置1个mysql数据源 在使用的时候直接用 "testorm_mysql" 这个逻辑名称
+ AntData.ORM.Common.Configuration.DBSettings = new DBSettings
+            {
+                DatabaseSettings = new List<DatabaseSettings>
+                {
+                    new DatabaseSettings
+                    {
+                        Name = "testorm_mysql",
+                        Provider = "mysql",
+                        ConnectionItemList = new List<ConnectionStringItem>
+                        {
+                            new ConnectionStringItem
+                            {
+                                Name = "testorm_mysql",
+                                ConnectionString = connectionString
+                            }
+                        }
+                    }
+                }
+            };
+	    
+//配置2个不同的mysql数据源 在使用的时候分别使用不同的 "testorm_mysql1" or "testorm_mysql2" 逻辑名称
+ AntData.ORM.Common.Configuration.DBSettings = new DBSettings
+            {
+                DatabaseSettings = new List<DatabaseSettings>
+                {
+                    new DatabaseSettings
+                    {
+                        Name = "testorm_mysql1",
+                        Provider = "mysql",
+                        ConnectionItemList = new List<ConnectionStringItem>
+                        {
+                            new ConnectionStringItem
+                            {
+                                Name = "testorm_mysql1",
+                                ConnectionString = connectionString1
+                            }
+                        }
+                    },
+		    new DatabaseSettings
+                    {
+                        Name = "testorm_mysql2",
+                        Provider = "mysql",
+                        ConnectionItemList = new List<ConnectionStringItem>
+                        {
+                            new ConnectionStringItem
+                            {
+                                Name = "testorm_mysql2",
+                                ConnectionString = connectionString2
+                            }
+                        }
+                    }
+                }
+            };	    
+	    
+//配置Master-Slave类型mysql数据源 
+ AntData.ORM.Common.Configuration.DBSettings = new DBSettings
+            {
+                DatabaseSettings = new List<DatabaseSettings>
+                {
+                    new DatabaseSettings
+                    {
+                        Name = "testorm_mysql",
+                        Provider = "mysql",
+                        ConnectionItemList = new List<ConnectionStringItem>
+                        {
+                            new ConnectionStringItem
+                            {
+                                Name = "testorm_mysql1",
+                                ConnectionString = connectionString1,
+				DatabaseType = DatabaseType.Master
+                            },
+			    new ConnectionStringItem
+                            {
+                                Name = "testorm_mysql2",
+                                ConnectionString = connectionString2,
+				DatabaseType = DatabaseType.Slave
+                            }
+                        }
+                    }
+                }
+            };	 
+```
+2 netfx下用config文件配置
+```csharp
+以下是App.config配置内容
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <configSections>
+    <section name="dal" type="AntData.ORM.DbEngine.Configuration.DbEngineConfigurationSection, AntData.ORM"/>
+  </configSections>
+
+
+  <location path="." allowOverride="true" inheritInChildApplications="false">
+    <dal configSource="Config\Dal.config"/>
+  </location>
+
+</configuration>
+以下是Config\Dal.config文件的配置内容
+<dal name="DBDal">
+  <databaseSets>
+    <databaseSet name="testorm" provider="mySqlProvider">
+      <add name="testorm1" databaseType="Master" connectionString="Server=127.0.0.1;Port=28747;Database=testorm;Uid=root;Pwd=123456;charset=utf8;"/>
+    </databaseSet>
+  <databaseProviders>
+    <add name="mySqlProvider" type="AntData.ORM.Mysql.MySqlDatabaseProvider,AntData.ORM.Mysql"/>
+  </databaseProviders>
+</dal>
+```	
+3 netcore下用appsettings.json文件配置
+```csharp
+{
+  "Logging": {
+    "IncludeScopes": false,
+    "LogLevel": {
+      "Default": "Warning"
+    }
+  },
+  "dal": [
+    {
+      "Provider": "mysql",
+      "Name": "testorm_mysql",
+      "ConnectionItemList": [
+        {
+          "Name": "testorm_mysql",
+          "ConnectionString": ConnectionString,
+          "DatabaseType": "Master"
+        }
+      ]
+
+    },
+    {
+      "Provider": "mysql",
+      "Name": "testorm_mysql2",
+      "ConnectionItemList": [
+        {
+          "Name": "testorm_mysql2",
+          "ConnectionString": "Server=127.0.0.1;Port=28747;Database=testorm;Uid=root;Pwd=123456;charset=utf8;SslMode=none",
+          "DatabaseType": "Master"
+        }
+      ]
+
+    }
+  ]
+}
+
+然后在Startup.cs里面的 Configure方法里面
+AntData.ORM.Common.Configuration.UseDBConfig(Configuration);
+```
