@@ -131,7 +131,7 @@ namespace AntData.ORM.DbEngine
                     throw new DalException(String.Format(Resources.InvalidDatabaseProviderException, provider.TypeName));
                 //创建provider实例
                 var databaseProvider = Activator.CreateInstance(provider.Type) as IDatabaseProvider;
-                DatabaseProviders.Add(provider.Name, databaseProvider);
+                if(!DatabaseProviders.ContainsKey(provider.Name)) DatabaseProviders.Add(provider.Name, databaseProvider);
             }
         }
 
