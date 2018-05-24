@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace AntDataUnitTest
 {
-	[TestClass]
+    [TestClass]
 	public class UnitTestForMysql
 	{
 		private static MysqlDbContext<TestormEntitys> DB
@@ -865,8 +865,8 @@ namespace AntDataUnitTest
 			//第二种就是用扩展方法来操作
 
 			//一对多
-			var aa = DB.Tables.Imports.SelectMany(_ => _.OrmList()).ToList();
-			DB.Tables.Imports.Where(r=>r.Id.Equals(1)).SelectMany(_ => _.OrmList()).ToList();
+			//var aa = DB.Tables.Imports.SelectMany(_ => _.OrmList()).ToList();
+			//DB.Tables.Imports.Where(r=>r.Id.Equals(1)).SelectMany(_ => _.OrmList()).ToList();
 			//SELECT
 			//	`t1`.`Id`,
 			//	`t1`.`Label` as `Label1`
@@ -875,7 +875,7 @@ namespace AntDataUnitTest
 			//INNER JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
 
 			//一对多
-			var bb = DB.Tables.Orms.SelectMany(_ => _.ImportList()).ToList();
+			//var bb = DB.Tables.Orms.SelectMany(_ => _.ImportList()).ToList();
 
 			//SELECT
 			//    `t1`.`Id`,
@@ -885,7 +885,7 @@ namespace AntDataUnitTest
 			//INNER JOIN `import` `t1` ON `t2`.`Label` = `t1`.`Label`
 
 			//一对一
-			var aa1 = DB.Tables.Imports.Select(r => new {I = r, O = r.Orm()}).FirstOrDefault();
+			//var aa1 = DB.Tables.Imports.Select(r => new {I = r, O = r.Orm()}).FirstOrDefault();
 
 			//SELECT
 			//    `t2`.`Id`,
@@ -896,15 +896,23 @@ namespace AntDataUnitTest
 			//    `import` `t2`
 			//LEFT JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
 			//LIMIT 1
-			var aa3 = DB.Tables.Orms.Select(r => new { I = r, O = r.Import() }).FirstOrDefault();
+			//var aa3 = DB.Tables.Orms.Select(r => new { I = r, O = r.Import() }).FirstOrDefault();
 
 			//一对多 有问题
-			//var aa2 = DB.Tables.Imports.Select(r => new { I = r, O = r.OrmList() }).FirstOrDefault();
+			var aa2 = DB.Tables.Imports.Select(r => new { I = r, O = r.OrmList() }).FirstOrDefault();
 
 		}
-	}
 
-	public static class AssociationExtension
+	    [TestMethod]
+	    public void TestMethod7_04()
+	    {
+	        var aaaa = DB.Query<Person>("select * from person where age>@age", new {age = 18}).FirstOrDefault();
+
+	    }
+
+    }
+
+    public static class AssociationExtension
 	{
 		[Association(ThisKey = "Label", OtherKey = "Label")]
 		public static IEnumerable<Orm> OrmList(this Import import)

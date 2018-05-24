@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -11,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace AntData.ORM.Data
 {
-	using Common;
-	using Expressions;
-	using Extensions;
+    using Common;
+    using Expressions;
+    using Extensions;
 
-	public class CommandInfo
+    public class CommandInfo
 	{
 		public DataConnection  DataConnection;
 		public string          CommandText;
@@ -377,6 +376,7 @@ namespace AntData.ORM.Data
                 dataConnection.DataProvider.SetParameter(p.DbDataParameter, parameter.Name, dataType, value);
 
 			    p.ParameterName = parameter.Name;
+			    p.Value = value;
                 result.Add(parameter.Name.StartsWith(dataConnection.DataProvider.ParameterSymbol) ? parameter.Name : dataConnection.DataProvider.ParameterSymbol + parameter.Name, p);
 				//dataConnection.Command.Parameters.Add(p);
 			}
