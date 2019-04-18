@@ -20,6 +20,7 @@ namespace AntData.ORM.Mapping
 		public string Comment                   { get; set; }
 		public string Schema                    { get; set; }
 		public string Database                  { get; set; }
+		public string Db                  { get; set; }
 		public bool   IsColumnAttributeRequired { get; set; }
 		public bool   IsView                    { get; set; }
 	}
