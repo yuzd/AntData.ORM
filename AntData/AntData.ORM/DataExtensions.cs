@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using System.Runtime.InteropServices.ComTypes;
+using AntData.ORM.Reflection;
 using JetBrains.Annotations;
 
 namespace AntData.ORM
@@ -199,7 +200,16 @@ namespace AntData.ORM
 			string tableName = null, string databaseName = null, string schemaName = null)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return Query<T>.Insert(dataContextInfo, obj, tableName, databaseName, schemaName);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("Insert");
+                return (int)methodInfo.FastInvoke(null, dataContextInfo, obj, tableName, databaseName, schemaName);
+            }
+            return Query<T>.Insert(dataContextInfo, obj, tableName, databaseName, schemaName);
 		}
 
 	    /// <summary>
@@ -216,7 +226,16 @@ namespace AntData.ORM
 	    public static int Insert<T>(this IDataContext dataContext, T obj,
 			string tableName = null, string databaseName = null, string schemaName = null, bool ignoreNullInsert = false) 
         {
-			return Query<T>.Insert(DataContextInfo.Create(dataContext), obj, tableName, databaseName, schemaName, ignoreNullInsert);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("Insert");
+                return (int)methodInfo.FastInvoke(null, DataContextInfo.Create(dataContext), obj, tableName, databaseName, schemaName, ignoreNullInsert);
+            }
+            return Query<T>.Insert(DataContextInfo.Create(dataContext), obj, tableName, databaseName, schemaName, ignoreNullInsert);
 		}
 
 		#endregion
@@ -226,12 +245,30 @@ namespace AntData.ORM
 		public static int InsertOrReplace<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return Query<T>.InsertOrReplace(dataContextInfo, obj);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("InsertOrReplace");
+                return (int)methodInfo.FastInvoke(null, dataContextInfo, obj);
+            }
+            return Query<T>.InsertOrReplace(dataContextInfo, obj);
 		}
 
 		public static int InsertOrReplace<T>(this IDataContext dataContext, T obj)
 		{
-			return Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("InsertOrReplace");
+                return (int)methodInfo.FastInvoke(null, DataContextInfo.Create(dataContext), obj);
+            }
+            return Query<T>.InsertOrReplace(DataContextInfo.Create(dataContext), obj);
 		}
 
 		#endregion
@@ -241,16 +278,44 @@ namespace AntData.ORM
 		public static object InsertWithIdentity<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return Query<T>.InsertWithIdentity(dataContextInfo, obj);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("InsertWithIdentity");
+                return methodInfo.FastInvoke(null, dataContextInfo, obj);
+            }
+            return Query<T>.InsertWithIdentity(dataContextInfo, obj);
 		}
 
 		public static object InsertWithIdentity<T>(this IDataContext dataContext, T obj, bool ignoreNullInsert = false)
 		{
-			return Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("InsertWithIdentity");
+                return methodInfo.FastInvoke(null, DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
+            }
+            return Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
 		}
 
         public static F InsertWithIdentity<T,F>(this IDataContext dataContext, T obj, bool ignoreNullInsert = false)
         {
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("InsertWithIdentity");
+                var r = methodInfo.FastInvoke(null, DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
+                return (F)Convert.ChangeType(r, typeof(F));
+            }
             var result = Query<T>.InsertWithIdentity(DataContextInfo.Create(dataContext), obj, ignoreNullInsert);
             return (F)Convert.ChangeType(result, typeof(F));
         }
@@ -261,12 +326,30 @@ namespace AntData.ORM
         public static int Update<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return Query<T>.Update(dataContextInfo, obj);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("Update");
+                return (int)methodInfo.FastInvoke(null, dataContextInfo, obj);
+            }
+            return Query<T>.Update(dataContextInfo, obj);
 		}
 
 		public static int Update<T>(this IDataContext dataContext, T obj, bool ignoreNullUpdate = false)
 		{
-			return Query<T>.Update(DataContextInfo.Create(dataContext), obj, ignoreNullUpdate);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("Update");
+                return (int)methodInfo.FastInvoke(null, DataContextInfo.Create(dataContext), obj, ignoreNullUpdate);
+            }
+            return Query<T>.Update(DataContextInfo.Create(dataContext), obj, ignoreNullUpdate);
 		}
 
 		#endregion
@@ -276,13 +359,31 @@ namespace AntData.ORM
 		public static int Delete<T>([NotNull] this IDataContextInfo dataContextInfo, T obj)
 		{
 			if (dataContextInfo == null) throw new ArgumentNullException("dataContextInfo");
-			return Query<T>.Delete(dataContextInfo, obj);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("Delete");
+                return (int)methodInfo.FastInvoke(null, dataContextInfo, obj);
+            }
+            return Query<T>.Delete(dataContextInfo, obj);
 		}
 
 		public static int Delete<T>([NotNull] this IDataContext dataContext, T obj)
 		{
 			if (dataContext == null) throw new ArgumentNullException("dataContext");
-			return Query<T>.Delete(DataContextInfo.Create(dataContext), obj);
+            var type = obj.GetType();
+            if (typeof(T) != type)
+            {
+                Type d1 = typeof(Query<>);
+                Type[] typeArgs = { type };
+                Type constructed = d1.MakeGenericType(typeArgs);
+                var methodInfo = constructed.GetMethod("Delete");
+                return (int)methodInfo.FastInvoke(null, DataContextInfo.Create(dataContext), obj);
+            }
+            return Query<T>.Delete(DataContextInfo.Create(dataContext), obj);
 		}
 		#endregion
 

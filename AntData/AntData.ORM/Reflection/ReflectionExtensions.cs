@@ -11,7 +11,7 @@ namespace AntData.ORM.Reflection
 	/// <summary>
 	/// 反射优化相关扩展方法
 	/// </summary>
-	public static class ReflectionExtensions
+	internal static class ReflectionExtensions
 	{
 		/// <summary>
 		/// 返回MemberInfo对象指定类型的Attribute
