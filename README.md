@@ -26,7 +26,7 @@ Mysql：Install-Package AntData.Core.Mysql
 
 Postgre：Install-Package AntData.Core.Postgre
 
-QQ Group ：433685124
+QQ Group ：774590645
 
 [如何配置tt模板自动生成entity以及常见的问题(文章末尾会有最新的tt文件包)](http://www.cnblogs.com/yudongdong/p/6421312.html)
 
