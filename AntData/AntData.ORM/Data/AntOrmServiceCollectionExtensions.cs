@@ -20,6 +20,7 @@ using AntData.ORM.DataProvider.Oracle;
 using AntData.ORM.DataProvider.PostgreSQL;
 using AntData.ORM.DataProvider.SqlServer;
 using AntData.ORM.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -183,6 +184,18 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class AntOrmServiceCollectionExtensions
     {
+        /// <summary>
+        /// 使用配置
+        /// </summary>
+        /// <param name="app"></param>
+        /// <returns></returns>
+        public static IApplicationBuilder UseAntData(this IApplicationBuilder app)
+        {
+            var Configuration = app.ApplicationServices.GetService<IConfiguration>();
+            AntData.ORM.Common.Configuration.UseDBConfig(Configuration);
+            return app;
+        }
+
         /// <summary>
         /// 添加Msyql entity到DI
         /// </summary>

@@ -40,9 +40,7 @@ namespace netcore2web
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             #region AntORM
-
-            AntData.ORM.Common.Configuration.UseDBConfig(Configuration);
-
+            app.UseAntData();
             #endregion
 
             if (env.IsDevelopment())

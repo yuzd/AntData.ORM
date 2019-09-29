@@ -40,7 +40,7 @@ namespace AntData.ORM.Common
             foreach (IConfigurationSection child in children)
             {
                 var bind = new DatabaseSettings();
-                ConfigurationBinder.Bind(child, bind);
+                child.Bind(bind);
                 dbSettings.Add(bind);
 
                 if (bind.ConnectionItemList == null || bind.ConnectionItemList.Count < 1)
@@ -56,7 +56,7 @@ namespace AntData.ORM.Common
         {
             public static bool PreloadGroups;
             public static bool IgnoreEmptyUpdate;
-            public static bool AllowMultipleQuery;
+            public static bool AllowMultipleQuery = true;
             public static bool GenerateExpressionTest;
             public static bool OptimizeJoins = true;
             /// <summary>
