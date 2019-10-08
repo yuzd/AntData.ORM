@@ -34,6 +34,8 @@ QQ Group ：774590645
 [VS插件生成Db model Class](https://marketplace.visualstudio.com/items?itemName=nainaigu.AntDataVS)
 
 
+[跨平台mac机器上如何使用代码生成](https://www.cnblogs.com/yudongdong/p/11634134.html)
+
 # DEMO
 
 [Dotnetcore Demo](http://www.cnblogs.com/yudongdong/p/6427432.html)
@@ -542,6 +544,11 @@ var count= DB.Execute("update person where name='yuzd'");//count是执行sql受�
   ]
 }
 
-然后在Startup.cs里面的 Configure方法里面
-AntData.ORM.Common.Configuration.UseDBConfig(Configuration);
+然后在Startup.cs里面的 Configure方法里面 参考 https://github.com/yuzd/AntData.ORM/blob/netcore2/AntData/Test/netcore2web/Startup.cs#L43
+  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            #region AntORM
+            app.UseAntData();
+            #endregion
+        }
 ```
