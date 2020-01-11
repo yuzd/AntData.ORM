@@ -11,9 +11,9 @@ namespace AntData.ORM
 
 	}
 
-    public interface IAntTable<out T,out C> : IExpressionQuery<T> where C:new()
+    public interface IAntTable<out T,out C> : ITable<T> where C:new()
     {
-        string Name { get; }
+        string Table { get; }
 
         C Column { get; }
     }

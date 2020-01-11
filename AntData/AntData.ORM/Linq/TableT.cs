@@ -81,7 +81,7 @@ namespace AntData.ORM.Linq
         #endregion
 
   
-        public string Name { get; } = TableNames<T>.Name;
+        public string Table { get; } = TableNames<T>.Name;
 
         public B Column { get; } = ColumnNames<B>.Instance;
     }
