@@ -25,6 +25,12 @@ namespace AntData.ORM.Data
 			return new Table<T>(this);
 		}
 
+        public IAntTable<T,T2> GetTable<T,T2>()
+            where T2 : new()
+        {
+            return new AntDataTable<T,T2>(this);
+        }
+
 		public ITable<T> GetTable<T>(bool dispose)
 			where T : class
 		{
