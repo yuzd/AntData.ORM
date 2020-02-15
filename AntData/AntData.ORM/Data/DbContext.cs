@@ -201,7 +201,12 @@ namespace AntData.ORM.Data
             }
         }
 
-        public void UseTransaction(System.Func<DbContext<T>,bool> func)
+        /// <summary>
+        /// Transaction
+        /// </summary>
+        /// <param name="func">委托</param>
+        /// <returns>True代表Commit成功 false代表没有Commit</returns>
+        public bool UseTransaction(System.Func<DbContext<T>,bool> func)
         {
             using (var scope = ExecuteTransaction())
             {
@@ -210,6 +215,11 @@ namespace AntData.ORM.Data
                     if (func(this))
                     {
                         scope.Commit();
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
                     }
                 }
                 catch (Exception)
@@ -224,7 +234,13 @@ namespace AntData.ORM.Data
             }
         }
 
-        public void UseTransaction(System.Func<DbContext<T>,bool> func, System.Data.IsolationLevel isolationLevel)
+        /// <summary>
+        /// Transaction
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="isolationLevel"></param>
+        /// <returns>True代表Commit成功 false代表没有Commit</returns>
+        public bool UseTransaction(System.Func<DbContext<T>,bool> func, System.Data.IsolationLevel isolationLevel)
         {
             using (var scope = ExecuteTransaction(isolationLevel))
             {
@@ -233,7 +249,13 @@ namespace AntData.ORM.Data
                     if (func(this))
                     {
                         scope.Commit();
+                        return true;
                     }
+                    else
+                    {
+                        return false;
+                    }
+                 
                 }
                 catch (Exception)
                 {
