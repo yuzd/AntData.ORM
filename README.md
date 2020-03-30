@@ -26,15 +26,15 @@ Mysql：Install-Package AntData.Core.Mysql
 
 Postgre：Install-Package AntData.Core.Postgre
 
-QQ Group ：774590645
-
-[如何配置tt模板自动生成entity以及常见的问题(文章末尾会有最新的tt文件包)](http://www.cnblogs.com/yudongdong/p/6421312.html)
-
 
 [VS插件生成Db model Class](https://marketplace.visualstudio.com/items?itemName=nainaigu.AntDataVS)
 
 
-[跨平台mac机器上如何使用代码生成](https://www.cnblogs.com/yudongdong/p/11634134.html)
+[跨平台mac机器上如何使用代码生成小工具](https://www.cnblogs.com/yudongdong/p/11634134.html)
+
+
+[用Rider作为IDE可以使用rider plugin](https://plugins.jetbrains.com/plugin/14033)
+
 
 # DEMO
 
