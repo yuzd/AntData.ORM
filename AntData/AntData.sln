@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.902
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.ORM", "AntData.ORM\AntData.ORM.csproj", "{8156E731-ED0A-404E-9A72-FCA6988270DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.ORM", "AntData.ORM\AntData.ORM.csproj", "{8156E731-ED0A-404E-9A72-FCA6988270DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntData.ORM.Mysql", "AntData.ORM.Mysql\AntData.ORM.Mysql.csproj", "{793DCFF9-618B-4106-9F2E-7280D8DA8CCC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntData.ORM.Mysql", "AntData.ORM.Mysql\AntData.ORM.Mysql.csproj", "{793DCFF9-618B-4106-9F2E-7280D8DA8CCC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntDataUnitTest", "AntDataUnitTest\AntDataUnitTest.csproj", "{A0141544-D86B-456D-9300-1C04465FC994}"
 EndProject
@@ -82,5 +82,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B54209F6-29E1-4EDD-8822-085DB8041234}
 	EndGlobalSection
 EndGlobal

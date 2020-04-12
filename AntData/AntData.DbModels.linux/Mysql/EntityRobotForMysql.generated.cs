@@ -30,11 +30,11 @@ namespace DbModels.Mysql
 		/// <summary>
 		/// 人员
 		/// </summary>
-		public IQueryable<Person>        People        { get { return this.Get<Person>(); } }
+		public IAntTable<Person, Person.PersonColumn>        People        { get { return this.Get<Person,Person.PersonColumn>(); } }
 		/// <summary>
 		/// 学校
 		/// </summary>
-		public IQueryable<School>        Schools       { get { return this.Get<School>(); } }
+		public IAntTable<School,School.SchoolColumn>        Schools       { get { return this.Get<School,School.SchoolColumn>(); } }
 		public IQueryable<SchoolName>    SchoolName    { get { return this.Get<SchoolName>(); } }
 		public IQueryable<school_name>   school_name   { get { return this.Get<school_name>(); } }
 
@@ -51,6 +51,11 @@ namespace DbModels.Mysql
 			return this.con.GetTable<T>();
 		}
 
+        public IAntTable<T,T2> Get<T,T2>()
+            where T2:new()
+        {
+            return this.con.GetTable<T,T2>();
+        }
 		public TestormEntitys(DataConnection con)
 		{
 			this.con = con;
@@ -226,6 +231,16 @@ namespace DbModels.Mysql
 		public School School { get; set; }
 
 		#endregion
+
+		public class PersonColumn
+        {
+            public string Id = "Id";
+            public string Name = "Name";
+            public string Age = "Age";
+            public string SchoolId = "SchoolId";
+            public string DataChangeLastTime = "DataChange_LastTime";
+
+        }
 	}
 
 	/// <summary>
@@ -281,6 +296,15 @@ namespace DbModels.Mysql
 		public IEnumerable<Person> PersonList { get; set; }
 
 		#endregion
+
+        public class SchoolColumn
+		{
+            public string Id = "Id";
+            public string Name = "Name";
+            public string Address = "Address";
+            public string DataChangeLastTime = "DataChange_LastTime";
+
+        }
 	}
 
 	[Table("school__name")]

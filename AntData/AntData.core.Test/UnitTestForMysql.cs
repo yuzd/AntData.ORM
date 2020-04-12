@@ -857,7 +857,10 @@ namespace AntDataUnitTest
 
 		[TestMethod]
 		public void TestMethod7_03()
-		{
+        {
+
+
+
 
 			//假设Import 表的 Label 字段 与Orm表的Label 字段是一对一的关系 但是没有设置外键
 			//有两种方式在没有数据库配置的情况下代码来配置
@@ -911,8 +914,16 @@ namespace AntDataUnitTest
 	    }
 
     }
+    public class A
+    {
 
-    public static class AssociationExtension
+    }
+
+    public class AColumns
+    {
+        public string ColumnA = "a";
+    }
+	public static class AssociationExtension
 	{
 		[Association(ThisKey = "Label", OtherKey = "Label")]
 		public static IEnumerable<Orm> OrmList(this Import import)
