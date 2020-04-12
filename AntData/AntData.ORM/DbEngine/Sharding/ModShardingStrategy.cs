@@ -183,13 +183,13 @@ namespace AntData.DbEngine.Sharding
                     if (column.Contains(':'))
                     {
                         var tableColumnPair = column.Split(':');
-                        shardColumnAndTable[tableColumnPair[0].ToLower()] = tableColumnPair[1].ToLower();
-                        shardColumns.Add(tableColumnPair[1].ToLower());
+                        shardColumnAndTable[tableColumnPair[0]] = tableColumnPair[1];
+                        shardColumns.Add(tableColumnPair[1]);
                     }
                     else
                     {
                         //兼容最初版本的DAL.config配置
-                        shardColumns.Add(column.ToLower());
+                        shardColumns.Add(column);
                     }
                 }
             }
@@ -392,7 +392,6 @@ namespace AntData.DbEngine.Sharding
                 parameterName = item.ColumnName;
                 if (String.IsNullOrEmpty(parameterName)) continue;
 
-                parameterName = parameterName.ToLower();
                 dict.Add(Tuple.Create<string, StatementParameter>(parameterName, item));
             }
 
@@ -411,13 +410,13 @@ namespace AntData.DbEngine.Sharding
                     IComparable shardColumnValue = null;
                     if (itemKv.Item1.Equals(name))
                     {
-                        shardColumnValue = itemKv.Item2.Value as IComparable;
+                        shardColumnValue = (itemKv.Item2.Value ?? itemKv.Item2.DbDataParameter?.Value) as IComparable;
                         itemKv.Item2.IsShardingColumn = true;
                         itemKv.Item2.ShardingValue = ComputeShardId(shardColumnValue);
                     }
-                    else if (itemKv.Item1.Equals(item.ToLower()))
+                    else if (itemKv.Item1.Equals(item))
                     {
-                        shardColumnValue = itemKv.Item2.Value as IComparable;
+                        shardColumnValue = (itemKv.Item2.Value??itemKv.Item2.DbDataParameter?.Value) as IComparable;
                         itemKv.Item2.IsShardingColumn = true;
                         itemKv.Item2.ShardingValue = ComputeShardId(shardColumnValue);
                     }

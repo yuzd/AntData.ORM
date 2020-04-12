@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>AntData.Orm mysql For Dotnet Core</Description>
     <VersionPrefix>1.2.9</VersionPrefix>
-    <Authors>nainaigu</Authors>
+    <Authors>yuzd</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
     <PackageId>AntData.Core.Mysql</PackageId>
@@ -14,7 +14,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.4.4</Version>
+    <Version>1.4.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

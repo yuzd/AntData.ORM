@@ -11,7 +11,7 @@ using TestSharding.Mysql1;
 namespace TestSharding
 {
     [TestClass]
-    public class UnitTest1
+    public class UnitTestForSharingDb
     {
         private static MysqlDbContext<Entitys> DB
         {
@@ -38,8 +38,7 @@ namespace TestSharding
         {
             try
             {
-                string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
-                    (current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
+                string sql = customerTraceInfo.SqlText;
                 Debug.Write(sql + Environment.NewLine);
                 foreach (var detail in customerTraceInfo.RunTimeList)
                 {
@@ -226,7 +225,6 @@ namespace TestSharding
         [TestMethod]
         public void TestMethod7_03()
         {
-
             var odIsExist = DB.Tables.Orders.Delete();
             Assert.AreEqual(odIsExist, 3);
 

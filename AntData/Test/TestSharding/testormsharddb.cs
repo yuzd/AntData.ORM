@@ -39,7 +39,7 @@ namespace TestSharding.Mysql1
     /// <summary>
     /// 订单表
     /// </summary>
-    [Table(Comment = "订单表", Name = "orders")]
+    [Table(Comment = "订单表", Name = "order")]
     public partial class Order : BaseEntity
     {
         #region Column

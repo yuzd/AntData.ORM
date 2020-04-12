@@ -33,7 +33,7 @@ namespace TestSharding.Mysql2
         }
     }
 
-    [Table("orders_{0}")]
+    [Table("order_{0}")]
     public partial class Orders : BaseEntity
     {
         #region Column

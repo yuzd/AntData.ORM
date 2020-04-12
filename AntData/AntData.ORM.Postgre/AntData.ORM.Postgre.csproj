@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>AntData.Orm postgre For Dotnet Core</Description>
-    <Authors>nainaigu</Authors>
+    <Authors>yuzd</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
     <PackageTags>linq;ORM;postgre</PackageTags>
@@ -12,10 +12,10 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.4.4</Version>
+    <Version>1.4.5</Version>
     <PackageId>AntData.Core.Postgre</PackageId>
-    <AssemblyVersion>1.4.4.0</AssemblyVersion>
-    <FileVersion>1.4.4.0</FileVersion>
+    <AssemblyVersion>1.4.5.0</AssemblyVersion>
+    <FileVersion>1.4.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

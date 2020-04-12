@@ -96,46 +96,62 @@ namespace AntData.ORM.Dao.sql
                 throw new DalException("Please specify sql.");
 
             var result = new List<Statement>();
-            var tupleList = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
-            if (tupleList.Count < 1)
+            if (operationType != null && operationType == OperationType.ShardingTable)
             {
-                //非sharding的场合
-                Statement statement = GetStatement(logicDbName, StatementType.Sql,
-                    operationType ?? OperationType.Default, sqlType, hints, null);
-                statement.StatementText = GetSql(sql, null);
-                statement.Parameters = parameters;
-#if !NETSTANDARD
-                CurrentStackCustomizedLog(statement);
-#endif
+                //sharding的场合只是获取parameter
+                Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, string.Empty);
+                result.Add(statement);
+            }
+            else if (operationType != null && operationType == OperationType.ShardingDB && shardingStrategy.AllShards.Any())
+            {
+                //sharding的场合只是获取parameter
+                Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, shardingStrategy.AllShards.First());
                 result.Add(statement);
             }
             else
             {
-                var bulkCopy = false;
-                if (hints != null && hints.Contains(DALExtStatementConstant.BULK_COPY))//查看是否是批量插入的case
+                var tupleList = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
+                if (tupleList.Count < 1)
                 {
-                    bulkCopy = Convert.ToBoolean(hints[DALExtStatementConstant.BULK_COPY]);
-                }
-
-                if (bulkCopy)
-                {
-                    
-                    result.AddRange(BulkCopyCase(logicDbName, shardingStrategy, sql, parameters, hints,  tupleList, sqlType, operationType));
+                    //非sharding的场合
+                    Statement statement = GetStatement(logicDbName, StatementType.Sql,
+                        operationType ?? OperationType.Default, sqlType, hints, null);
+                    statement.StatementText = GetSql(sql, null);
+                    statement.Parameters = parameters;
+#if !NETSTANDARD
+                CurrentStackCustomizedLog(statement);
+#endif
+                    result.Add(statement);
                 }
                 else
                 {
-                    foreach (var tuple in tupleList)
+                    var bulkCopy = false;
+                    if (hints != null && hints.Contains(DALExtStatementConstant.BULK_COPY))//查看是否是批量插入的case
                     {
-                        Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, tuple.Item1);
-                        statement.StatementText = GetSql(sql, tuple.Item2);
-                        statement.Parameters = parameters;
+                        bulkCopy = Convert.ToBoolean(hints[DALExtStatementConstant.BULK_COPY]);
+                    }
+
+                    if (bulkCopy)
+                    {
+
+                        result.AddRange(BulkCopyCase(logicDbName, shardingStrategy, sql, parameters, hints, tupleList, sqlType, operationType));
+                    }
+                    else
+                    {
+                        foreach (var tuple in tupleList)
+                        {
+                            Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, tuple.Item1);
+                            statement.StatementText = GetSql(sql, tuple.Item2);
+                            statement.Parameters = parameters;
 #if !NETSTANDARD
                         CurrentStackCustomizedLog(statement);
 #endif
-                        result.Add(statement);
+                            result.Add(statement);
+                        }
                     }
                 }
             }
+     
 
             return result;
         }
@@ -173,7 +189,7 @@ namespace AntData.ORM.Dao.sql
                 {
                     dicValues.Add(shardingStrategy.ShardByDB?tuple.Item1: tuple.Item2, Tuple.Create(new List<string>(),new StatementParameterCollection()));
                 }
-                var defaultSharding = dicValues.Keys.First();
+                var defaultSharding = shardingStrategy.AllShards.First();
                 //分库的情况
                 var arr = sql.Split(new string[] { "VALUES" }, StringSplitOptions.None);
                 if (arr.Length != 2)

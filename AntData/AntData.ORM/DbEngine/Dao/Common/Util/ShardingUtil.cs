@@ -372,8 +372,8 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                     }
                 }
 
-                //对于不带条件的查询 都默认查询所有的
-                if ((shards == null || shards.Count == 0) && sqlStatementType.Equals(SqlStatementType.SELECT))
+                //对于不带条件的查询或者删除 都默认查询所有的
+                if ((shards == null || shards.Count == 0) && (sqlStatementType.Equals(SqlStatementType.SELECT) || sqlStatementType.Equals(SqlStatementType.DELETE)))
                 {
                     shards = shardingStrategy.AllShards;
                 }

@@ -49,13 +49,12 @@ namespace AntDataUnitTest
 		{
 			try
 			{
-				string sql = customerTraceInfo.CustomerParams.Aggregate(customerTraceInfo.SqlText,
-					(current, item) => current.Replace(item.Key, item.Value.Value.ToString()));
-				Trace.Write(sql + Environment.NewLine);
+				string sql = customerTraceInfo.SqlText;
+				Debug.Write(sql + Environment.NewLine);
 			}
 			catch (Exception)
 			{
-				Trace.Write(customerTraceInfo.SqlText + Environment.NewLine);
+                Debug.Write(customerTraceInfo.SqlText + Environment.NewLine);
 				//ignore
 			}
 		}
