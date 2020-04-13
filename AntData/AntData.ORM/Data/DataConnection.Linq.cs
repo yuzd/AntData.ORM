@@ -206,6 +206,7 @@ namespace AntData.ORM.Data
 			DataProvider.SetParameter(p.DbDataParameter, name, dataType, parm.Value);
 		    p.TableName = parm.TableName;
 		    p.ColumnName = parm.CoumnName;
+            p.Value = p.DbDataParameter.Value;
 		    return p;
 		}
 

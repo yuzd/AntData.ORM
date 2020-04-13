@@ -834,76 +834,76 @@ namespace AntDataUnitTest
 
 		}
 
-		[TestMethod]
-		public void TestMethod7_02()
-		{
-			//DB.Tables.Orms.Delete();
-			//DB.Tables.Imports.Delete();
+		//[TestMethod]
+		//public void TestMethod7_02()
+		//{
+		//	//DB.Tables.Orms.Delete();
+		//	//DB.Tables.Imports.Delete();
 
-			//var datas1 = new List<Import>(new[] { new Import { Id = 1, Label = "LINQ2DB" }, new Import { Id = 2, Label = null }, new Import { Id = 3, Label = null } });
-			//var datas2 = new List<Orm>(new[] { new Orm { Id = 1, Label = "BLTOOLKIT" }, new Orm { Id = 2, Label = "ENTITY" }, new Orm { Id = 3, Label = null }, new Orm { Id = 4, Label = "LINQ2DB" }, new Orm { Id = 5, Label = null }, });
+		//	//var datas1 = new List<Import>(new[] { new Import { Id = 1, Label = "LINQ2DB" }, new Import { Id = 2, Label = null }, new Import { Id = 3, Label = null } });
+		//	//var datas2 = new List<Orm>(new[] { new Orm { Id = 1, Label = "BLTOOLKIT" }, new Orm { Id = 2, Label = "ENTITY" }, new Orm { Id = 3, Label = null }, new Orm { Id = 4, Label = "LINQ2DB" }, new Orm { Id = 5, Label = null }, });
 
-			//DB.BulkCopy(datas1);
-			//DB.BulkCopy(datas2);
+		//	//DB.BulkCopy(datas1);
+		//	//DB.BulkCopy(datas2);
 
-			var query = from a in DB.Tables.Imports
-				join b in DB.Tables.Orms on a.Label equals b.Label
-				select a;
-			var res = query.ToList();
-
-
-		}
-
-		[TestMethod]
-		public void TestMethod7_03()
-        {
+		//	var query = from a in DB.Tables.Imports
+		//		join b in DB.Tables.Orms on a.Label equals b.Label
+		//		select a;
+		//	var res = query.ToList();
 
 
+		//}
+
+		//[TestMethod]
+		//public void TestMethod7_03()
+  //      {
 
 
-			//假设Import 表的 Label 字段 与Orm表的Label 字段是一对一的关系 但是没有设置外键
-			//有两种方式在没有数据库配置的情况下代码来配置
-			//第一种是在tt文件里面配置
-			//第二种就是用扩展方法来操作
 
-			//一对多
-			//var aa = DB.Tables.Imports.SelectMany(_ => _.OrmList()).ToList();
-			//DB.Tables.Imports.Where(r=>r.Id.Equals(1)).SelectMany(_ => _.OrmList()).ToList();
-			//SELECT
-			//	`t1`.`Id`,
-			//	`t1`.`Label` as `Label1`
-			//FROM
-			//	`import` `t2`
-			//INNER JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
 
-			//一对多
-			//var bb = DB.Tables.Orms.SelectMany(_ => _.ImportList()).ToList();
+		//	//假设Import 表的 Label 字段 与Orm表的Label 字段是一对一的关系 但是没有设置外键
+		//	//有两种方式在没有数据库配置的情况下代码来配置
+		//	//第一种是在tt文件里面配置
+		//	//第二种就是用扩展方法来操作
 
-			//SELECT
-			//    `t1`.`Id`,
-			//    `t1`.`Label` as `Label1`
-			//FROM
-			//    `orm` `t2`
-			//INNER JOIN `import` `t1` ON `t2`.`Label` = `t1`.`Label`
+		//	//一对多
+		//	//var aa = DB.Tables.Imports.SelectMany(_ => _.OrmList()).ToList();
+		//	//DB.Tables.Imports.Where(r=>r.Id.Equals(1)).SelectMany(_ => _.OrmList()).ToList();
+		//	//SELECT
+		//	//	`t1`.`Id`,
+		//	//	`t1`.`Label` as `Label1`
+		//	//FROM
+		//	//	`import` `t2`
+		//	//INNER JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
 
-			//一对一
-			//var aa1 = DB.Tables.Imports.Select(r => new {I = r, O = r.Orm()}).FirstOrDefault();
+		//	//一对多
+		//	//var bb = DB.Tables.Orms.SelectMany(_ => _.ImportList()).ToList();
 
-			//SELECT
-			//    `t2`.`Id`,
-			//    `t2`.`Label` as `Label1`,
-			//    `t1`.`Id` as `Id1`,
-			//    `t1`.`Label` as `Label2`
-			//FROM
-			//    `import` `t2`
-			//LEFT JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
-			//LIMIT 1
-			//var aa3 = DB.Tables.Orms.Select(r => new { I = r, O = r.Import() }).FirstOrDefault();
+		//	//SELECT
+		//	//    `t1`.`Id`,
+		//	//    `t1`.`Label` as `Label1`
+		//	//FROM
+		//	//    `orm` `t2`
+		//	//INNER JOIN `import` `t1` ON `t2`.`Label` = `t1`.`Label`
 
-			//一对多 有问题
-			var aa2 = DB.Tables.Imports.Select(r => new { I = r, O = r.OrmList() }).FirstOrDefault();
+		//	//一对一
+		//	//var aa1 = DB.Tables.Imports.Select(r => new {I = r, O = r.Orm()}).FirstOrDefault();
 
-		}
+		//	//SELECT
+		//	//    `t2`.`Id`,
+		//	//    `t2`.`Label` as `Label1`,
+		//	//    `t1`.`Id` as `Id1`,
+		//	//    `t1`.`Label` as `Label2`
+		//	//FROM
+		//	//    `import` `t2`
+		//	//LEFT JOIN `orm` `t1` ON `t2`.`Label` = `t1`.`Label`
+		//	//LIMIT 1
+		//	//var aa3 = DB.Tables.Orms.Select(r => new { I = r, O = r.Import() }).FirstOrDefault();
+
+		//	//一对多 有问题
+		//	var aa2 = DB.Tables.Imports.Select(r => new { I = r, O = r.OrmList() }).FirstOrDefault();
+
+		//}
 
 	    [TestMethod]
 	    public void TestMethod7_04()
