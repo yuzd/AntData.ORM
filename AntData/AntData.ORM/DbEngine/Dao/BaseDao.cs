@@ -87,7 +87,7 @@ namespace AntData.ORM.Dao
         /// <returns></returns>
         public IDbDataParameter CreateDbDataParameter(IDictionary hints = null)
         {
-            Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>CreateDbDataParameter", null, null, ShardingStrategy!=null && ShardingStrategy.ShardByTable?OperationType.ShardingTable: ShardingStrategy != null && ShardingStrategy.ShardByDB ?OperationType.ShardingTable:OperationType.Write).Single();
+            Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>CreateDbDataParameter", null, null, ShardingStrategy!=null && ShardingStrategy.ShardByTable?OperationType.ShardingTable: ShardingStrategy != null && ShardingStrategy.ShardByDB ?OperationType.ShardingDB:OperationType.Write).Single();
             return DatabaseBridge.Instance.CreateDbDataParameter(statement);
         }
         #region SelectDataReader VisitDataReader

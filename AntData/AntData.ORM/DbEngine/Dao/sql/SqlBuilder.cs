@@ -187,7 +187,9 @@ namespace AntData.ORM.Dao.sql
                 var dicValues = new Dictionary<string,Tuple<List<string>, StatementParameterCollection>>();
                 foreach (var tuple in tupleList)
                 {
-                    dicValues.Add(shardingStrategy.ShardByDB?tuple.Item1: tuple.Item2, Tuple.Create(new List<string>(),new StatementParameterCollection()));
+                    var key = shardingStrategy.ShardByDB ? tuple.Item1 : tuple.Item2;
+                    if (dicValues.ContainsKey(key)) continue;
+                    dicValues.Add(key, Tuple.Create(new List<string>(),new StatementParameterCollection()));
                 }
                 var defaultSharding = shardingStrategy.AllShards.First();
                 //分库的情况
