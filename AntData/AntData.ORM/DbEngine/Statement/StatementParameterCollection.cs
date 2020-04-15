@@ -127,5 +127,35 @@ namespace AntData.ORM.DbEngine
         {
             return item.Name;
         }
+
+        public StatementParameterCollection CloneParamter()
+        {
+            var cloneResult = new StatementParameterCollection();
+            foreach (var item in this)
+            {
+                var copy = new StatementParameter
+                {
+                    DbType = item.DbType,
+                    ExtendTypeValue = item.ExtendTypeValue,
+                    ExtendType = item.ExtendType,
+                    Direction = item.Direction,
+                    IsNullable = item.IsNullable,
+                    Name = item.Name,
+                    TypeName = item.TypeName,
+                    Size = item.Size,
+                    Value = item.Value,
+                    IsSensitive = item.IsSensitive,
+                    IsShardingColumn = item.IsShardingColumn,
+                    ShardingValue = item.ShardingValue,
+                    TableName = item.TableName,
+                    ColumnName = item.ColumnName,
+                    DbDataParameter = item.DbDataParameter,
+                };
+
+                cloneResult.Add(copy);
+            }
+
+            return cloneResult;
+        }
     }
 }

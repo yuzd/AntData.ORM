@@ -459,9 +459,10 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                     OperationType = operationType ?? OperationType.Default,
                     Hints = hints,
                     ShardID = tuple.Item1,
+                    IsSharding = true,
                     TableName = "",
                     SqlOperationType = SqlStatementType.SELECT,
-                    Parameters = parameters
+                    Parameters =  parameters
                 };
 
                 statement.StatementText = string.IsNullOrEmpty(tuple.Item2) ? sql : string.Format(sql, tuple.Item2);

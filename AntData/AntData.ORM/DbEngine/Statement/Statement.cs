@@ -35,7 +35,7 @@ namespace AntData.ORM.DbEngine
         /// <summary>
         /// 指令内容的Hash值（MD5 - base64)
         /// </summary>
-        public String SQLHash { get; set; }
+        //public String SQLHash { get; set; }
 
         private Int32 cacheKey = 0;
 
@@ -131,6 +131,7 @@ namespace AntData.ORM.DbEngine
         /// 分区标识
         /// </summary>
         public String ShardID { get; set; }
+        public Boolean IsSharding { get; set; }
 
         /// <summary>
         /// 指令操作类型
@@ -253,10 +254,10 @@ namespace AntData.ORM.DbEngine
 #if !NETSTANDARD
             InTransaction = Transaction.Current != null;
 #endif
-            SQLHash = CommonUtil.GetHashCodeOfSQL(StatementText);
+            //SQLHash = CommonUtil.GetHashCodeOfSQL(StatementText);
 
-            if (StatementType == StatementType.Sql)
-                StatementText = CommonUtil.GetTaggedAppIDSql(StatementText);
+            //if (StatementType == StatementType.Sql)
+            //    StatementText = CommonUtil.GetTaggedAppIDSql(StatementText);
         }
 
         /// <summary>

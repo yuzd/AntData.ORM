@@ -137,9 +137,9 @@ namespace AntData.ORM.DbEngine.DB
             var connection = TransactionConnectionManager.GetConnection(this);
             if (connection != null)
             {
-//#if DEBUG
-//                Debug.WriteLine(connection.ConnectionString);
-//#endif
+                //#if DEBUG
+                //                Debug.WriteLine(connection.ConnectionString);
+                //#endif
                 return new ConnectionWrapper(connection, false);
             }
 
@@ -165,12 +165,12 @@ namespace AntData.ORM.DbEngine.DB
         {
             DbCommand command = m_DatabaseProvider.CreateCommand();
             return command.CreateParameter();
-        } 
+        }
         #endregion
 
         #region Transactions
-        
-        
+
+
         public DataConnectionTransaction BeginTransaction(Statement statement)
         {
 
@@ -202,7 +202,7 @@ namespace AntData.ORM.DbEngine.DB
             return new DataConnectionTransaction(new ConnectionWrapper(connection, Transactions));
         }
 
-       
+
 
         #endregion
 
@@ -214,9 +214,9 @@ namespace AntData.ORM.DbEngine.DB
         {
             if (String.IsNullOrEmpty(ConnectionString))
                 throw new DalException(String.Format("ConnectionString:{0} can't be found!", AllInOneKey));
-//#if DEBUG
-//            Debug.WriteLine(ConnectionString);
-//#endif
+            //#if DEBUG
+            //            Debug.WriteLine(ConnectionString);
+            //#endif
             var connection = m_DatabaseProvider.CreateConnection();
             connection.ConnectionString = ConnectionString;
             return connection;
@@ -235,7 +235,8 @@ namespace AntData.ORM.DbEngine.DB
             command.CommandTimeout = statement.Timeout;
             foreach (var p in statement.Parameters)
             {
-                var parameter = p.DbDataParameter;// command.CreateParameter();
+
+                var parameter = statement.IsSharding ? null : p.DbDataParameter;// command.CreateParameter();
                 if (parameter == null)
                 {
                     parameter = command.CreateParameter();
@@ -312,7 +313,7 @@ namespace AntData.ORM.DbEngine.DB
                 adapter.Fill(dataSet);
             }
         }
-#endregion
+        #endregion
 
 
 
@@ -341,14 +342,14 @@ namespace AntData.ORM.DbEngine.DB
                         }
                         try
                         {
-                            LoadDataSet(statement, (DbCommand) command, dataSet);
+                            LoadDataSet(statement, (DbCommand)command, dataSet);
                         }
                         finally
                         {
                             UpdateStatementParamenters(statement, (DbCommand)command);
                             SetRuntimeDetail(statement, wrapper);
                         }
-                        
+
                     }
                 }
 
@@ -384,10 +385,10 @@ namespace AntData.ORM.DbEngine.DB
                 var trans_wrapper = GetConnectionInTransaction(statement);
                 using (IDbCommand command = PrepareCommand(statement))
                 {
-                    using (var wrapper = trans_wrapper ??  GetOpenConnection(true))
+                    using (var wrapper = trans_wrapper ?? GetOpenConnection(true))
                     {
                         command.Connection = wrapper.Connection;
-                        if (trans_wrapper!=null)
+                        if (trans_wrapper != null)
                         {
                             command.Transaction = trans_wrapper.GetTransaction();
                         }
@@ -401,7 +402,7 @@ namespace AntData.ORM.DbEngine.DB
                             UpdateStatementParamenters(statement, (DbCommand)command);
                             SetRuntimeDetail(statement, wrapper);
                         }
-                       
+
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -450,7 +451,7 @@ namespace AntData.ORM.DbEngine.DB
                                 ? CommandBehavior.Default
                                 : CommandBehavior.CloseConnection);
 #else
-                            reader = command.ExecuteReader(trans_wrapper!=null ?CommandBehavior.Default :CommandBehavior.CloseConnection);
+                            reader = command.ExecuteReader(trans_wrapper != null ? CommandBehavior.Default : CommandBehavior.CloseConnection);
 #endif
                         }
                         finally
@@ -458,11 +459,11 @@ namespace AntData.ORM.DbEngine.DB
                             UpdateStatementParamenters(statement, (DbCommand)command);
                             SetRuntimeDetail(statement, wrapper);
                         }
-                      
+
                     }
                 }
                 statement.ExecStatus = DALState.Success;
-                
+
                 return reader;
             }
             catch (Exception ex)
@@ -524,7 +525,7 @@ namespace AntData.ORM.DbEngine.DB
                             UpdateStatementParamenters(statement, (DbCommand)command);
                             SetRuntimeDetail(statement, wrapper);
                         }
-                      
+
                     }
                 }
                 statement.ExecStatus = DALState.Success;
@@ -554,9 +555,9 @@ namespace AntData.ORM.DbEngine.DB
             try
             {
                 IDataReader reader;
-                statement.SQLHash = CommonUtil.GetHashCodeOfSQL(statement.StatementText);
-                if (statement.StatementType == StatementType.Sql)
-                    statement.StatementText = CommonUtil.GetTaggedAppIDSql(statement.StatementText);
+                //statement.SQLHash = CommonUtil.GetHashCodeOfSQL(statement.StatementText);
+                //if (statement.StatementType == StatementType.Sql)
+                //    statement.StatementText = CommonUtil.GetTaggedAppIDSql(statement.StatementText);
                 watch.Start();
                 var trans_wrapper = GetConnectionInTransaction(statement);
                 using (IDbCommand command = PrepareCommand(statement))
@@ -577,7 +578,7 @@ namespace AntData.ORM.DbEngine.DB
                                     ? CommandBehavior.Default
                                     : CommandBehavior.CloseConnection);
 #else
-                        reader = command.ExecuteReader(trans_wrapper !=null ?CommandBehavior.Default : CommandBehavior.CloseConnection);
+                            reader = command.ExecuteReader(trans_wrapper != null ? CommandBehavior.Default : CommandBehavior.CloseConnection);
 #endif
 
                         }
@@ -586,7 +587,7 @@ namespace AntData.ORM.DbEngine.DB
                             UpdateStatementParamenters(statement, (DbCommand)command);
                             SetRuntimeDetail(statement, wrapper);
                         }
-                       
+
                     }
                 }
 
@@ -616,9 +617,9 @@ namespace AntData.ORM.DbEngine.DB
             watch.Start();
             try
             {
-                statement.SQLHash = CommonUtil.GetHashCodeOfSQL(statement.StatementText);
-                if (statement.StatementType == StatementType.Sql)
-                    statement.StatementText = CommonUtil.GetTaggedAppIDSql(statement.StatementText);
+                //statement.SQLHash = CommonUtil.GetHashCodeOfSQL(statement.StatementText);
+                //if (statement.StatementType == StatementType.Sql)
+                //    statement.StatementText = CommonUtil.GetTaggedAppIDSql(statement.StatementText);
 
                 watch.Start();
                 Object result;
@@ -641,7 +642,7 @@ namespace AntData.ORM.DbEngine.DB
                             UpdateStatementParamenters(statement, (DbCommand)command);
                             SetRuntimeDetail(statement, wrapper);
                         }
-                      
+
                     }
                 }
 
