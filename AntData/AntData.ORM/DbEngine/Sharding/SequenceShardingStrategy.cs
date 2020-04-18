@@ -91,10 +91,36 @@ namespace AntData.DbEngine.Sharding
                 }
             }
 
+            string tableSharding;
+            if (config.TryGetValue("tableSharding", out tableSharding))
+            {
+                var tempTableSharding = tableSharding.Split(',');
+                foreach (var s in tempTableSharding)
+                {
+                    var arr = s.Split(':');
+                    if (arr.Length != 2)
+                    {
+                        throw new ArgumentException("tableSharding is invaild");
+                    }
+
+                    var arr2 = arr[1].Split('-');
+                    if (arr2.Length != 2)
+                    {
+                        throw new ArgumentException("tableSharding is invaild");
+                    }
+                    shards.Add(new SequenceInnerClass() { Sharding = arr[0], SequenceStart = arr2[0], SequenceEnd = arr2[1]});
+                    allShards.Add(arr[0]);
+                }
+            }
+
+
             foreach (var db in ShardingConfig)
             {
-                shards.Add(new SequenceInnerClass() { Sharding = db.Sharding, SequenceStart = db.Start, SequenceEnd = db.End });
-                allShards.Add(db.Sharding);
+                if (!string.IsNullOrEmpty(db.Sharding))
+                {
+                    shards.Add(new SequenceInnerClass() { Sharding = db.Sharding, SequenceStart = db.Start, SequenceEnd = db.End });
+                    allShards.Add(db.Sharding);
+                }
             }
 
             String _shardByDb;
