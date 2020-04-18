@@ -23,15 +23,6 @@ namespace AntData.ORM.Enums
         /// 写操作，从master库执行
         /// </summary>
         [Description("写操作")]
-        Write = 2,
-
-    
-        [Description("ShardingDB")]
-        ShardingDB = 3
-        ,
-
-
-        [Description("ShardingTable")]
-        ShardingTable = 4
+        Write = 2
     }
 }

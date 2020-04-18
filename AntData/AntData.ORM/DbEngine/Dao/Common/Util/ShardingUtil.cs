@@ -35,26 +35,6 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
     {
 
         /// <summary>
-        /// 获取分表还是分库 或者分表分库都有
-        /// </summary>
-        /// <param name="shardingStrategy"></param>
-        /// <returns></returns>
-        public static ShardingType GetShardingType(IShardingStrategy shardingStrategy)
-        {
-            Boolean shardByDb = IsShardByDb(shardingStrategy);
-            Boolean shardByTable = IsShardByTable(shardingStrategy);
-
-            if (shardByDb && shardByTable)
-                return ShardingType.ShardByDBAndTable;
-            if (shardByDb)
-                return ShardingType.ShardByDB;
-            if (shardByTable)
-                return ShardingType.ShardByTable;
-
-            return ShardingType.ShardByDB;
-        }
-
-        /// <summary>
         /// 是否配置了ShardingStrategy
         /// </summary>
         /// <param name="shardingStrategy"></param>
@@ -123,59 +103,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return shardingStrategy.ComputeShardId(shardColumnValue);
         }
 
-        /// <summary>
-        /// 获取分片信息
-        /// </summary>
-        /// <param name="logicDbName"></param>
-        /// <param name="shardingStrategy"></param>
-        /// <param name="hints"></param>
-        /// <returns></returns>
-        public static List<Tuple<String, String>> GetShardInfo(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
-        {
-            List<String> shardId = null;
-            List<String> tableId = null;
-            var result = new List<Tuple<string, string>>();
-            Boolean shardEnabled = IsShardEnabled(shardingStrategy);
-            if (!shardEnabled)
-                return result;
-
-            shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);//是否有分库
-            tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);//分表
-
-            if (shardId.Count < 1 && tableId.Count < 1)
-                throw new DalException("Please provide shard information.");
-
-            if (shardId.Count > 0 && tableId.Count == 0)
-            {
-                foreach (var d in shardId)
-                {
-                    result.Add(Tuple.Create<String, String>(d, null));
-
-                }
-            }
-            else if (shardId.Count == 0 && tableId.Count > 0)
-            {
-                foreach (var d in tableId)
-                {
-                    result.Add(Tuple.Create<String, String>(null, d));
-                }
-
-            }
-            else
-            {
-                foreach (var d in shardId)
-                {
-                    foreach (var t in tableId)
-                    {
-                        result.Add(Tuple.Create<String, String>(d, t));
-                    }
-
-                }
-            }
-
-            return result;
-        }
-
+     
         private static List<String> GetShardId(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints)
         {
             List<String> shardIdList = new List<string>();
@@ -229,248 +157,355 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             return tableIdList;
         }
 
-        #region Shuffled Items
 
-        //private static IDictionary<String, IList<T>> ShuffledByDb<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
-        //    IList<T> list, IDictionary hints)
-        //{
-        //    if (String.IsNullOrEmpty(logicDbName))
-        //        return null;
-        //    if (list == null || list.Count == 0)
-        //        return null;
-        //    var dict = new Dictionary<String, IList<T>>();
-
-        //    foreach (var item in list)
-        //    {
-        //        String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
-        //        if (String.IsNullOrEmpty(shardId))
-        //            continue;
-
-        //        if (!dict.ContainsKey(shardId))
-        //            dict.Add(shardId, new List<T>());
-        //        dict[shardId].Add(item);
-        //    }
-
-        //    return dict;
-        //}
-
-        //private static IDictionary<String, IList<T>> ShuffledByTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
-        //    IList<T> list,IDictionary hints)
-        //{
-        //    if (String.IsNullOrEmpty(logicDbName))
-        //        return null;
-        //    if (list == null || list.Count == 0)
-        //        return null;
-        //    var dict = new Dictionary<String, IList<T>>();
-
-        //    foreach (var item in list)
-        //    {
-        //        String tableId = GetTableId(logicDbName, shardingStrategy, parameters, hints);
-        //        if (String.IsNullOrEmpty(tableId))
-        //            continue;
-
-        //        if (!dict.ContainsKey(tableId))
-        //            dict.Add(tableId, new List<T>());
-        //        dict[tableId].Add(item);
-        //    }
-
-        //    return dict;
-        //}
-
-        //private static IDictionary<String, IDictionary<String, IList<T>>> ShuffledByDbTable<T>(String logicDbName, IShardingStrategy shardingStrategy, StatementParameterCollection parameters,
-        //    IList<T> list, IDictionary hints)
-        //{
-        //    if (String.IsNullOrEmpty(logicDbName))
-        //        return null;
-        //    if (list == null || list.Count == 0)
-        //        return null;
-
-        //    var dict = new Dictionary<String, IDictionary<String, IList<T>>>();
-
-        //    foreach (var item in list)
-        //    {
-        //        String shardId = GetShardId(logicDbName, shardingStrategy, parameters, hints);
-        //        String tableId = GetTableId(logicDbName, shardingStrategy , parameters,hints);
-
-        //        if (!dict.ContainsKey(shardId))
-        //            dict.Add(shardId, new Dictionary<String, IList<T>>());
-        //        if (!dict[shardId].ContainsKey(tableId))
-        //            dict[shardId].Add(tableId, new List<T>());
-        //        dict[shardId][tableId].Add(item);
-        //    }
-
-        //    return dict;
-        //}
-
-        #endregion Shuffled Items
-
-        public static IList<Statement> GetShardStatement(String logicDbName, IShardingStrategy shardingStrategy,
-            StatementParameterCollection parameters, IDictionary hints, Func<IDictionary, List<Statement>> func, SqlStatementType sqlStatementType)
+        public static IList<Statement> GetShardStatement(string sql,String logicDbName, IShardingStrategy shardingStrategy,
+            StatementParameterCollection parameters, IDictionary hints, SqlStatementType sqlStatementType)
         {
-            IList<Statement> statements;
             if (shardingStrategy == null)
                 return null;
-            var shardingType = GetShardingType(shardingStrategy);
 
-            if (shardingType != ShardingType.ShardByDBAndTable)
+            IList<String> shardsdb = null;
+            IList<String> shardstable = null;
+
+            //Get shards from hints
+            if (hints != null)
             {
-                IList<String> shards = null;
 
-                //Get shards from hints
-                if (hints != null)
+                if (hints.Contains(DALExtStatementConstant.SHARD_IDS))//看下hints里面有没有指定分配id(一组)
                 {
-                    IList<String> temp = null;
-
-                    if (shardingType == ShardingType.ShardByDB)//是分库的情况
-                    {
-                        if (hints.Contains(DALExtStatementConstant.SHARD_IDS))//看下hints里面有没有指定分配id(一组)
-                        {
-                            temp = hints[DALExtStatementConstant.SHARD_IDS] as List<String>;
-                        }
-                        else if (hints.Contains(DALExtStatementConstant.SHARDID))//单个的分配id
-                        {
-                            temp = new List<String> { hints[DALExtStatementConstant.SHARDID] as String };
-                        }
-                    }
-                    else if (shardingType == ShardingType.ShardByTable)//是分表的情况
-                    {
-                        if (hints.Contains(DALExtStatementConstant.TABLE_IDS))
-                        {
-                            temp = hints[DALExtStatementConstant.TABLE_IDS] as List<String>;
-                        }
-                        else if (hints.Contains(DALExtStatementConstant.TABLEID))
-                        {
-                            temp = new List<String> { hints[DALExtStatementConstant.TABLEID] as String };
-                        }
-                    }
-
-                    if (temp != null)
-                        shards = temp;
+                    shardsdb = hints[DALExtStatementConstant.SHARD_IDS] as List<String>;
+                }
+                else if (hints.Contains(DALExtStatementConstant.SHARDID))//单个的分配id
+                {
+                    shardsdb = new List<String> { hints[DALExtStatementConstant.SHARDID] as String };
                 }
 
-
-                var bulkCopy = false;
-                if (hints != null && hints.Contains(DALExtStatementConstant.BULK_COPY))//查看是否是批量插入的case
+                if (hints.Contains(DALExtStatementConstant.TABLE_IDS))
                 {
-                    bulkCopy = Convert.ToBoolean(hints[DALExtStatementConstant.BULK_COPY]);
+                    shardstable = hints[DALExtStatementConstant.TABLE_IDS] as List<String>;
                 }
-
-                if (bulkCopy)
+                else if (hints.Contains(DALExtStatementConstant.TABLEID))
                 {
-                    return func.Invoke(hints);
-                }
-                //Get shards from parameters 这里会根据 查询参数得出分配的信息
-                if (shards == null)
-                {
-                    if (shardingType == ShardingType.ShardByDB)
-                    {
-                        shards = GetShardId(logicDbName, shardingStrategy, parameters, hints);
-                    }
-                    else if (shardingType == ShardingType.ShardByTable)
-                    {
-                        shards = GetTableId(logicDbName, shardingStrategy, parameters, hints);
-                    }
-                }
-
-                //对于不带条件的查询或者删除 都默认查询所有的
-                if ((shards == null || shards.Count == 0) && (sqlStatementType.Equals(SqlStatementType.SELECT) || sqlStatementType.Equals(SqlStatementType.DELETE)))
-                {
-                    shards = shardingStrategy.AllShards;
-                }
-
-                if (shards == null || shards.Count == 0)
-                    throw new DalException("Please provide shard information.");
-
-                //Build statements
-                statements = new List<Statement>();
-
-                foreach (var item in shards.Distinct())
-                {
-                    var newHints = HintsUtil.CloneHints(hints);
-
-                    switch (shardingType)
-                    {
-                        case ShardingType.ShardByDB:
-                            newHints[DALExtStatementConstant.SHARDID] = item;
-                            break;
-                        case ShardingType.ShardByTable:
-                            newHints[DALExtStatementConstant.TABLEID] = item;
-                            break;
-                    }
-
-                    var statement = func.Invoke(newHints);
-                    foreach (var ss in statement)
-                    {
-                        statements.Add(ss);
-                    }
+                    shardstable = new List<String> { hints[DALExtStatementConstant.TABLEID] as String };
                 }
             }
-            else
-            {
-                statements = new List<Statement>();
-                IDictionary<String, IList<String>> shardDict = null;
-                if (hints != null && hints.Contains(DALExtStatementConstant.SHARD_TABLE_DICT))
-                    shardDict = hints[DALExtStatementConstant.SHARD_TABLE_DICT] as IDictionary<String, IList<String>>;
 
-                if (shardDict == null)
+            //Get shards from parameters 这里会根据 查询参数得出分配的信息
+            if (shardsdb == null || !shardsdb.Any())
+            {
+                if (shardingStrategy.ShardByDB)
                 {
-                    var newHints = HintsUtil.CloneHints(hints);
-                    newHints[DALExtStatementConstant.SHARDID] = GetShardIdByHints(hints);
-                    newHints[DALExtStatementConstant.TABLEID] = GetTableIdByHints(hints);
-                    var statement = func.Invoke(newHints);
-                    foreach (var ss in statement)
+                    shardsdb = GetShardId(logicDbName, shardingStrategy, parameters, hints);
+                }
+            }
+
+            if (shardstable == null || !shardstable.Any())
+            {
+                if (shardingStrategy.ShardByTable)
+                {
+                    shardstable = GetTableId(logicDbName, shardingStrategy, parameters, hints);
+                }
+            }
+                
+            //对于不带条件的查询或者删除 都默认查询所有的
+            if (((shardsdb == null || shardsdb.Count == 0) && (shardstable == null || shardstable.Count == 0)) )
+            {
+                if ((sqlStatementType.Equals(SqlStatementType.SELECT) ||
+                     sqlStatementType.Equals(SqlStatementType.DELETE)))
+                {
+                    if (shardingStrategy.ShardByDB)
                     {
-                        statements.Add(ss);
+                        shardsdb = shardingStrategy.AllShards;
+                    }
+                    if (shardingStrategy.ShardByTable)
+                    {
+                        shardstable = shardingStrategy.AllShards;
                     }
                 }
                 else
                 {
-                    foreach (var shard in shardDict)
+                    throw new DalException("Please provide shard information.");
+                }
+            }
+
+            //Build statements
+            IList<Statement> statements = new List<Statement>();
+            if (shardsdb == null) shardsdb = new List<string>();
+            if (shardstable == null) shardstable = new List<string>();
+
+
+            if (hints != null && hints.Contains(DALExtStatementConstant.BULK_COPY))
+            {
+                //批量插入 需要
+                return BulkCopyCase(logicDbName, shardingStrategy, sql, parameters, hints, shardsdb, shardstable);
+
+            }
+
+            if (shardsdb.Any() && shardstable.Any())
+            {
+                foreach (var item in shardsdb)
+                {
+                    foreach (var table in shardstable)
                     {
-                        foreach (var table in shard.Value)
+                        var newHints = HintsUtil.CloneHints(hints);
+                        newHints[DALExtStatementConstant.SHARDID] = item;
+                        newHints[DALExtStatementConstant.TABLEID] = table;
+                        Statement statement = new Statement
                         {
-                            var newHints = HintsUtil.CloneHints(hints);
-                            newHints[DALExtStatementConstant.SHARDID] = shard.Key;
-                            newHints[DALExtStatementConstant.TABLEID] = table;
-                            var statement = func.Invoke(newHints);
-                            foreach (var ss in statement)
-                            {
-                                statements.Add(ss);
-                            }
-                        }
+                            DatabaseSet = logicDbName,
+                            StatementType = StatementType.Sql,
+                            Hints = hints,
+                            ShardID = item,//分库的情况
+                            IsSharding = true,
+                            TableName = "",
+                            SqlOperationType = sqlStatementType,
+                            Parameters = parameters
+                        };
+                        statement.StatementText =  string.Format(sql, table);
+                        statements.Add(statement);
                     }
                 }
             }
+            else if (shardsdb.Any())
+            {
+                foreach (var item in shardsdb)
+                {
+                    var newHints = HintsUtil.CloneHints(hints);
+                    newHints[DALExtStatementConstant.SHARDID] = item;
+
+                    Statement statement = new Statement
+                    {
+                        DatabaseSet = logicDbName,
+                        StatementType = StatementType.Sql,
+                        Hints = hints,
+                        ShardID = item,//分库的情况
+                        IsSharding = true,
+                        TableName = "",
+                        SqlOperationType = sqlStatementType,
+                        Parameters = parameters
+                    };
+                    statement.StatementText = sql;
+                    statements.Add(statement);
+
+                }
+            }
+            else if(shardstable.Any())
+            {
+                foreach (var table in shardstable)
+                {
+                    var newHints = HintsUtil.CloneHints(hints);
+                    newHints[DALExtStatementConstant.TABLEID] = table;
+
+                    Statement statement = new Statement
+                    {
+                        DatabaseSet = logicDbName,
+                        StatementType = StatementType.Sql,
+                        Hints = hints,
+                        ShardID = "",//分库的情况
+                        IsSharding = true,
+                        TableName = "",
+                        SqlOperationType = sqlStatementType,
+                        Parameters = parameters
+                    };
+                    statement.StatementText = string.Format(sql, table);
+                    statements.Add(statement);
+                }
+            }
+           
 
             return statements;
         }
 
 
-        public static List<Statement> GetQueryStatement(String logicDbName, string sql, IShardingStrategy shardingStrategy, StatementParameterCollection parameters, IDictionary hints, OperationType? operationType = null)
+        /// <summary>
+        /// 批量插入分片规则： 解析sqlstring 按照分片进行分组 在重新组合 如果没有找到分片的默认第一个分片
+        /// </summary>
+        /// <param name="logicDbName"></param>
+        /// <param name="shardingStrategy"></param>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="hints"></param>
+        /// <param name="sqlType"></param>
+        /// <returns></returns>
+        private static List<Statement> BulkCopyCase(String logicDbName, IShardingStrategy shardingStrategy,
+            String sql, StatementParameterCollection parameters, IDictionary hints,IList<string> dbList,IList<string> tableList)
         {
-            var result = new List<Statement>();
-            var tupleList = ShardingUtil.GetShardInfo(logicDbName, shardingStrategy, parameters, hints);
-            foreach (var tuple in tupleList)
-            {
-                Statement statement = new Statement
-                {
-                    DatabaseSet = logicDbName,
-                    StatementType = StatementType.Sql,
-                    OperationType = operationType ?? OperationType.Default,
-                    Hints = hints,
-                    ShardID = tuple.Item1,
-                    IsSharding = true,
-                    TableName = "",
-                    SqlOperationType = SqlStatementType.SELECT,
-                    Parameters =  parameters
-                };
 
-                statement.StatementText = string.IsNullOrEmpty(tuple.Item2) ? sql : string.Format(sql, tuple.Item2);
-                result.Add(statement);
+            //根据sqlstring 进行分组
+            var dbDic = dbList.GroupBy(r=>r).ToDictionary(r => r.Key, y => y.First());
+            var tableDic = tableList.GroupBy(r=>r).ToDictionary(r => r.Key, y => y.First());
+            var result = new List<Statement>();
+
+            var dicValues = new Dictionary<string, Dictionary<string, Tuple<List<string>, StatementParameterCollection>>>();
+           
+            string defaultDBSharding = !dbDic.Any()? "": dbDic.Keys.FirstOrDefault();
+            string defaultTableSharding = !tableDic.Any() ?"": tableDic.Keys.FirstOrDefault();
+            //分库的情况
+            var arr = sql.Split(new string[] { "VALUES" }, StringSplitOptions.None);
+            if (arr.Length != 2)
+            {
+                throw new DalException("sharding db for bulkInsert sql string err.");
+            }
+            var title = arr[0] + " VALUES ";
+            var body = arr[1].Replace("\r\n", "");
+            var values = body.Split(')').Where(r => !string.IsNullOrEmpty(r)).Select(r => r.StartsWith(",") ? r.Substring(1) : r).ToArray();//总共有多少行
+            var first = values.First();
+            var cloumnCount = first.Split(',').Length;//每行总共有多少列
+
+            if (parameters.Count != (cloumnCount * values.Length))
+            {
+                throw new DalException("sharding db for bulkInsert sql parameters counts err.");
+            }
+            var ii = 0;
+            //将parameters 按 分库进行分组
+            for (int i = 0; i < values.Length; i++)
+            {
+                var columns = values[i].Split(',');
+                var haveShardingC = false;
+                var shardingValue = string.Empty;
+                List<StatementParameter> newC = new List<StatementParameter>();
+                for (int j = 0; j < columns.Length; j++)
+                {
+                    var p = parameters.ElementAt(ii);
+                    if (p.IsShardingColumn)
+                    {
+                        haveShardingC = true;
+                        shardingValue = p.ShardingValue;
+                    }
+                    newC.Add(p);
+                    ii++;
+                }
+
+                if (haveShardingC)
+                {
+                    if (!string.IsNullOrEmpty(shardingValue))
+                    {
+                        if (dbDic.ContainsKey(shardingValue) && tableDic.ContainsKey(shardingValue))
+                        {
+                            //分表又分库的情况
+                            if (!dicValues.TryGetValue(shardingValue,out var dic2))
+                            {
+                                dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                                dicValues.Add(shardingValue,dic2);
+                            }
+
+                            if (!dic2.TryGetValue(shardingValue, out var dic3))
+                            {
+                                dic3 = Tuple.Create(new List<string>(),new StatementParameterCollection());
+                                dic2.Add(shardingValue,dic3);
+                            }
+
+                            dic3.Item1.Add(values[i] + ")");
+                            foreach (var pp in newC)
+                            {
+                                dic3.Item2.Add(pp);
+                            }
+                        }
+                        else if (dbDic.ContainsKey(shardingValue))
+                        {
+                            //只分库的情况
+                            if (!dicValues.TryGetValue(shardingValue, out var dic2))
+                            {
+                                dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                                dicValues.Add(shardingValue, dic2);
+                            }
+
+                            if (!dic2.TryGetValue("", out var dic3))
+                            {
+                                dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                                dic2.Add("", dic3);
+                            }
+
+                            dic3.Item1.Add(values[i] + ")");
+                            foreach (var pp in newC)
+                            {
+                                dic3.Item2.Add(pp);
+                            }
+
+                        }
+                        else if (tableDic.ContainsKey(shardingValue))
+                        {
+                            //只分表的情况
+                            if (!dicValues.TryGetValue("", out var dic2))
+                            {
+                                dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                                dicValues.Add("", dic2);
+                            }
+
+                            if (!dic2.TryGetValue(shardingValue, out var dic3))
+                            {
+                                dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                                dic2.Add(shardingValue, dic3);
+                            }
+
+                            dic3.Item1.Add(values[i] + ")");
+                            foreach (var pp in newC)
+                            {
+                                dic3.Item2.Add(pp);
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                        //添加到第一个分片
+                        if (!dicValues.TryGetValue(defaultDBSharding, out var dic2))
+                        {
+                            dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                            dicValues.Add(defaultDBSharding, dic2);
+                        }
+
+                        if (!dic2.TryGetValue(defaultTableSharding, out var dic3))
+                        {
+                            dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                            dic2.Add(defaultTableSharding, dic3);
+                        }
+                        dic3.Item1.Add(values[i] + ")");
+                        foreach (var pp in newC)
+                        {
+                            dic3.Item2.Add(pp);
+                        }
+                    }
+
+                }
             }
 
+            foreach (var dic in dicValues)
+            {
+                var newHints = HintsUtil.CloneHints(hints);
+                if (!dic.Key.Equals(""))
+                {
+                    newHints[DALExtStatementConstant.SHARDID] = dic.Key;
+                }
+                foreach (var dic2 in dic.Value)
+                {
+                    if (!dic2.Key.Equals(""))
+                    {
+                        newHints[DALExtStatementConstant.TABLEID] = dic2.Key;
+                    }
+
+                    Statement statement = new Statement
+                    {
+                        DatabaseSet = logicDbName,
+                        StatementType = StatementType.Sql,
+                        Hints = hints,
+                        ShardID = dic.Key,//分库的情况
+                        IsSharding = true,
+                        TableName = "",
+                        SqlOperationType = SqlStatementType.INSERT,
+                        Parameters = parameters
+                    };
+                    statement.StatementText = GetSql(title + string.Join(",", dic2.Value.Item1), dic2.Key);
+                    statement.Parameters = dic2.Value.Item2;
+                    result.Add(statement);
+                }
+            }
 
             return result;
+        }
+        private static String GetSql(String sql, String tableId)
+        {
+            return String.IsNullOrEmpty(tableId) ? sql : String.Format(sql, tableId);
         }
     }
 }

@@ -49,8 +49,6 @@ namespace AntData.ORM.DbEngine.DB
                 throw new DalException(String.Format("DatabaseSet '{0}' doesn't contain any database.", databaseSetWrapper.Name));
 
             String shard = statement.ShardID ?? String.Empty;
-            if (shard.Length > 0 && !databaseSetWrapper.TotalRatios.ContainsKey(shard))
-                throw new ArgumentOutOfRangeException(String.Format("Shard '{0}' doesn't exist.", shard));
 
             if (databaseSetWrapper.EnableReadWriteSpliding)
             {
@@ -69,7 +67,23 @@ namespace AntData.ORM.DbEngine.DB
             if (result == null || (result.FirstCandidate == null && result.OtherCandidates.Count == 0))
             {
                 result = new OperationalDatabases();
-                Database master = databaseSetWrapper.DatabaseWrappers.Single(item => item.DatabaseType == DatabaseType.Master && item.Sharding == shard).Database;
+
+                Database master = null;
+                if (!string.IsNullOrEmpty(statement.ShardID))
+                {
+                    master = databaseSetWrapper.DatabaseWrappers.Single(item =>
+                        item.DatabaseType == DatabaseType.Master && item.Sharding == shard).Database;
+                }
+                else if (statement.IsSharding)
+                {
+                    master = databaseSetWrapper.DatabaseWrappers.First(item => item.DatabaseType == DatabaseType.Master).Database;
+                }
+                else
+                {
+                    master = databaseSetWrapper.DatabaseWrappers.Single(item =>
+                        item.DatabaseType == DatabaseType.Master && item.Sharding == shard).Database;
+                }
+
                 if (databaseSetWrapper.EnableReadWriteSpliding && statement.OperationType == OperationType.Read)
                 {
                     //首先选出所有Slave

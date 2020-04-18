@@ -69,41 +69,6 @@ namespace AntData.DbEngine.Sharding
         void SetShardConfig(IDictionary<String, String> config, List<ShardingConfig> ShardingConfig);
 
         /// <summary>
-        /// 将数据按照当前的策略进行分组，返回ShardID：T的键值对，主要用于增删改
-        /// </summary>
-        /// <typeparam name="T">需要Shuffle的类型</typeparam>
-        /// <typeparam name="TColumnType">Sharding的字段</typeparam>
-        /// <param name="dataList">需要Shuffle的数据</param>
-        /// <param name="shuffleByColumn"></param>
-        /// <returns>ShardID：T的键值对</returns>
-        IDictionary<String, IList<T>> ShuffleData<T, TColumnType>(IList<T> dataList, Func<T, TColumnType> shuffleByColumn) where TColumnType : IComparable;
-
-        /// <summary>
-        /// 如果Sql语句中有Between，计算出当前Sql语句需要在哪几个Shard上进行操作
-        /// </summary>
-        /// <typeparam name="TColumnType"></typeparam>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        IList<String> ComputeShardIdsBetween<TColumnType>(TColumnType start, TColumnType end) where TColumnType : IComparable;
-
-        /// <summary>
-        /// 如果Sql语句中有In，计算出当前Sql语句需要在哪几个Shard上进行操作
-        /// </summary>
-        /// <typeparam name="TColumnType"></typeparam>
-        /// <param name="columnValues"></param>
-        /// <returns></returns>
-        IList<String> ComputeShardIdsIn<TColumnType>(IList<TColumnType> columnValues) where TColumnType : IComparable;
-
-        /// <summary>
-        /// 如果Sql语句中有In，计算出当前Sql语句需要在哪几个Shard上进行操作
-        /// </summary>
-        /// <typeparam name="TColumnType"></typeparam>
-        /// <param name="columnValues"></param>
-        /// <returns></returns>
-        IList<String> ComputeShardIdsIn<TColumnType>(params TColumnType[] columnValues) where TColumnType : IComparable;
-
-        /// <summary>
         /// 根据当前策略，计算出当前字段属于哪个Shard
         /// </summary>
         /// <typeparam name="TColumnType"></typeparam>

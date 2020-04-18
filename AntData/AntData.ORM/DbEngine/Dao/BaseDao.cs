@@ -87,7 +87,7 @@ namespace AntData.ORM.Dao
         /// <returns></returns>
         public IDbDataParameter CreateDbDataParameter(IDictionary hints = null)
         {
-            Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>CreateDbDataParameter", null, null, ShardingStrategy!=null && ShardingStrategy.ShardByTable?OperationType.ShardingTable: ShardingStrategy != null && ShardingStrategy.ShardByDB ?OperationType.ShardingDB:OperationType.Write).Single();
+            Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, LogicDbName + "=>CreateDbDataParameter", null, null, OperationType.Write).First();
             return DatabaseBridge.Instance.CreateDbDataParameter(statement);
         }
         #region SelectDataReader VisitDataReader
@@ -146,7 +146,6 @@ namespace AntData.ORM.Dao
             if (!IsShardEnabled)
             {
                 Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
-                AddSqlToExtendParams(statement, hints);
                 try
                 {
                     var reader = DatabaseBridge.Instance.ExecuteReader(statement);
@@ -166,7 +165,7 @@ namespace AntData.ORM.Dao
             }
             else
             {
-                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
+                var statements = ShardingUtil.GetShardStatement(sql,LogicDbName, ShardingStrategy, parameters, hints, SqlStatementType.SELECT);
 
                 try
                 {
@@ -308,7 +307,6 @@ namespace AntData.ORM.Dao
             {
                 Statement statement = SqlBuilder.GetSqlStatement(LogicDbName, ShardingStrategy, sql, parameters,
                     hints, operationType).Single();
-                AddSqlToExtendParams(statement, hints);
                 try
                 {
                     var dataSet = DatabaseBridge.Instance.ExecuteDataSet(statement);
@@ -329,7 +327,7 @@ namespace AntData.ORM.Dao
             }
             else
             {
-                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, null, hints, newHints => ShardingUtil.GetQueryStatement(LogicDbName, sql, ShardingStrategy, parameters, newHints, operationType), SqlStatementType.SELECT);
+                var statements = ShardingUtil.GetShardStatement(sql,LogicDbName, ShardingStrategy, null, hints, SqlStatementType.SELECT);
                 try
                 {
                     var dataSet = ShardingExecutor.ExecuteShardingDataSet(statements);
@@ -417,7 +415,6 @@ namespace AntData.ORM.Dao
             if (!IsShardEnabled)
             {
                 Statement statement = SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
-                AddSqlToExtendParams(statement, hints);
                 try
                 {
                     result = DatabaseBridge.Instance.ExecuteScalar(statement);
@@ -438,8 +435,7 @@ namespace AntData.ORM.Dao
             }
             else
             {
-                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                    newHints => SqlBuilder.GetScalarStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType), SqlStatementType.SELECT);
+                var statements = ShardingUtil.GetShardStatement(sql,LogicDbName, ShardingStrategy, parameters, hints, SqlStatementType.SELECT);
                 try
                 {
                     var temp = ShardingExecutor.ExecuteShardingScalar(statements);
@@ -529,7 +525,6 @@ namespace AntData.ORM.Dao
             if (!IsShardEnabled)
             {
                 Statement statement = SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, hints, operationType).Single();
-                AddSqlToExtendParams(statement, hints);
                 try
                 {
                     var result = DatabaseBridge.Instance.ExecuteNonQuery(statement);
@@ -558,8 +553,7 @@ namespace AntData.ORM.Dao
                     SqlStatementType = SqlStatementType.UPDATE;
                 }
 
-                var statements = ShardingUtil.GetShardStatement(LogicDbName, ShardingStrategy, parameters, hints,
-                    newHints => SqlBuilder.GetNonQueryStatement(LogicDbName, ShardingStrategy, sql, parameters, newHints, operationType, SqlStatementType), SqlStatementType);
+                var statements = ShardingUtil.GetShardStatement(sql,LogicDbName, ShardingStrategy, parameters, hints, SqlStatementType);
 
                 try
                 {
@@ -590,15 +584,5 @@ namespace AntData.ORM.Dao
 
         #endregion
 
-        public void AddSqlToExtendParams(Statement statement, IDictionary extendParams)
-        {
-            if (extendParams == null) return;
-            var types = extendParams.GetType().GetGenericArgumentsEx();
-
-            //仅当extendParams是 Dictionary<string, object> 或者 Dictionary<string, string>时，
-            //才将SQL填回
-            if (types.Length != 2 || types[0] != typeof(String) || (types[1] != typeof(String) && types[1] != typeof(Object))) return;
-            extendParams[DALExtStatementConstant.SQL] = statement.StatementText;
-        }
     }
 }

@@ -94,6 +94,8 @@ namespace AntData.ORM.DbEngine.Configuration
         /// 分片值
         /// </summary>
         public string Sharding { get; set; }
+        public string Start { get; set; }
+        public string End { get; set; }
 
         /// <summary>
         /// 分片权重

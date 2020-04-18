@@ -16,7 +16,7 @@ namespace AntData.DbEngine.Sharding
         /// get shard strategy object via shard config
         /// </summary>
         /// <param name="element"></param>
-        /// <param name="value"></param>
+        /// <param name="settings">兼容非config文件</param>
         /// <returns></returns>
         public IShardingStrategy GetShardingStrategy(DatabaseSetElement element,DatabaseSettings settings = null)
         {
@@ -36,8 +36,7 @@ namespace AntData.DbEngine.Sharding
                 config.Add(param[0].Trim(), param[1].Trim());
             }
 
-            String classname;
-            if (!config.TryGetValue("class", out classname))
+            if (!config.TryGetValue("class", out var classname))
                 throw new ArgumentException("Strategy invalid.");
 
             Type type = Type.GetType(classname);
@@ -58,20 +57,24 @@ namespace AntData.DbEngine.Sharding
                     {
                         foreach (DatabaseElement e in element.Databases)
                         {
-                            if (!string.IsNullOrWhiteSpace(e.Sharding))
+                            allShardingConfig.Add(new ShardingConfig
                             {
-                                allShardingConfig.Add(new ShardingConfig {Sharding = e.Sharding });
-                            }
+                                Sharding = e.Sharding,
+                                Start = e.Start,
+                                End = e.End
+                            });
                         }
                     }
                     if (settings != null)
                     {
                         foreach (var e in settings.ConnectionItemList)
                         {
-                            if (!string.IsNullOrWhiteSpace(e.Sharding))
+                            allShardingConfig.Add(new ShardingConfig
                             {
-                                allShardingConfig.Add(new ShardingConfig { Sharding = e.Sharding });
-                            }
+                                Sharding = e.Sharding,
+                                Start = e.Start,
+                                End = e.End
+                            });
                         }
                     }
                     resultStrategy.SetShardConfig(config, allShardingConfig);
