@@ -98,6 +98,8 @@ namespace AntData.ORM.Dao.sql
             var result = new List<Statement>();
             Statement statement = GetStatement(logicDbName, StatementType.Sql, operationType ?? OperationType.Default, sqlType, hints, string.Empty);
             if (shardingStrategy != null) statement.IsSharding = true;
+            statement.StatementText = sql;
+            statement.Parameters = parameters;
             result.Add(statement);
             return result;
         }
