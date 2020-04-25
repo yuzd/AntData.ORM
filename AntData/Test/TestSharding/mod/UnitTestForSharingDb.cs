@@ -229,5 +229,35 @@ namespace TestSharding
             Assert.AreEqual(odIsExist, 3);
 
         }
+
+        /// <summary>
+        /// 指定了shadingdb的分库 自动会走到1对应的db
+        /// </summary>
+        [TestMethod]
+        public void TestMethod7_04()
+        {
+            DB.UseShardingDb("1", con =>
+            {
+                var first = con.Tables.Orders.FirstOrDefault();
+                Assert.IsNotNull(first);
+                Assert.AreEqual(1,first.ID);
+            });
+
+        }
+
+        /// <summary>
+        /// 指定了shadingdb的分库 自动会走到2对应的db
+        /// </summary>
+        [TestMethod]
+        public void TestMethod7_05()
+        {
+            DB.UseShardingDb("0", con =>
+            {
+                var first = con.Tables.Orders.FirstOrDefault();
+                Assert.IsNotNull(first);
+                Assert.AreEqual(2, first.ID);
+            });
+
+        }
     }
 }

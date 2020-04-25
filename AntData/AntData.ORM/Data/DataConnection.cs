@@ -316,6 +316,11 @@ namespace AntData.ORM.Data
             
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
+
+            foreach (var append in HintWrapper)
+            {
+                dic.Add(append.Key,append.Value);
+            }
 		    try
 		    {
 
@@ -355,6 +360,10 @@ namespace AntData.ORM.Data
             
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
+            foreach (var append in HintWrapper)
+            {
+                dic.Add(append.Key, append.Value);
+            }
             try
             {
                 var result = CustomerExecuteScalar(ConnectionString, sqlString, Params, dic, isWrite);
@@ -392,7 +401,11 @@ namespace AntData.ORM.Data
 
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
-		    try
+            foreach (var append in HintWrapper)
+            {
+                dic.Add(append.Key, append.Value);
+            }
+            try
 		    {
 		        var result = CustomerExecuteQuery(ConnectionString, sqlString, Params, dic, isWrite);
 		        return result;
@@ -433,6 +446,10 @@ namespace AntData.ORM.Data
 
             dic.Add(DALExtStatementConstant.PARAMETER_SYMBOL, DataProvider.ParameterSymbol);
             dic.Add(DALExtStatementConstant.TRANSACTION_CONNECTION, ConnectionWrapper);
+            foreach (var append in HintWrapper)
+            {
+                dic.Add(append.Key, append.Value);
+            }
             try
             {
                 var result = CustomerExecuteQueryTable(ConnectionString, sqlString, Params, dic, isWrite);
@@ -453,6 +470,7 @@ namespace AntData.ORM.Data
             }
         }
         internal ConnectionWrapper ConnectionWrapper { get; private set; }
+        internal Dictionary<string, object> HintWrapper { get;  set; } = new Dictionary<string, object>();
         internal DataConnectionTransaction ExecuteTransaction()
         {
             var dic = new Dictionary<string, object>();

@@ -10,6 +10,10 @@ using System.Transactions;
 #endif
 using AntData.ORM.DataProvider;
 using System;
+using AntData.ORM.Dao.Common;
+using AntData.ORM.DbEngine.Enums;
+using AntData.ORM.Mapping;
+
 namespace AntData.ORM.Data
 {
 
@@ -21,97 +25,6 @@ namespace AntData.ORM.Data
             
         }
 
-
-        #region Transaction
-
-        public void UseTransaction(System.Action<DbContext> func)
-        {
-            using (var scope = ExecuteTransaction())
-            {
-                try
-                {
-                    func(this);
-                    scope.Commit();
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
-                }
-            }
-        }
-
-        public void UseTransaction(System.Action<DbContext> func, System.Data.IsolationLevel isolationLevel)
-        {
-            using (var scope = ExecuteTransaction(isolationLevel))
-            {
-                try
-                {
-                    func(this);
-                    scope.Commit();
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
-                }
-            }
-        }
-
-        public void UseTransaction(System.Func<DbContext, bool> func)
-        {
-            using (var scope = ExecuteTransaction())
-            {
-                try
-                {
-                    if (func(this))
-                    {
-                        scope.Commit();
-                    }
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
-                }
-            }
-        }
-
-        public void UseTransaction(System.Func<DbContext, bool> func, System.Data.IsolationLevel isolationLevel)
-        {
-            using (var scope = ExecuteTransaction(isolationLevel))
-            {
-                try
-                {
-                    if (func(this))
-                    {
-                        scope.Commit();
-                    }
-                }
-                catch (Exception)
-                {
-                    scope.Rollback();
-                    throw;
-                }
-                finally
-                {
-                    Close();
-                }
-            }
-        }
-        #endregion
     }
 
 
@@ -131,7 +44,6 @@ namespace AntData.ORM.Data
         }
 
         public DbContext(string dbMappingName):base(dbMappingName)
-
         {
             base.DataProvider = provider;
             _lazy = new Lazy<T>(() =>
@@ -161,6 +73,7 @@ namespace AntData.ORM.Data
 
         public void UseTransaction(System.Action<DbContext<T>> func)
         {
+
             using (var scope = ExecuteTransaction())
             {
                 try
@@ -270,5 +183,60 @@ namespace AntData.ORM.Data
         }
         #endregion
 
+
+
+        #region Sharding
+
+        public void UseShardingDb(string shadingId, System.Action<DbContext<T>> func)
+        {
+            if(!this.HintWrapper.TryGetValue(DALExtStatementConstant.SHARDID,out _))
+            {
+                this.HintWrapper.Add(DALExtStatementConstant.SHARDID ,shadingId);
+            }
+            else
+            {
+                this.HintWrapper[DALExtStatementConstant.SHARDID] = shadingId;
+            }
+            
+            func(this);
+        }
+
+        public void UseShardingTable(string tableId, System.Action<DbContext<T>> func)
+        {
+            if (!this.HintWrapper.TryGetValue(DALExtStatementConstant.TABLEID, out _))
+            {
+                this.HintWrapper.Add(DALExtStatementConstant.TABLEID, tableId);
+            }
+            else
+            {
+                this.HintWrapper[DALExtStatementConstant.TABLEID] = tableId;
+            }
+
+            func(this);
+        }
+
+        public void UseShardingDbAndTable(string shadingId,string tableId,System.Action<DbContext<T>> func)
+        {
+            if (!this.HintWrapper.TryGetValue(DALExtStatementConstant.SHARDID, out _))
+            {
+                this.HintWrapper.Add(DALExtStatementConstant.SHARDID, shadingId);
+            }
+            else
+            {
+                this.HintWrapper[DALExtStatementConstant.SHARDID] = shadingId;
+            }
+
+            if (!this.HintWrapper.TryGetValue(DALExtStatementConstant.TABLEID, out _))
+            {
+                this.HintWrapper.Add(DALExtStatementConstant.TABLEID, tableId);
+            }
+            else
+            {
+                this.HintWrapper[DALExtStatementConstant.TABLEID] = tableId;
+            }
+
+            func(this);
+        }
+        #endregion
     }
 }
