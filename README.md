@@ -6,8 +6,9 @@
 [![NuGet Status](https://img.shields.io/nuget/v/GoogleMapsApi.svg)](https://www.nuget.org/packages/AntData.Core/)
 
 # AntData.ORM Is Fork from [Linq2db](https://github.com/linq2db/linq2db) And CtripDal
-.Read-write separation
-.Sharding By DB And Sharding By Table
+.[Read-write separation](https://www.cnblogs.com/yudongdong/p/6432049.html)
+
+.[Sharding By DB And Sharding By Table](https://www.cnblogs.com/yudongdong/p/12690919.html)
 
 # NUGET FOR .NET
 
