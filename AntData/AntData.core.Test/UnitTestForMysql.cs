@@ -748,6 +748,34 @@ namespace AntDataUnitTest
 			Assert.AreEqual(rows.RowsCopied,2);
 		}
 
+        [TestMethod]
+        public void TestMethod6_09()
+        {
+            var school = new School
+            {
+                Name = "上海大学",
+                Address = "上海"
+            };
+
+            try
+            {
+                var rows = DB.Insert(school, "dddd");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+			}
+			try
+            {
+                var row2s = DB.Insert(school, "2222");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+		}
+
 		//[TestMethod]
 		//public async Task TestMethod6_09()
 		//{

@@ -633,11 +633,11 @@ namespace AntData.ORM.Linq
 
 		static class ObjectOperation<T1>
 		{
-			public static readonly Dictionary<object,Query<int>>    Insert             = new Dictionary<object,Query<int>>();
-			public static readonly Dictionary<object,Query<object>> InsertWithIdentity = new Dictionary<object,Query<object>>();
-			public static readonly Dictionary<object,Query<int>>    InsertOrUpdate     = new Dictionary<object,Query<int>>();
-			public static readonly Dictionary<object,Query<int>>    Update             = new Dictionary<object,Query<int>>();
-			public static readonly Dictionary<object,Query<int>>    Delete             = new Dictionary<object,Query<int>>();
+			public static readonly ConcurrentDictionary<object,Query<int>>    Insert             = new ConcurrentDictionary<object,Query<int>>();
+			public static readonly ConcurrentDictionary<object,Query<object>> InsertWithIdentity = new ConcurrentDictionary<object,Query<object>>();
+			public static readonly ConcurrentDictionary<object,Query<int>>    InsertOrUpdate     = new ConcurrentDictionary<object,Query<int>>();
+			public static readonly ConcurrentDictionary<object,Query<int>>    Update             = new ConcurrentDictionary<object,Query<int>>();
+			public static readonly ConcurrentDictionary<object,Query<int>>    Delete             = new ConcurrentDictionary<object,Query<int>>();
 		}
 
 		static ParameterAccessor GetParameter(IDataContext dataContext, SqlField field)
@@ -683,61 +683,57 @@ namespace AntData.ORM.Linq
 
             Query<int> ei;
 
-            var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
-
+            var key = new { dataContextInfo.MappingSchema.ConfigurationID, dataContextInfo.ContextID ,tableName, databaseName , schemaName };
             if (Configuration.Linq.IgnoreNullInsert || ignoreNullInsert || !ObjectOperation<T>.Insert.TryGetValue(key, out ei))
-                lock (_sync)
-                    if (Configuration.Linq.IgnoreNullInsert || ignoreNullInsert || !ObjectOperation<T>.Insert.TryGetValue(key, out ei))
+            {
+                var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+                var sqlQuery = new SelectQuery { QueryType = QueryType.Insert };
+
+                if (tableName != null) sqlTable.PhysicalName = tableName;
+                if (databaseName != null) sqlTable.Database = databaseName;
+                if (schemaName != null) sqlTable.Owner = schemaName;
+
+                sqlQuery.Insert.Into = sqlTable;
+
+                ei = new Query<int>
+                {
+                    MappingSchema = dataContextInfo.MappingSchema,
+                    ContextID = dataContextInfo.ContextID,
+                    SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
+                    Queries = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } }
+                };
+
+                foreach (var field in sqlTable.Fields)
+                {
+                    if (field.Value.IsInsertable)
                     {
-                        var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
-                        var sqlQuery = new SelectQuery { QueryType = QueryType.Insert };
+                        var param = GetParameter(dataContextInfo.DataContext, field.Value);
 
-                        if (tableName != null) sqlTable.PhysicalName = tableName;
-                        if (databaseName != null) sqlTable.Database = databaseName;
-                        if (schemaName != null) sqlTable.Owner = schemaName;
+                        ei.Queries[0].Parameters.Add(param);
 
-                        sqlQuery.Insert.Into = sqlTable;
-
-                        ei = new Query<int>
-                        {
-                            MappingSchema = dataContextInfo.MappingSchema,
-                            ContextID = dataContextInfo.ContextID,
-                            SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
-                            Queries = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } }
-                        };
-
-                        foreach (var field in sqlTable.Fields)
-                        {
-                            if (field.Value.IsInsertable)
-                            {
-                                var param = GetParameter(dataContextInfo.DataContext, field.Value);
-
-                                ei.Queries[0].Parameters.Add(param);
-
-                                sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, param.SqlParameter));
-                            }
-                            else if (field.Value.IsIdentity)
-                            {
-                                var sqlb = dataContextInfo.CreateSqlBuilder();
-                                var expr = sqlb.GetIdentityExpression(sqlTable);
-
-                                if (expr != null)
-                                    sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, expr));
-                            }
-                        }
-
-                        ei.SetNonQueryQuery();
-
-                        if (!Configuration.Linq.IgnoreNullInsert && !ignoreNullInsert)
-                        {
-                            ObjectOperation<T>.Insert.Add(key, ei);
-                        }
-                        else
-                        {
-                            ObjectOperation<T>.Insert.Clear();
-
-                        }
+                        sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, param.SqlParameter));
                     }
+                    else if (field.Value.IsIdentity)
+                    {
+                        var sqlb = dataContextInfo.CreateSqlBuilder();
+                        var expr = sqlb.GetIdentityExpression(sqlTable);
+
+                        if (expr != null)
+                            sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, expr));
+                    }
+                }
+
+                ei.SetNonQueryQuery();
+
+                if (!Configuration.Linq.IgnoreNullInsert && !ignoreNullInsert)
+                {
+                    ObjectOperation<T>.Insert.TryAdd(key, ei);
+                }
+                else
+                {
+                    ObjectOperation<T>.Insert.Clear();
+                }
+            }
             if (Configuration.Linq.IgnoreNullInsert || ignoreNullInsert)
             {
                 return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), new object[2] { null, true });
@@ -759,55 +755,49 @@ namespace AntData.ORM.Linq
             var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
             if (Configuration.Linq.IgnoreNullInsert || ignoreNullInsert || !ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
-                lock (_sync)
-                    if (Configuration.Linq.IgnoreNullInsert || ignoreNullInsert || !ObjectOperation<T>.InsertWithIdentity.TryGetValue(key, out ei))
+            {
+                var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+                var sqlQuery = new SelectQuery { QueryType = QueryType.Insert };
+
+                sqlQuery.Insert.Into = sqlTable;
+                sqlQuery.Insert.WithIdentity = true;
+
+                ei = new Query<object>
+                {
+                    MappingSchema = dataContextInfo.MappingSchema,
+                    ContextID = dataContextInfo.ContextID,
+                    SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
+                    Queries = { new Query<object>.QueryInfo { SelectQuery = sqlQuery, } }
+                };
+
+                foreach (var field in sqlTable.Fields)
+                {
+                    if (field.Value.IsInsertable)
                     {
-                        var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
-                        var sqlQuery = new SelectQuery { QueryType = QueryType.Insert };
-
-                        sqlQuery.Insert.Into = sqlTable;
-                        sqlQuery.Insert.WithIdentity = true;
-
-                        ei = new Query<object>
-                        {
-                            MappingSchema = dataContextInfo.MappingSchema,
-                            ContextID = dataContextInfo.ContextID,
-                            SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
-                            Queries = { new Query<object>.QueryInfo { SelectQuery = sqlQuery, } }
-                        };
-
-                        foreach (var field in sqlTable.Fields)
-                        {
-                            if (field.Value.IsInsertable)
-                            {
-                                var param = GetParameter(dataContextInfo.DataContext, field.Value);
-
-                                ei.Queries[0].Parameters.Add(param);
-
-                                sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, param.SqlParameter));
-                            }
-                            else if (field.Value.IsIdentity)
-                            {
-                                var sqlb = dataContextInfo.CreateSqlBuilder();
-                                var expr = sqlb.GetIdentityExpression(sqlTable);
-
-                                if (expr != null)
-                                    sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, expr));
-                            }
-                        }
-
-                        ei.SetScalarQuery<object>();
-
-                        if (!Configuration.Linq.IgnoreNullInsert && !ignoreNullInsert)
-                        {
-                            ObjectOperation<T>.InsertWithIdentity.Add(key, ei);
-                        }
-                        else
-                        {
-                            ObjectOperation<T>.InsertWithIdentity.Clear();
-                        }
-
+                        var param = GetParameter(dataContextInfo.DataContext, field.Value);
+                        ei.Queries[0].Parameters.Add(param);
+                        sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, param.SqlParameter));
                     }
+                    else if (field.Value.IsIdentity)
+                    {
+                        var sqlb = dataContextInfo.CreateSqlBuilder();
+                        var expr = sqlb.GetIdentityExpression(sqlTable);
+                        if (expr != null)
+                            sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field.Value, expr));
+                    }
+                }
+
+                ei.SetScalarQuery<object>();
+
+                if (!Configuration.Linq.IgnoreNullInsert && !ignoreNullInsert)
+                {
+                    ObjectOperation<T>.InsertWithIdentity.TryAdd(key, ei);
+                }
+                else
+                {
+                    ObjectOperation<T>.InsertWithIdentity.Clear();
+                }
+            }
             if (Configuration.Linq.IgnoreNullInsert || ignoreNullInsert)
             {
                 return ei.GetElement(null, dataContextInfo, Expression.Constant(obj), new object[2] { obj, true });
@@ -830,115 +820,109 @@ namespace AntData.ORM.Linq
 
 			if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
 			{
-				lock (_sync)
+				var fieldDic = new Dictionary<SqlField, ParameterAccessor>();
+				var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+				var sqlQuery = new SelectQuery { QueryType = QueryType.InsertOrUpdate };
+
+				ParameterAccessor param;
+
+				sqlQuery.Insert.Into = sqlTable;
+				sqlQuery.Update.Table = sqlTable;
+
+				sqlQuery.From.Table(sqlTable);
+
+				ei = new Query<int>
 				{
-					if (AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert || !ObjectOperation<T>.InsertOrUpdate.TryGetValue(key, out ei))
+					MappingSchema = dataContextInfo.MappingSchema,
+					ContextID = dataContextInfo.ContextID,
+					SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
+					Queries = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } },
+					SqlProviderFlags = dataContextInfo.SqlProviderFlags,
+				};
+
+				var supported = ei.SqlProviderFlags.IsInsertOrUpdateSupported && ei.SqlProviderFlags.CanCombineParameters;
+
+				// Insert.
+				//
+				foreach (var field in sqlTable.Fields.Select(f => f.Value))
+				{
+					if (field.IsInsertable)
 					{
-						var fieldDic = new Dictionary<SqlField, ParameterAccessor>();
-						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
-						var sqlQuery = new SelectQuery { QueryType = QueryType.InsertOrUpdate };
-
-						ParameterAccessor param;
-
-						sqlQuery.Insert.Into  = sqlTable;
-						sqlQuery.Update.Table = sqlTable;
-
-						sqlQuery.From.Table(sqlTable);
-
-						ei = new Query<int>
+						if (!supported || !fieldDic.TryGetValue(field, out param))
 						{
-							MappingSchema    = dataContextInfo.MappingSchema,
-							ContextID        = dataContextInfo.ContextID,
-							SqlOptimizer     = dataContextInfo.GetSqlOptimizer(),
-							Queries          = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } },
-							SqlProviderFlags = dataContextInfo.SqlProviderFlags,
-						};
+							param = GetParameter(dataContextInfo.DataContext, field);
+							ei.Queries[0].Parameters.Add(param);
 
-						var supported = ei.SqlProviderFlags.IsInsertOrUpdateSupported && ei.SqlProviderFlags.CanCombineParameters;
-
-						// Insert.
-						//
-						foreach (var field in sqlTable.Fields.Select(f => f.Value))
-						{
-							if (field.IsInsertable)
-							{
-								if (!supported || !fieldDic.TryGetValue(field, out param))
-								{
-									param = GetParameter(dataContextInfo.DataContext, field);
-									ei.Queries[0].Parameters.Add(param);
-
-									if (supported)
-										fieldDic.Add(field, param);
-								}
-
-								sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field, param.SqlParameter));
-							}
-							else if (field.IsIdentity)
-							{
-								throw new LinqException("InsertOrUpdate method does not support identity field '{0}.{1}'.", sqlTable.Name, field.Name);
-							}
+							if (supported)
+								fieldDic.Add(field, param);
 						}
 
-						// Update.
-						//
-						var keys   = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
-						var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
-
-						if (keys.Count == 0)
-							throw new LinqException("InsertOrUpdate method requires the '{0}' table to have a primary key.", sqlTable.Name);
-
-						var q =
-						(
-							from k in keys
-							join i in sqlQuery.Insert.Items on k equals i.Column
-							select new { k, i }
-						).ToList();
-
-						var missedKey = keys.Except(q.Select(i => i.k)).FirstOrDefault();
-
-						if (missedKey != null)
-							throw new LinqException("InsertOrUpdate method requires the '{0}.{1}' field to be included in the insert setter.",
-								sqlTable.Name,
-								missedKey.Name);
-
-						if (fields.Count == 0)
-							throw new LinqException("There are no fields to update in the type '{0}'.", sqlTable.Name);
-
-						foreach (var field in fields)
-						{
-							if (!supported || !fieldDic.TryGetValue(field, out param))
-							{
-								param = GetParameter(dataContextInfo.DataContext, field);
-								ei.Queries[0].Parameters.Add(param);
-
-								if (supported)
-									fieldDic.Add(field, param = GetParameter(dataContextInfo.DataContext, field));
-							}
-
-							sqlQuery.Update.Items.Add(new SelectQuery.SetExpression(field, param.SqlParameter));
-						}
-
-						sqlQuery.Update.Keys.AddRange(q.Select(i => i.i));
-
-						// Set the query.
-						//
-						if (ei.SqlProviderFlags.IsInsertOrUpdateSupported)
-							ei.SetNonQueryQuery();
-						else
-							ei.MakeAlternativeInsertOrUpdate(sqlQuery);
-
-					    if (!AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert)
-					    {
-					        ObjectOperation<T>.InsertOrUpdate.Add(key, ei);
-					    }
-					    else
-					    {
-                            ObjectOperation<T>.InsertOrUpdate.Clear();
-
-                        }
-						
+						sqlQuery.Insert.Items.Add(new SelectQuery.SetExpression(field, param.SqlParameter));
+					}
+					else if (field.IsIdentity)
+					{
+						throw new LinqException("InsertOrUpdate method does not support identity field '{0}.{1}'.", sqlTable.Name, field.Name);
 					}
 				}
+
+				// Update.
+				//
+				var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
+				var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
+
+				if (keys.Count == 0)
+					throw new LinqException("InsertOrUpdate method requires the '{0}' table to have a primary key.", sqlTable.Name);
+
+				var q =
+				(
+					from k in keys
+					join i in sqlQuery.Insert.Items on k equals i.Column
+					select new { k, i }
+				).ToList();
+
+				var missedKey = keys.Except(q.Select(i => i.k)).FirstOrDefault();
+
+				if (missedKey != null)
+					throw new LinqException("InsertOrUpdate method requires the '{0}.{1}' field to be included in the insert setter.",
+						sqlTable.Name,
+						missedKey.Name);
+
+				if (fields.Count == 0)
+					throw new LinqException("There are no fields to update in the type '{0}'.", sqlTable.Name);
+
+				foreach (var field in fields)
+				{
+					if (!supported || !fieldDic.TryGetValue(field, out param))
+					{
+						param = GetParameter(dataContextInfo.DataContext, field);
+						ei.Queries[0].Parameters.Add(param);
+
+						if (supported)
+							fieldDic.Add(field, param = GetParameter(dataContextInfo.DataContext, field));
+					}
+
+					sqlQuery.Update.Items.Add(new SelectQuery.SetExpression(field, param.SqlParameter));
+				}
+
+				sqlQuery.Update.Keys.AddRange(q.Select(i => i.i));
+
+				// Set the query.
+				//
+				if (ei.SqlProviderFlags.IsInsertOrUpdateSupported)
+					ei.SetNonQueryQuery();
+				else
+					ei.MakeAlternativeInsertOrUpdate(sqlQuery);
+
+				if (!AntData.ORM.Common.Configuration.Linq.IgnoreNullInsert)
+				{
+					ObjectOperation<T>.InsertOrUpdate.TryAdd(key, ei);
+				}
+				else
+				{
+					ObjectOperation<T>.InsertOrUpdate.Clear();
+
+				}
+
 			}
 
 			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
@@ -991,7 +975,6 @@ namespace AntData.ORM.Linq
 
 		public static int Update(IDataContextInfo dataContextInfo, T obj, bool ignoreNullUpdate = false)
 		{
-
             if (Equals(default(T), obj))
                 return 0;
 
@@ -999,73 +982,70 @@ namespace AntData.ORM.Linq
 
             var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
-            if (Configuration.Linq.IgnoreNullUpdate || ignoreNullUpdate || !ObjectOperation<T>.Update.TryGetValue(key, out ei))
-                lock (_sync)
-                    if (Configuration.Linq.IgnoreNullUpdate || ignoreNullUpdate || !ObjectOperation<T>.Update.TryGetValue(key, out ei))
-                    {
-                        var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
-                        var sqlQuery = new SelectQuery { QueryType = QueryType.Update };
+			if (Configuration.Linq.IgnoreNullUpdate || ignoreNullUpdate || !ObjectOperation<T>.Update.TryGetValue(key, out ei))
+			{
+				var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+				var sqlQuery = new SelectQuery { QueryType = QueryType.Update };
 
-                        sqlQuery.From.Table(sqlTable);
+				sqlQuery.From.Table(sqlTable);
 
-                        ei = new Query<int>
-                        {
-                            MappingSchema = dataContextInfo.MappingSchema,
-                            ContextID = dataContextInfo.ContextID,
-                            SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
-                            Queries = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } }
-                        };
+				ei = new Query<int>
+				{
+					MappingSchema = dataContextInfo.MappingSchema,
+					ContextID = dataContextInfo.ContextID,
+					SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
+					Queries = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } }
+				};
 
-                        var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
-                        var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
+				var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
+				var fields = sqlTable.Fields.Values.Where(f => f.IsUpdatable).Except(keys).ToList();
 
-                        if (fields.Count == 0)
-                        {
-                            if (Configuration.Linq.IgnoreEmptyUpdate)
-                                return 0;
+				if (fields.Count == 0)
+				{
+					if (Configuration.Linq.IgnoreEmptyUpdate)
+						return 0;
 
-                            throw new LinqException(
-                                (keys.Count == sqlTable.Fields.Count ?
-                                    "There are no fields to update in the type '{0}'. No PK is defined or all fields are keys." :
-                                    "There are no fields to update in the type '{0}'.")
-                                .Args(sqlTable.Name));
-                        }
+					throw new LinqException(
+						(keys.Count == sqlTable.Fields.Count ?
+							"There are no fields to update in the type '{0}'. No PK is defined or all fields are keys." :
+							"There are no fields to update in the type '{0}'.")
+						.Args(sqlTable.Name));
+				}
 
-                        foreach (var field in fields)
-                        {
-                            var param = GetParameter(dataContextInfo.DataContext, field);
+				foreach (var field in fields)
+				{
+					var param = GetParameter(dataContextInfo.DataContext, field);
 
-                            ei.Queries[0].Parameters.Add(param);
+					ei.Queries[0].Parameters.Add(param);
 
-                            sqlQuery.Update.Items.Add(new SelectQuery.SetExpression(field, param.SqlParameter));
-                        }
+					sqlQuery.Update.Items.Add(new SelectQuery.SetExpression(field, param.SqlParameter));
+				}
 
-                        foreach (var field in keys)
-                        {
-                            var param = GetParameter(dataContextInfo.DataContext, field);
+				foreach (var field in keys)
+				{
+					var param = GetParameter(dataContextInfo.DataContext, field);
 
-                            ei.Queries[0].Parameters.Add(param);
+					ei.Queries[0].Parameters.Add(param);
 
-                            sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+					sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
 
-                            if (field.CanBeNull)
-                                sqlQuery.IsParameterDependent = true;
-                        }
+					if (field.CanBeNull)
+						sqlQuery.IsParameterDependent = true;
+				}
 
-                        ei.SetNonQueryQuery();
-                        if (!Configuration.Linq.IgnoreNullUpdate && !ignoreNullUpdate)
-                        {
-                            ObjectOperation<T>.Update.Add(key, ei);
-                        }
-                        else
-                        {
-                            ObjectOperation<T>.Update.Clear();
+				ei.SetNonQueryQuery();
+				if (!Configuration.Linq.IgnoreNullUpdate && !ignoreNullUpdate)
+				{
+					ObjectOperation<T>.Update.TryAdd(key, ei);
+				}
+				else
+				{
+					ObjectOperation<T>.Update.Clear();
 
-                        }
+				}
+			}
 
-
-                    }
-            if (Configuration.Linq.IgnoreNullUpdate || ignoreNullUpdate)
+			if (Configuration.Linq.IgnoreNullUpdate || ignoreNullUpdate)
             {
                 return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), new object[3] { null, true, true });
             }
@@ -1085,44 +1065,42 @@ namespace AntData.ORM.Linq
 
 			var key = new { dataContextInfo.MappingSchema, dataContextInfo.ContextID };
 
-			if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
-				lock (_sync)
-					if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
-					{
-						var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
-						var sqlQuery = new SelectQuery { QueryType = QueryType.Delete };
+            if (!ObjectOperation<T>.Delete.TryGetValue(key, out ei))
+            {
+                var sqlTable = new SqlTable<T>(dataContextInfo.MappingSchema);
+                var sqlQuery = new SelectQuery { QueryType = QueryType.Delete };
 
-						sqlQuery.From.Table(sqlTable);
+                sqlQuery.From.Table(sqlTable);
 
-						ei = new Query<int>
-						{
-							MappingSchema = dataContextInfo.MappingSchema,
-							ContextID     = dataContextInfo.ContextID,
-							SqlOptimizer  = dataContextInfo.GetSqlOptimizer(),
-							Queries       = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } }
-						};
+                ei = new Query<int>
+                {
+                    MappingSchema = dataContextInfo.MappingSchema,
+                    ContextID = dataContextInfo.ContextID,
+                    SqlOptimizer = dataContextInfo.GetSqlOptimizer(),
+                    Queries = { new Query<int>.QueryInfo { SelectQuery = sqlQuery, } }
+                };
 
-						var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
+                var keys = sqlTable.GetKeys(true).Cast<SqlField>().ToList();
 
-						if (keys.Count == 0)
-							throw new LinqException("Table '{0}' does not have primary key.".Args(sqlTable.Name));
+                if (keys.Count == 0)
+                    throw new LinqException("Table '{0}' does not have primary key.".Args(sqlTable.Name));
 
-						foreach (var field in keys)
-						{
-							var param = GetParameter(dataContextInfo.DataContext, field);
+                foreach (var field in keys)
+                {
+                    var param = GetParameter(dataContextInfo.DataContext, field);
 
-							ei.Queries[0].Parameters.Add(param);
+                    ei.Queries[0].Parameters.Add(param);
 
-							sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
+                    sqlQuery.Where.Field(field).Equal.Expr(param.SqlParameter);
 
-							if (field.CanBeNull)
-								sqlQuery.IsParameterDependent = true;
-						}
+                    if (field.CanBeNull)
+                        sqlQuery.IsParameterDependent = true;
+                }
 
-						ei.SetNonQueryQuery();
+                ei.SetNonQueryQuery();
 
-						ObjectOperation<T>.Delete.Add(key, ei);
-					}
+                ObjectOperation<T>.Delete.TryAdd(key, ei);
+            }
 
 			return (int)ei.GetElement(null, dataContextInfo, Expression.Constant(obj), null);
 		}
