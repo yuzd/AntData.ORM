@@ -96,11 +96,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
         /// <param name="shardingStrategy"></param>
         /// <param name="shardColumnValue"></param>
         /// <returns></returns>
-        private static String CalculateShardId(IShardingStrategy shardingStrategy, IComparable shardColumnValue)
+        private static String CalculateShardId(IShardingStrategy shardingStrategy, IComparable shardColumnValue,bool isDb)
         {
             if (shardingStrategy == null || shardColumnValue == null)
                 return null;
-            return shardingStrategy.ComputeShardId(shardColumnValue);
+            return shardingStrategy.ComputeShardId(shardColumnValue, isDb);
         }
 
      
@@ -114,10 +114,10 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                 var shardId = GetShardIdByHints(hints);
                 if (String.IsNullOrEmpty(shardId))
                 {
-                    List<IComparable> shardColumnValue = shardingStrategy.GetShardColumnValueList(logicDbName, parameters, hints);
+                    List<IComparable> shardColumnValue = shardingStrategy.GetShardColumnValueList(logicDbName, parameters, hints,true);
                     foreach (var comparable in shardColumnValue)
                     {
-                        shardId = CalculateShardId(shardingStrategy, comparable);
+                        shardId = CalculateShardId(shardingStrategy, comparable,true);
                         shardIdList.Add(shardId);
                     }
                 }
@@ -140,11 +140,11 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
                 var tableId = GetTableIdByHints(hints);
                 if (String.IsNullOrEmpty(tableId))
                 {
-                    List<IComparable> shardColumnValue = shardingStrategy.GetShardColumnValueList(logicDbName, parameters, hints);
+                    List<IComparable> shardColumnValue = shardingStrategy.GetShardColumnValueList(logicDbName, parameters, hints,false);
 
                     foreach (var comparable in shardColumnValue)
                     {
-                        tableId = CalculateShardId(shardingStrategy, comparable);
+                        tableId = CalculateShardId(shardingStrategy, comparable,false);
                         tableIdList.Add(tableId);
                     }
                 }
@@ -210,22 +210,22 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             //对于不带条件的查询或者删除 都默认查询所有的
             if (((shardsdb == null || shardsdb.Count == 0) && (shardstable == null || shardstable.Count == 0)) )
             {
-                if ((sqlStatementType.Equals(SqlStatementType.SELECT) ||
-                     sqlStatementType.Equals(SqlStatementType.DELETE)))
+                if (shardingStrategy.ShardByDB)
                 {
-                    if (shardingStrategy.ShardByDB)
-                    {
-                        shardsdb = shardingStrategy.AllShards;
-                    }
-                    if (shardingStrategy.ShardByTable)
-                    {
-                        shardstable = shardingStrategy.AllShards;
-                    }
+                    shardsdb = shardingStrategy.AllDbShards;
                 }
-                else
+                if (shardingStrategy.ShardByTable)
                 {
-                    throw new DalException("Please provide shard information.");
+                    shardstable = shardingStrategy.AllTableShards;
                 }
+            }
+            else if (shardingStrategy.ShardByDB && (shardsdb == null || shardsdb.Count == 0))
+            {
+                shardsdb = shardingStrategy.AllDbShards;
+            }
+            else if (shardingStrategy.ShardByDB && (shardstable == null || shardstable.Count == 0))
+            {
+                shardstable = shardingStrategy.AllTableShards;
             }
 
             //Build statements
@@ -361,112 +361,110 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             for (int i = 0; i < values.Length; i++)
             {
                 var columns = values[i].Split(',');
-                var haveShardingC = false;
                 var shardingValue = string.Empty;
+                var shardingDB = string.Empty;
                 List<StatementParameter> newC = new List<StatementParameter>();
                 for (int j = 0; j < columns.Length; j++)
                 {
                     var p = parameters.ElementAt(ii);
                     if (p.IsShardingColumn)
                     {
-                        haveShardingC = true;
                         shardingValue = p.ShardingValue;
+                    }
+
+                    if (p.IsShardingDb)
+                    {
+                        shardingDB = p.ShardingDbValue;
                     }
                     newC.Add(p);
                     ii++;
                 }
 
-                if (haveShardingC)
+                if (!string.IsNullOrEmpty(shardingDB) && !string.IsNullOrEmpty(shardingValue))
                 {
-                    if (!string.IsNullOrEmpty(shardingValue))
+                    //分表又分库的情况
+                    if (!dicValues.TryGetValue(shardingDB, out var dic2))
                     {
-                        if (dbDic.ContainsKey(shardingValue) && tableDic.ContainsKey(shardingValue))
-                        {
-                            //分表又分库的情况
-                            if (!dicValues.TryGetValue(shardingValue,out var dic2))
-                            {
-                                dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
-                                dicValues.Add(shardingValue,dic2);
-                            }
-
-                            if (!dic2.TryGetValue(shardingValue, out var dic3))
-                            {
-                                dic3 = Tuple.Create(new List<string>(),new StatementParameterCollection());
-                                dic2.Add(shardingValue,dic3);
-                            }
-
-                            dic3.Item1.Add(values[i] + ")");
-                            foreach (var pp in newC)
-                            {
-                                dic3.Item2.Add(pp);
-                            }
-                        }
-                        else if (dbDic.ContainsKey(shardingValue))
-                        {
-                            //只分库的情况
-                            if (!dicValues.TryGetValue(shardingValue, out var dic2))
-                            {
-                                dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
-                                dicValues.Add(shardingValue, dic2);
-                            }
-
-                            if (!dic2.TryGetValue("", out var dic3))
-                            {
-                                dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
-                                dic2.Add("", dic3);
-                            }
-
-                            dic3.Item1.Add(values[i] + ")");
-                            foreach (var pp in newC)
-                            {
-                                dic3.Item2.Add(pp);
-                            }
-
-                        }
-                        else if (tableDic.ContainsKey(shardingValue))
-                        {
-                            //只分表的情况
-                            if (!dicValues.TryGetValue("", out var dic2))
-                            {
-                                dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
-                                dicValues.Add("", dic2);
-                            }
-
-                            if (!dic2.TryGetValue(shardingValue, out var dic3))
-                            {
-                                dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
-                                dic2.Add(shardingValue, dic3);
-                            }
-
-                            dic3.Item1.Add(values[i] + ")");
-                            foreach (var pp in newC)
-                            {
-                                dic3.Item2.Add(pp);
-                            }
-                        }
-                    }
-                    else
-                    {
-
-                        //添加到第一个分片
-                        if (!dicValues.TryGetValue(defaultDBSharding, out var dic2))
-                        {
-                            dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
-                            dicValues.Add(defaultDBSharding, dic2);
-                        }
-
-                        if (!dic2.TryGetValue(defaultTableSharding, out var dic3))
-                        {
-                            dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
-                            dic2.Add(defaultTableSharding, dic3);
-                        }
-                        dic3.Item1.Add(values[i] + ")");
-                        foreach (var pp in newC)
-                        {
-                            dic3.Item2.Add(pp);
-                        }
+                        dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                        dicValues.Add(shardingDB, dic2);
                     }
 
+                    if (!dic2.TryGetValue(shardingValue, out var dic3))
+                    {
+                        dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                        dic2.Add(shardingValue, dic3);
+                    }
+
+                    dic3.Item1.Add(values[i] + ")");
+                    foreach (var pp in newC)
+                    {
+                        dic3.Item2.Add(pp);
+                    }
+                }
+
+                else if (!string.IsNullOrEmpty(shardingDB))
+                {
+                    //只分库的情况
+                    if (!dicValues.TryGetValue(shardingDB, out var dic2))
+                    {
+                        dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                        dicValues.Add(shardingDB, dic2);
+                    }
+
+                    if (!dic2.TryGetValue("", out var dic3))
+                    {
+                        dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                        dic2.Add("", dic3);
+                    }
+
+                    dic3.Item1.Add(values[i] + ")");
+                    foreach (var pp in newC)
+                    {
+                        dic3.Item2.Add(pp);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(shardingValue))
+                {
+                    //只分表的情况
+                    if (!dicValues.TryGetValue("", out var dic2))
+                    {
+                        dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                        dicValues.Add("", dic2);
+                    }
+
+                    if (!dic2.TryGetValue(shardingValue, out var dic3))
+                    {
+                        dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                        dic2.Add(shardingValue, dic3);
+                    }
+
+                    dic3.Item1.Add(values[i] + ")");
+                    foreach (var pp in newC)
+                    {
+                        dic3.Item2.Add(pp);
+                    }
+
+                }
+                else
+                {
+
+                    //添加到第一个分片
+                    if (!dicValues.TryGetValue(defaultDBSharding, out var dic2))
+                    {
+                        dic2 = new Dictionary<string, Tuple<List<string>, StatementParameterCollection>>();
+                        dicValues.Add(defaultDBSharding, dic2);
+                    }
+
+                    if (!dic2.TryGetValue(defaultTableSharding, out var dic3))
+                    {
+                        dic3 = Tuple.Create(new List<string>(), new StatementParameterCollection());
+                        dic2.Add(defaultTableSharding, dic3);
+                    }
+                    dic3.Item1.Add(values[i] + ")");
+                    foreach (var pp in newC)
+                    {
+                        dic3.Item2.Add(pp);
+                    }
                 }
             }
 

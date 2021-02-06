@@ -146,6 +146,8 @@ namespace AntData.ORM.DbEngine
                     Value = item.Value,
                     IsSensitive = item.IsSensitive,
                     IsShardingColumn = item.IsShardingColumn,
+                    IsShardingDb = item.IsShardingDb,
+                    ShardingDbValue = item.ShardingDbValue,
                     ShardingValue = item.ShardingValue,
                     TableName = item.TableName,
                     ColumnName = item.ColumnName,

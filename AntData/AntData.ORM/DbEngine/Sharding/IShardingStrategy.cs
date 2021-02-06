@@ -41,14 +41,19 @@ namespace AntData.DbEngine.Sharding
         /// <summary>
         /// 所有Shard列表
         /// </summary>
-        IList<String> AllShards { get; }
+        IList<String> AllTableShards { get; }
+        IList<String> AllDbShards { get; }
 
         /// <summary>
         /// Shard字段列表，通常一个库中有多个表，可能一个表采用orderid做Shard，另一个表采用cityid做Shard，这里提供这种支持
         /// </summary>
-        IList<String> ShardColumns { get; }
+        IList<String> TableShardColumns { get; }
 
         IDictionary<String, String> ShardColumnAndTable { get; }
+
+        IList<String> DbShardColumns { get; }
+
+        IDictionary<String, String> DbShardColumnAndTable { get; }
 
         /// <summary>
         /// 分库，如果配置了Sharding，默认为True，可以显示通过shardByDB=false设置为False
@@ -74,9 +79,9 @@ namespace AntData.DbEngine.Sharding
         /// <typeparam name="TColumnType"></typeparam>
         /// <param name="columnValue"></param>
         /// <returns></returns>
-        String ComputeShardId<TColumnType>(TColumnType columnValue) where TColumnType : IComparable;
+        String ComputeShardId<TColumnType>(TColumnType columnValue, bool isDb) where TColumnType : IComparable;
 
         //IComparable GetShardColumnValue(String logicDbName,StatementParameterCollection parameters, IDictionary hints);
-        List<IComparable> GetShardColumnValueList(String logicDbName, StatementParameterCollection parameters, IDictionary hints);
+        List<IComparable> GetShardColumnValueList(String logicDbName, StatementParameterCollection parameters, IDictionary hints,bool isDb);
     }
 }
