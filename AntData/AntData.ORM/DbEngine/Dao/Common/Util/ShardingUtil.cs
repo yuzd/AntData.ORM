@@ -223,7 +223,7 @@ namespace AntData.ORM.DbEngine.Dao.Common.Util
             {
                 shardsdb = shardingStrategy.AllDbShards;
             }
-            else if (shardingStrategy.ShardByDB && (shardstable == null || shardstable.Count == 0))
+            else if (shardingStrategy.ShardByTable && (shardstable == null || shardstable.Count == 0))
             {
                 shardstable = shardingStrategy.AllTableShards;
             }
